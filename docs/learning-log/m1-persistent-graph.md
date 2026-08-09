@@ -64,6 +64,12 @@ M1 的 Repository 为规范化后的研究问题计算 SHA-256。同一项目重
 
 每次 `invoke` 都由 State 自身的 `thread_id` 构造 Checkpointer config。重复运行同一输入会执行相同三个 Node，但 Repository 内容哈希保证只有一个研究问题版本。Checkpoint 和业务表的项目隔离测试都使用两个真实 thread，而不是 mock。
 
+## CLI 边界
+
+`project create` 只接收经过 Pydantic 校验的 UTF-8 JSON，不把自由文本悄悄补成研究事实；`project continue` 从 Repository 解析项目绑定的 thread，再恢复 Checkpoint；`project show` 从业务表读取项目和全部研究问题版本。输出使用稳定 JSON，便于后续脚本和 Web API 复用。
+
+非法 JSON 或 Schema 返回退出码 2，缺失项目、Checkpoint 或身份冲突返回退出码 1。Windows 入口显式使用 UTF-8 输出，避免系统默认 GBK 与现代 PowerShell 的 UTF-8 解码不一致导致中文帮助乱码。
+
 ## 与前后里程碑的关系
 
 M0 提供可安装工程和质量门禁。M1.1 冻结 State、ResearchQuestion 和 Reducer 语义；M1 后续批次将补齐 Repository、最小 Graph、SQLite Checkpointer、CLI 和独立进程恢复。M2 才增加条件 Edge、人工审批、`interrupt`、`Command` 和版本回滚。

@@ -29,7 +29,25 @@ class PersistentResearchProjectGraph:
 
     def get_state(self, thread_id: str) -> ResearchProjectState:
         snapshot = self.graph.get_state(_thread_config(validate_identifier(thread_id)))
+        if not snapshot.values:
+            raise CheckpointNotFoundError(f"checkpoint for thread {thread_id!r} was not found")
         return cast(ResearchProjectState, snapshot.values)
+
+    def resume(self, thread_id: str) -> ResearchProjectState:
+        validated_thread_id = validate_identifier(thread_id)
+        configuration = _thread_config(validated_thread_id)
+        if not self.graph.get_state(configuration).values:
+            raise CheckpointNotFoundError(
+                f"checkpoint for thread {validated_thread_id!r} was not found"
+            )
+        result = self.graph.invoke(None, config=configuration)
+        if result is None:
+            return self.get_state(validated_thread_id)
+        return cast(ResearchProjectState, result)
+
+
+class CheckpointNotFoundError(RuntimeError):
+    """Raised when a requested thread has no persisted graph state."""
 
 
 def build_research_project_graph(
@@ -55,7 +73,11 @@ def build_research_project_graph(
 
     def save(state: ResearchProjectState) -> dict[str, Any]:
         question = ResearchQuestion.model_validate(state["draft_research_question"])
-        record = repository.save_research_question(state["project_id"], question)
+        record = repository.save_research_question(
+            state["project_id"],
+            question,
+            active_stage="completed",
+        )
         return {
             "active_stage": "completed",
             "draft_research_question": None,

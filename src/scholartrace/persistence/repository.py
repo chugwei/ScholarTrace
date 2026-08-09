@@ -118,8 +118,11 @@ class ProjectRepository:
         self,
         project_id: str,
         question: ResearchQuestion,
+        active_stage: str | None = None,
     ) -> ResearchQuestionRecord:
         project_id = validate_identifier(project_id)
+        if active_stage is not None:
+            active_stage = validate_identifier(active_stage)
         payload = question.model_dump(mode="json")
         canonical_payload = json.dumps(
             payload,
@@ -132,8 +135,11 @@ class ProjectRepository:
         research_question_id = f"rq_{identity_digest[:32]}"
 
         with Session(self._engine) as session, session.begin():
-            if session.get(ProjectRow, project_id) is None:
+            project = session.get(ProjectRow, project_id)
+            if project is None:
                 raise ProjectNotFoundError(f"project {project_id!r} was not found")
+            if active_stage is not None:
+                project.active_stage = active_stage
 
             existing = session.scalar(
                 select(ResearchQuestionRow).where(
@@ -142,6 +148,7 @@ class ProjectRepository:
                 )
             )
             if existing is not None:
+                session.flush()
                 return _research_question_record(existing)
 
             latest_version = session.scalar(

@@ -20,7 +20,11 @@ dependencies = [
   "langgraph-checkpoint-sqlite>=3.1,<4",
   "pydantic>=2.11,<3",
   "sqlalchemy>=2.0,<3",
+  "typer>=0.27,<1",
 ]
+
+[project.scripts]
+scholartrace = "scholartrace.cli:app"
 
 [dependency-groups]
 dev = [

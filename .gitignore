@@ -7,6 +7,7 @@ __pycache__/
 .mypy_cache/
 .coverage
 .verification/
+.scholartrace/
 htmlcov/
 dist/
 build/

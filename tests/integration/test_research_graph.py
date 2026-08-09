@@ -62,6 +62,7 @@ def test_graph_persists_domain_entity_and_checkpoint_across_reopen(tmp_path: Pat
     repository = ProjectRepository(domain_path)
     saved = repository.get_research_question("lychee-pest-001", result["research_question_id"])
     assert saved.question == question()
+    assert repository.get_project("lychee-pest-001").active_stage == "completed"
     repository.close()
 
     with open_research_project_graph(domain_path, checkpoint_path) as reopened:

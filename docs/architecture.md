@@ -56,4 +56,6 @@ START → intake → build_research_question → save → END
 
 `intake` 幂等创建项目记录，`build_research_question` 再次执行 Pydantic 契约校验，`save` 通过 Repository 保存内容并把 `research_question_id` 写回 State。运行入口只从已校验的 State `thread_id` 生成 LangGraph config，调用方不能额外传入冲突的 checkpoint thread。
 
+`save` 在同一 Repository 事务中保存研究问题并把 Project 的 `active_stage` 更新为 `completed`，因此 `project show` 的业务视图和 Graph 最终 State 不会分别停留在 `intake` 与 `completed`。
+
 业务数据库与 checkpoint 数据库是两个文件：前者保存项目和研究问题版本，后者由 `SqliteSaver` 保存节点执行快照。关闭两个连接后重新打开，领域实体和最终 State 都能恢复；两个 thread 的 checkpoint 查询互不串联。本批次只实现固定 Edge，不包含人工暂停或条件路由。
