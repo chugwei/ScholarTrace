@@ -10,6 +10,7 @@
 - 支持消息合并和有序去重的幂等 Reducer。
 - 基于 SQLite、SQLAlchemy 与 Alembic 的 Project Repository 和可回滚初始迁移。
 - 项目身份冲突、持久化重开、研究问题版本与跨项目隔离测试。
+- `START → intake → build_research_question → save → END` 最小 LangGraph 与 SQLite Checkpointer。
 
 ## [0.0.1] - 2026-08-09
 

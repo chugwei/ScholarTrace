@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 Graph 与 Checkpointer 设计
+- 项目状态：M1 CLI 设计
 - 当前里程碑：M1 — 最小持久化科研项目图
 - 当前版本：`v0.0.1`
 - 当前分支：`feat/m1-project-state`
@@ -33,8 +33,8 @@
 
 - [x] M1.1 ResearchProjectState、ResearchQuestion 与 Reducer 契约
 - [x] M1.2 SQLite Project Repository、迁移与幂等写入
-- [ ] M1.3 `START → intake → build_research_question → save → END` 与 SQLite Checkpointer（当前）
-- [ ] M1.4 CLI 创建、继续和查看项目
+- [x] M1.3 `START → intake → build_research_question → save → END` 与 SQLite Checkpointer
+- [ ] M1.4 CLI 创建、继续和查看项目（当前）
 - [ ] M1.5 重启恢复、项目隔离、幂等与农业视觉黄金场景验收
 - [ ] M1.6 独立审查、合并 `main` 与 `v0.1.0` 发布
 
@@ -52,6 +52,8 @@
 | M1.1 后全量 pytest | 通过，25 passed |
 | M1.2 Repository/迁移集成测试 | 通过，12 passed |
 | M1.2 后全量 pytest | 通过，37 passed |
+| M1.3 Graph/Checkpointer 集成测试 | 通过，5 passed |
+| M1.3 后全量 pytest | 通过，42 passed |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
 | `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.0.1 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
@@ -65,9 +67,9 @@
 
 ## 当前限制
 
-- M1 当前完成 State、Schema、Reducer、SQLite Repository 与初始 Alembic 迁移；Graph、Checkpointer 和 CLI 尚未实现。
+- M1 当前完成 State、Schema、Reducer、SQLite Repository、初始 Alembic 迁移、固定顺序 Graph 与 SQLite Checkpointer；CLI 尚未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-实现 M1.3 固定顺序的最小 LangGraph，并把 SQLite Checkpointer 与 Project Repository 接入同一项目流程。
+实现 M1.4 CLI 的项目创建、继续和查看命令，以及明确的退出码和错误输出。

@@ -58,6 +58,12 @@ Repository 保存可查询的领域事实，例如项目身份和研究问题版
 
 M1 的 Repository 为规范化后的研究问题计算 SHA-256。同一项目重复提交完全相同的内容时返回已有记录，因此重试不会制造假版本；同一内容在不同项目中仍获得不同实体 ID。Alembic 管理 Schema 版本，测试覆盖重复升级、回滚到 base 和重新升级，避免把“能新建数据库”误当成“迁移可用”。
 
+## 当前 Graph 的真实节点
+
+`intake` 读取 State 的 `project_id`、`thread_id` 和 `current_goal`，通过 Repository 幂等创建项目。`build_research_question` 不调用外部模型，而是确定性地验证调用方提交的结构化草案。`save` 保存研究问题，并用实体 ID 替换 State 中的完整草案。三个普通 Edge 固定连接，没有隐藏路由。
+
+每次 `invoke` 都由 State 自身的 `thread_id` 构造 Checkpointer config。重复运行同一输入会执行相同三个 Node，但 Repository 内容哈希保证只有一个研究问题版本。Checkpoint 和业务表的项目隔离测试都使用两个真实 thread，而不是 mock。
+
 ## 与前后里程碑的关系
 
 M0 提供可安装工程和质量门禁。M1.1 冻结 State、ResearchQuestion 和 Reducer 语义；M1 后续批次将补齐 Repository、最小 Graph、SQLite Checkpointer、CLI 和独立进程恢复。M2 才增加条件 Edge、人工审批、`interrupt`、`Command` 和版本回滚。

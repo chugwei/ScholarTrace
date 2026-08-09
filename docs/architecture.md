@@ -47,3 +47,13 @@ State 中的消息使用 LangGraph `add_messages` Reducer：相同消息 ID 的�
 业务实体使用 SQLite、SQLAlchemy 2 和 Alembic。`projects` 保存项目与线程的一对一身份关系；`research_questions` 保存通过 Schema 校验的研究问题版本、内容 SHA-256 和 JSON payload。Repository 的每次公开操作使用短事务，同一项目重复保存相同内容时返回原记录，不增加版本；内容改变时才分配下一版本。
 
 研究问题查询必须同时匹配 `project_id` 和 `research_question_id`，防止跨项目读取。数据库启用 SQLite 外键约束；初始迁移支持 upgrade、downgrade 到 base 和再次 upgrade。业务数据库属于运行数据，由 `.gitignore` 排除，不进入源码历史。
+
+## M1 最小 Graph
+
+```text
+START → intake → build_research_question → save → END
+```
+
+`intake` 幂等创建项目记录，`build_research_question` 再次执行 Pydantic 契约校验，`save` 通过 Repository 保存内容并把 `research_question_id` 写回 State。运行入口只从已校验的 State `thread_id` 生成 LangGraph config，调用方不能额外传入冲突的 checkpoint thread。
+
+业务数据库与 checkpoint 数据库是两个文件：前者保存项目和研究问题版本，后者由 `SqliteSaver` 保存节点执行快照。关闭两个连接后重新打开，领域实体和最终 State 都能恢复；两个 thread 的 checkpoint 查询互不串联。本批次只实现固定 Edge，不包含人工暂停或条件路由。
