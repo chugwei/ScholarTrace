@@ -1,8 +1,8 @@
 # M0 独立审查
 
 - 日期：2026-08-09（Asia/Shanghai）
-- 审查对象：`7b26e2dba27191c9783f0aac8d67daae025619c1`
-- 审查结论：`in_progress`。代码、本地质量门禁、远端同步、CI 和许可证满足 M0 技术要求；最终 CI 与 Tag 尚未完成。
+- 审查对象：`724de3549b40bcc42b11399db924f7b35860016b`
+- 审查结论：`release_candidate`。代码、本地与独立环境门禁、远端同步、CI 和许可证满足 M0 技术要求；release commit CI 与 Tag 尚未完成。
 
 ## 审查矩阵
 

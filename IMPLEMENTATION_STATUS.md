@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M0 最终发布验证
+- 项目状态：M0 v0.0.1 发布候选
 - 当前里程碑：M0 — 问题定义与仓库骨架
 - 当前版本：`0.0.1`（尚未发布 Tag）
 - 当前分支：`main`
@@ -26,7 +26,7 @@
 - [x] M0.3 农业视觉黄金场景、3 个脱敏 Fixture 及校验
 - [x] M0.4 Ruff、pytest、CI 与降级测试
 - [x] M0.5 全新环境验收、工程记录、追溯矩阵和独立审查
-- [ ] M0.6 Apache-2.0 已确认，等待最终 CI 与 `v0.0.1` Tag
+- [ ] M0.6 发布候选验收通过，等待 release commit CI 与 `v0.0.1` Tag
 
 ## 当前验证
 
@@ -35,25 +35,25 @@
 | `uv sync --all-groups` | 通过，CPython 3.12.13 |
 | `uv run ruff format --check src tests scripts` | 通过 |
 | `uv run ruff check src tests scripts` | 通过 |
-| `uv run pytest` | 通过，8 passed |
+| `uv run pytest` | 通过，9 passed |
 | `uv run python scripts/validate_fixtures.py` | 通过，3 个合成 Fixture |
 | `uv run python scripts/check.py` | 通过 |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
 | `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.0.1 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
 | `actionlint` Docker 静态检查 | 通过，无诊断输出 |
-| GitHub Actions quality Run #1 | 通过，commit `7b26e2d`，14s |
-| `git ls-remote origin refs/heads/main` | 远端与本地均为 `7b26e2d...` |
+| GitHub Actions quality Run #3 | 通过，commit `724de35`，9s |
+| `git ls-remote origin refs/heads/main` | 本地与远端 `main` 同步 |
 | Apache-2.0 官方正文比对 | 通过 |
 | 安装包 `License-Expression` | `Apache-2.0` |
 | wheel 许可证文件 | 包含 `dist-info/licenses/LICENSE` |
 
 ## 发布前待办
 
-- 推送许可证提交并等待当前 HEAD 的 GitHub Actions 通过。
-- 完成最终干净环境验收、状态审查与版本 Tag。
+- 推送 release-candidate 验收提交并等待当前 HEAD 的 GitHub Actions 通过。
+- 创建、推送并核验版本 Tag。
 - M0 仅提供工程骨架；LangGraph、RAG、实验、论文、Web 和部署能力尚未实现。
 
 ## 下一步
 
-推送许可证提交并核验 CI，然后完成最终验收、创建并推送 `v0.0.1`，随后开始 M1 功能分支。
+推送 release-candidate 验收提交并核验 CI，然后创建并推送 `v0.0.1`，随后开始 M1 功能分支。

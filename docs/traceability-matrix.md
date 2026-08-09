@@ -10,7 +10,7 @@
 | M0 风险登记 | `docs/risk-register.md` | 文档审查 | v0.0.1 | implemented-unverified |
 | M0 ADR 机制 | `docs/adr/0001-progressive-evidence-first-architecture.md` | 文档审查 | v0.0.1 | implemented-unverified |
 | M0 架构与学习日志 | `docs/architecture.md`, `docs/learning-log/m0-foundations.md` | `docs/verification/m0-review.md` | v0.0.1 | implemented-tested |
-| M0 全新环境安装与构建 | `pyproject.toml`, `uv.lock` | `docs/verification/m0-acceptance.md` | v0.0.1 | implemented-tested |
+| M0 全新环境安装与构建 | `pyproject.toml`, `uv.lock` | `docs/verification/m0-release-candidate.md` | v0.0.1 | implemented-tested |
 | M0 3 个脱敏 Fixture | `tests/fixtures/projects/`, `src/scholartrace/fixtures.py`, `examples/agriculture-vision-project/` | `tests/unit/test_fixtures.py`, `tests/integration/test_fixture_catalog.py`, `scripts/validate_fixtures.py` | v0.0.1 | implemented-tested |
 | M0 CI | `.github/workflows/quality.yml`, `scripts/check.py` | [quality Run #1](https://github.com/chugwei/ScholarTrace/actions/runs/31313652417) | v0.0.1 | implemented-tested |
 | M0 LICENSE | `LICENSE`, `pyproject.toml`, `README.md` | `tests/unit/test_package.py`, wheel 内容检查 | v0.0.1 | implemented-tested |

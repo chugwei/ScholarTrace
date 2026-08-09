@@ -6,7 +6,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 
 | 里程碑 | 版本 | 状态 | 分支 | Tag | 验证 |
 |---|---|---|---|---|---|
-| M0 仓库骨架 | v0.0.1 | in_progress | main | 未创建 | Apache-2.0 已确认，等待最终 CI/Tag |
+| M0 仓库骨架 | v0.0.1 | in_progress | main | 未创建 | 发布候选验收通过，等待 CI/Tag |
 | M1 持久化项目图 | v0.1.0 | pending | feat/m1-project-state | — | — |
 | M2 人工审批与历史 | v0.2.0 | pending | feat/m2-human-approval | — | — |
 | M3 独立文献库 | v0.3.0 | pending | feat/m3-literature-library | — | — |
@@ -33,5 +33,5 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 
 ## 当前发布待办
 
-1. 推送 Apache-2.0 许可证提交并核验 CI。
-2. 执行最终独立验收并创建 `v0.0.1` Tag。
+1. 推送发布候选验收记录并核验 CI。
+2. 创建并核验 `v0.0.1` Tag。
