@@ -4,6 +4,8 @@
 
 ## [Unreleased]
 
+## [0.1.0] - 2026-08-09
+
 ### Added
 
 - 严格校验的 `ResearchQuestion` 和轻量 `ResearchProjectState` 契约。

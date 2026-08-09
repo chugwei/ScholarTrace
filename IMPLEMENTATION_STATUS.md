@@ -2,7 +2,7 @@
 
 - 项目状态：M1 发布候选审查
 - 当前里程碑：M1 — 最小持久化科研项目图
-- 当前版本：`v0.0.1`
+- 当前版本：`v0.1.0-rc`
 - 当前分支：`feat/m1-project-state`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-09（Asia/Shanghai）
@@ -45,9 +45,9 @@
 | `uv sync --all-groups` | 通过，CPython 3.12.13 |
 | `uv run ruff format --check src tests scripts` | 通过 |
 | `uv run ruff check src tests scripts` | 通过 |
-| `uv run pytest` | 通过，9 passed |
+| `uv run pytest` | 通过，50 passed |
 | `uv run python scripts/validate_fixtures.py` | 通过，3 个合成 Fixture |
-| `uv run python scripts/check.py` | 通过 |
+| `uv run python scripts/check.py` | 通过，50 passed |
 | M1.1 State/Schema/Reducer 目标测试 | 通过，16 passed |
 | M1.1 后全量 pytest | 通过，25 passed |
 | M1.2 Repository/迁移集成测试 | 通过，12 passed |
