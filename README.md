@@ -1,5 +1,7 @@
 # 研迹 ScholarTrace
 
+[![quality](https://github.com/chugwei/ScholarTrace/actions/workflows/quality.yml/badge.svg?branch=main)](https://github.com/chugwei/ScholarTrace/actions/workflows/quality.yml)
+
 研迹 ScholarTrace 是一个从研究问题、文献证据、数据与实验，到论文和真实部署的可追溯科研工作台。
 
 当前版本为 `v0.0.1` 的 M0 仓库骨架。它只提供可安装的 Python 包、项目治理文档、脱敏 Fixture 及其确定性校验、测试与 CI。LangGraph 工作流、文献检索、实验执行、论文生成和部署尚未实现，不能视为可用能力。

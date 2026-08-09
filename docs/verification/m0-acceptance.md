@@ -1,8 +1,8 @@
 # M0 本地验收记录
 
 - 日期：2026-08-09（Asia/Shanghai）
-- 被验收 Git commit：`fc774da81e6e8e77f527bb4898e2ea1c1480906f`
-- 结论：本地代码、Fixture、构建和独立安装门禁通过；远端 push、GitHub Actions 和 LICENSE 门禁未通过，因此 M0 尚未完成。
+- 被验收 Git commit：`7b26e2dba27191c9783f0aac8d67daae025619c1`
+- 结论：本地代码、Fixture、构建、独立安装、远端同步和 GitHub Actions 门禁通过；LICENSE 门禁未通过，因此 M0 尚未完成。
 
 ## 开发环境统一门禁
 
@@ -83,8 +83,15 @@ docker run --rm -v <repository>:/repo -w /repo rhysd/actionlint:latest -color
 | Fixture 私有数据标志 | 全部 false |
 | Fixture 真实现场验证标志 | 全部 false |
 
+## 远端 CI
+
+- Workflow：`quality`
+- Run：[#1](https://github.com/chugwei/ScholarTrace/actions/runs/31313652417)
+- Commit：`7b26e2dba27191c9783f0aac8d67daae025619c1`
+- 结论：`success`
+- 时长：14 秒
+
 ## 未通过门禁
 
-- `.github/workflows/quality.yml` 所在本地提交尚未推送，GitHub Actions 状态为“未运行/未验证”。
 - `LICENSE` 尚未创建，许可证类型仍待确认。
 - `v0.0.1` Tag 未创建且不得提前创建。
