@@ -1,4 +1,4 @@
-# M0 架构基线
+# 架构基线
 
 ## 当前结构
 
@@ -35,3 +35,9 @@ JSON Fixture
 - M11–M12 才增加 Web、容器部署和真实场景交付。
 
 所有演进必须通过 ADR、测试、迁移/兼容验证和版本 Tag 固定。
+
+## M1 状态契约
+
+`ResearchProjectState` 是 LangGraph 节点之间的小型控制平面。它保存项目和线程标识、当前阶段、待处理事项以及领域实体 ID，不保存 PDF、数据集、模型权重、长日志或论文全文。`draft_research_question` 是 M1 构建问题时唯一保留在 State 中的结构化草案；正式保存后由 Repository 分配 ID。
+
+State 中的消息使用 LangGraph `add_messages` Reducer：相同消息 ID 的更新会替换旧消息。警告、下一动作和实体 ID 列表使用有序去重 Reducer，使节点重放和重试不会重复追加同一个值。`new_research_project_state()` 每次创建独立容器，防止项目之间共享可变列表。

@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 契约设计
+- 项目状态：M1 持久化层设计
 - 当前里程碑：M1 — 最小持久化科研项目图
 - 当前版本：`v0.0.1`
 - 当前分支：`feat/m1-project-state`
@@ -31,8 +31,8 @@
 
 ## M1 小任务
 
-- [ ] M1.1 ResearchProjectState、ResearchQuestion 与 Reducer 契约（当前）
-- [ ] M1.2 SQLite Project Repository、迁移与幂等写入
+- [x] M1.1 ResearchProjectState、ResearchQuestion 与 Reducer 契约
+- [ ] M1.2 SQLite Project Repository、迁移与幂等写入（当前）
 - [ ] M1.3 `START → intake → build_research_question → save → END` 与 SQLite Checkpointer
 - [ ] M1.4 CLI 创建、继续和查看项目
 - [ ] M1.5 重启恢复、项目隔离、幂等与农业视觉黄金场景验收
@@ -48,6 +48,8 @@
 | `uv run pytest` | 通过，9 passed |
 | `uv run python scripts/validate_fixtures.py` | 通过，3 个合成 Fixture |
 | `uv run python scripts/check.py` | 通过 |
+| M1.1 State/Schema/Reducer 目标测试 | 通过，16 passed |
+| M1.1 后全量 pytest | 通过，25 passed |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
 | `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.0.1 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
@@ -61,8 +63,9 @@
 
 ## 当前限制
 
-- M0 仅提供工程骨架；LangGraph、RAG、实验、论文、Web 和部署能力尚未实现。
+- M1 当前只完成 State、Schema 与 Reducer 契约；Graph、持久化 Repository 和 CLI 尚未实现。
+- RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-先冻结 M1.1 的 Schema、State 与 Reducer 行为测试，再进入 SQLite Repository。
+实现 M1.2 SQLite Project Repository、迁移、事务隔离和幂等写入测试。
