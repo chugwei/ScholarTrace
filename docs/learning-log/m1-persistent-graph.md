@@ -70,6 +70,12 @@ M1 的 Repository 为规范化后的研究问题计算 SHA-256。同一项目重
 
 非法 JSON 或 Schema 返回退出码 2，缺失项目、Checkpoint 或身份冲突返回退出码 1。Windows 入口显式使用 UTF-8 输出，避免系统默认 GBK 与现代 PowerShell 的 UTF-8 解码不一致导致中文帮助乱码。
 
+## 为什么必须做独立进程恢复
+
+在同一 Python 进程中关闭再打开对象，只能证明连接生命周期正确，不能证明下一次程序启动能从磁盘恢复。M1.5 用 `subprocess` 为 create、continue、replay 和 show 各启动一个全新的解释器，三个参数化项目全部恢复成功。重复 create 仍返回相同实体 ID，两个项目既不能读取对方的研究问题，也不能读到对方的 checkpoint State。
+
+黄金样例的 `research-question.json` 明确标记其目标域来自合成、脱敏场景描述。它证明可恢复数据流，不证明检测模型、真实文献或果园效果。
+
 ## 与前后里程碑的关系
 
 M0 提供可安装工程和质量门禁。M1.1 冻结 State、ResearchQuestion 和 Reducer 语义；M1 后续批次将补齐 Repository、最小 Graph、SQLite Checkpointer、CLI 和独立进程恢复。M2 才增加条件 Edge、人工审批、`interrupt`、`Command` 和版本回滚。

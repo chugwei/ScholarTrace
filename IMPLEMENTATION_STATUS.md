@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 独立恢复验收
+- 项目状态：M1 发布候选审查
 - 当前里程碑：M1 — 最小持久化科研项目图
 - 当前版本：`v0.0.1`
 - 当前分支：`feat/m1-project-state`
@@ -35,8 +35,8 @@
 - [x] M1.2 SQLite Project Repository、迁移与幂等写入
 - [x] M1.3 `START → intake → build_research_question → save → END` 与 SQLite Checkpointer
 - [x] M1.4 CLI 创建、继续和查看项目
-- [ ] M1.5 重启恢复、项目隔离、幂等与农业视觉黄金场景验收（当前）
-- [ ] M1.6 独立审查、合并 `main` 与 `v0.1.0` 发布
+- [x] M1.5 重启恢复、项目隔离、幂等与农业视觉黄金场景验收
+- [ ] M1.6 独立审查、合并 `main` 与 `v0.1.0` 发布（当前）
 
 ## 当前验证
 
@@ -57,6 +57,8 @@
 | M1.4 CLI 集成测试 | 通过，4 passed |
 | M1.4 后全量 pytest | 通过，46 passed |
 | `uv run scholartrace --help` | 通过，Windows UTF-8 中文显示正常 |
+| M1.5 独立进程恢复 E2E | 通过，4 passed；参数化恢复 3/3 |
+| M1.5 后全量 pytest | 通过，50 passed |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
 | `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.0.1 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
@@ -70,9 +72,9 @@
 
 ## 当前限制
 
-- M1 当前完成 State、Schema、Reducer、SQLite Repository、初始 Alembic 迁移、固定顺序 Graph、SQLite Checkpointer 与 CLI；尚未完成独立进程恢复和黄金样例最终验收。
+- M1 功能与独立进程恢复门禁已完成；尚未完成独立 diff 审查、发布候选全新环境验收、合并 main 和 `v0.1.0` Tag。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-执行 M1.5 独立 Python 进程 create/continue/show、项目隔离、幂等、迁移兼容和农业视觉黄金样例验收。
+执行 M1.6 范围、测试、迁移、安全、文档、退化路径和秘密扫描审查，在全新环境验收后合并 main 并发布 `v0.1.0`。

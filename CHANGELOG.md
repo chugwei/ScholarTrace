@@ -12,6 +12,7 @@
 - 项目身份冲突、持久化重开、研究问题版本与跨项目隔离测试。
 - `START → intake → build_research_question → save → END` 最小 LangGraph 与 SQLite Checkpointer。
 - `scholartrace project create/continue/show` CLI、稳定 JSON 输出和明确错误退出码。
+- 三进程恢复、重放幂等和跨项目隔离的农业视觉黄金场景 E2E。
 
 ## [0.0.1] - 2026-08-09
 
