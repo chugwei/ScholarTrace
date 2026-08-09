@@ -7,7 +7,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | 里程碑 | 版本 | 状态 | 分支 | Tag | 验证 |
 |---|---|---|---|---|---|
 | M0 仓库骨架 | v0.0.1 | completed | main | [v0.0.1](https://github.com/chugwei/ScholarTrace/tree/v0.0.1) | 本地、独立环境、CI 通过 |
-| M1 持久化项目图 | v0.1.0 | in_progress | feat/m1-project-state | — | State 契约通过，进入 Repository |
+| M1 持久化项目图 | v0.1.0 | in_progress | feat/m1-project-state | — | Repository 通过，进入 Graph |
 | M2 人工审批与历史 | v0.2.0 | pending | feat/m2-human-approval | — | — |
 | M3 独立文献库 | v0.3.0 | pending | feat/m3-literature-library | — | — |
 | M4 可信证据 RAG | v0.4.0 | pending | feat/m4-evidence-rag | — | — |
@@ -43,8 +43,8 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | ID | 批次 | 主要证据 | 状态 |
 |---|---|---|---|
 | M1.1 | State、ResearchQuestion、Reducer 契约 | Schema 单元测试、Reducer 重放测试 | completed |
-| M1.2 | SQLite Project Repository | 迁移、事务、幂等与隔离测试 | in_progress |
-| M1.3 | 最小 LangGraph + SQLite Checkpointer | Graph 集成测试、checkpoint 证据 | pending |
+| M1.2 | SQLite Project Repository | 迁移、事务、幂等与隔离测试 | completed |
+| M1.3 | 最小 LangGraph + SQLite Checkpointer | Graph 集成测试、checkpoint 证据 | in_progress |
 | M1.4 | CLI create/continue/show | CLI 集成与错误路径测试 | pending |
 | M1.5 | 重启恢复与黄金样例 | 独立进程恢复成功率 100%、项目泄漏 0 | pending |
 | M1.6 | M1 发布 | 独立审查、main CI、`v0.1.0` | pending |

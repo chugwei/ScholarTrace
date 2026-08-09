@@ -1,15 +1,13 @@
 """State contract for the persistent research-project graph."""
 
-import re
 from collections.abc import Iterable
 from typing import Annotated, Any, TypedDict
 
 from langchain_core.messages import AnyMessage
 from langgraph.graph.message import add_messages
 
+from scholartrace.identifiers import validate_identifier
 from scholartrace.schemas.research import ResearchQuestion
-
-_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
 
 
 def merge_unique_strings(left: Iterable[str], right: Iterable[str]) -> list[str]:
@@ -50,15 +48,6 @@ class ResearchProjectState(TypedDict):
     warnings: Annotated[list[str], merge_unique_strings]
 
 
-def _validate_identifier(value: str) -> str:
-    if not _IDENTIFIER_PATTERN.fullmatch(value):
-        raise ValueError(
-            "identifier must start with an ASCII letter or digit and contain only "
-            "letters, digits, dots, underscores, or hyphens (maximum 128 characters)"
-        )
-    return value
-
-
 def new_research_project_state(
     project_id: str,
     thread_id: str,
@@ -68,8 +57,8 @@ def new_research_project_state(
 
     return ResearchProjectState(
         messages=[],
-        project_id=_validate_identifier(project_id),
-        thread_id=_validate_identifier(thread_id),
+        project_id=validate_identifier(project_id),
+        thread_id=validate_identifier(thread_id),
         active_stage="intake",
         current_goal=current_goal,
         pending_questions=[],

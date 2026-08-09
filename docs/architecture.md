@@ -41,3 +41,9 @@ JSON Fixture
 `ResearchProjectState` 是 LangGraph 节点之间的小型控制平面。它保存项目和线程标识、当前阶段、待处理事项以及领域实体 ID，不保存 PDF、数据集、模型权重、长日志或论文全文。`draft_research_question` 是 M1 构建问题时唯一保留在 State 中的结构化草案；正式保存后由 Repository 分配 ID。
 
 State 中的消息使用 LangGraph `add_messages` Reducer：相同消息 ID 的更新会替换旧消息。警告、下一动作和实体 ID 列表使用有序去重 Reducer，使节点重放和重试不会重复追加同一个值。`new_research_project_state()` 每次创建独立容器，防止项目之间共享可变列表。
+
+## M1 业务持久化
+
+业务实体使用 SQLite、SQLAlchemy 2 和 Alembic。`projects` 保存项目与线程的一对一身份关系；`research_questions` 保存通过 Schema 校验的研究问题版本、内容 SHA-256 和 JSON payload。Repository 的每次公开操作使用短事务，同一项目重复保存相同内容时返回原记录，不增加版本；内容改变时才分配下一版本。
+
+研究问题查询必须同时匹配 `project_id` 和 `research_question_id`，防止跨项目读取。数据库启用 SQLite 外键约束；初始迁移支持 upgrade、downgrade 到 base 和再次 upgrade。业务数据库属于运行数据，由 `.gitignore` 排除，不进入源码历史。

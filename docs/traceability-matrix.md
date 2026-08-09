@@ -17,6 +17,6 @@
 | M0 发布 | `CHANGELOG.md`, `docs/verification/m0-release.md` | quality Run #4、annotated Tag `v0.0.1` | v0.0.1 | implemented-tested |
 | M1–M12 | `docs/roadmap.md` | 尚未实现 | v0.1.0–v1.0.0 | planned |
 | M1 State/ResearchQuestion/Reducer | `src/scholartrace/schemas/research.py`, `src/scholartrace/states/research_project.py` | `tests/unit/test_research_question.py`, `tests/unit/test_research_project_state.py` | v0.1.0 | implemented-tested |
-| M1 SQLite Repository/迁移 | 待 M1.2 实现 | 待 M1.2 测试 | v0.1.0 | planned |
+| M1 SQLite Repository/迁移 | `src/scholartrace/persistence/` | `tests/integration/test_project_repository.py`, `docs/verification/m1-repository.md` | v0.1.0 | implemented-tested |
 | M1 最小 Graph/Checkpointer | 待 M1.3 实现 | 待 M1.3 测试 | v0.1.0 | planned |
 | M1 CLI 与重启恢复 | 待 M1.4–M1.5 实现 | 待独立进程验收 | v0.1.0 | planned |
