@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M0 已发布，准备 M1
+- 项目状态：M1 契约设计
 - 当前里程碑：M1 — 最小持久化科研项目图
 - 当前版本：`v0.0.1`
-- 当前分支：`main`
+- 当前分支：`feat/m1-project-state`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-09（Asia/Shanghai）
 
@@ -28,6 +28,15 @@
 - [x] M0.4 Ruff、pytest、CI 与降级测试
 - [x] M0.5 全新环境验收、工程记录、追溯矩阵和独立审查
 - [x] M0.6 发布候选 CI 通过，`v0.0.1` Tag 已推送并核验
+
+## M1 小任务
+
+- [ ] M1.1 ResearchProjectState、ResearchQuestion 与 Reducer 契约（当前）
+- [ ] M1.2 SQLite Project Repository、迁移与幂等写入
+- [ ] M1.3 `START → intake → build_research_question → save → END` 与 SQLite Checkpointer
+- [ ] M1.4 CLI 创建、继续和查看项目
+- [ ] M1.5 重启恢复、项目隔离、幂等与农业视觉黄金场景验收
+- [ ] M1.6 独立审查、合并 `main` 与 `v0.1.0` 发布
 
 ## 当前验证
 
@@ -56,4 +65,4 @@
 
 ## 下一步
 
-创建并推送 `feat/m1-project-state`，按 M1 小任务实现 ResearchProjectState、ResearchQuestion、最小 LangGraph、SQLite Checkpointer、Project Repository 与 CLI。
+先冻结 M1.1 的 Schema、State 与 Reducer 行为测试，再进入 SQLite Repository。
