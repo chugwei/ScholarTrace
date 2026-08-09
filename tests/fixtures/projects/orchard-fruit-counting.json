@@ -1,0 +1,34 @@
+{
+  "schema_version": "1.0",
+  "project_id": "orchard-fruit-counting",
+  "title": "果园果实目标计数研究（合成 Fixture）",
+  "domain": "agriculture_vision",
+  "task_type": "object_counting",
+  "research_intent": "研究遮挡、尺度变化和重复观测条件下果实目标计数管线的可复现评估设计。",
+  "inputs": [
+    "合成的果园图像批次描述",
+    "不含坐标和身份信息的采集条件标签"
+  ],
+  "expected_outputs": [
+    "每幅图像的计数候选",
+    "重复目标与漏计错误分类"
+  ],
+  "constraints": [
+    "相邻帧和同一对象不得跨数据划分泄漏",
+    "训练日志数值不能成为最终计数指标"
+  ],
+  "success_criteria": [
+    "后续实验协议明确匹配阈值和计数误差定义",
+    "失败样例按遮挡和尺度条件可追踪"
+  ],
+  "assumptions": [
+    "正式研究需要冻结目标实例定义"
+  ],
+  "unresolved_questions": [
+    "视频计数是否需要跨帧身份关联"
+  ],
+  "data_classification": "synthetic_deidentified_fixture",
+  "evidence_status": "fixture_only_not_research_evidence",
+  "contains_private_data": false,
+  "real_world_validation": false
+}
