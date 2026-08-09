@@ -1,12 +1,10 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M0 等待许可证确认
+- 项目状态：M0 最终发布验证
 - 当前里程碑：M0 — 问题定义与仓库骨架
 - 当前版本：`0.0.1`（尚未发布 Tag）
 - 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
-- 最近已推送检查点：`7b26e2dba27191c9783f0aac8d67daae025619c1`
-- 最近已记录本地检查点：`7b26e2dba27191c9783f0aac8d67daae025619c1`
 - 更新时间：2026-08-09（Asia/Shanghai）
 
 ## 已完成
@@ -17,6 +15,7 @@
 - 建立三个农业视觉合成/脱敏 Fixture 及严格 Schema 校验。
 - 建立本地统一质量门禁和最小权限 GitHub Actions workflow。
 - GitHub Actions quality Run #1 在 `main` 上通过。
+- 项目采用 Apache License 2.0，包元数据和 wheel 许可证文件已验证。
 - 完成 Git archive 独立源码安装、sdist/wheel 构建与全新 venv 安装验收。
 - 实际运行 Python 3.12 与 `actionlint` 容器。
 
@@ -27,7 +26,7 @@
 - [x] M0.3 农业视觉黄金场景、3 个脱敏 Fixture 及校验
 - [x] M0.4 Ruff、pytest、CI 与降级测试
 - [x] M0.5 全新环境验收、工程记录、追溯矩阵和独立审查
-- [ ] M0.6 许可证确认、`main` 推送与 `v0.0.1` Tag
+- [ ] M0.6 Apache-2.0 已确认，等待最终 CI 与 `v0.0.1` Tag
 
 ## 当前验证
 
@@ -45,12 +44,16 @@
 | `actionlint` Docker 静态检查 | 通过，无诊断输出 |
 | GitHub Actions quality Run #1 | 通过，commit `7b26e2d`，14s |
 | `git ls-remote origin refs/heads/main` | 远端与本地均为 `7b26e2d...` |
+| Apache-2.0 官方正文比对 | 通过 |
+| 安装包 `License-Expression` | `Apache-2.0` |
+| wheel 许可证文件 | 包含 `dist-info/licenses/LICENSE` |
 
-## 发布阻塞
+## 发布前待办
 
-- `LICENSE` 尚未确定；许可证会影响公开复用边界，发布 Tag 前必须确认。
+- 推送许可证提交并等待当前 HEAD 的 GitHub Actions 通过。
+- 完成最终干净环境验收、状态审查与版本 Tag。
 - M0 仅提供工程骨架；LangGraph、RAG、实验、论文、Web 和部署能力尚未实现。
 
 ## 下一步
 
-确认许可证后，添加 `LICENSE`、重跑 M0 门禁、创建并推送 `v0.0.1`，随后开始 M1 功能分支。
+推送许可证提交并核验 CI，然后完成最终验收、创建并推送 `v0.0.1`，随后开始 M1 功能分支。

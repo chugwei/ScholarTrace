@@ -8,6 +8,8 @@ version = "0.0.1"
 description = "研迹 ScholarTrace：可信、可追溯、可复现的科研工作台"
 readme = "README.md"
 requires-python = ">=3.12"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 authors = [
   { name = "ScholarTrace contributors" },
 ]

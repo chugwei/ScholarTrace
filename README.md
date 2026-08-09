@@ -39,3 +39,7 @@ uv run python scripts/check.py
 - [贡献指南](CONTRIBUTING.md)
 
 项目按 M0 → M12 的版本路线渐进开发。当前能力、验证证据和下一版本范围以 `IMPLEMENTATION_STATUS.md` 与发布路线为准。
+
+## 许可证
+
+本项目采用 [Apache License 2.0](LICENSE)。

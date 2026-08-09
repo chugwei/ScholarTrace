@@ -13,5 +13,5 @@
 | M0 全新环境安装与构建 | `pyproject.toml`, `uv.lock` | `docs/verification/m0-acceptance.md` | v0.0.1 | implemented-tested |
 | M0 3 个脱敏 Fixture | `tests/fixtures/projects/`, `src/scholartrace/fixtures.py`, `examples/agriculture-vision-project/` | `tests/unit/test_fixtures.py`, `tests/integration/test_fixture_catalog.py`, `scripts/validate_fixtures.py` | v0.0.1 | implemented-tested |
 | M0 CI | `.github/workflows/quality.yml`, `scripts/check.py` | [quality Run #1](https://github.com/chugwei/ScholarTrace/actions/runs/31313652417) | v0.0.1 | implemented-tested |
-| M0 LICENSE | 许可证类型待确认 | 无 | v0.0.1 | blocked |
+| M0 LICENSE | `LICENSE`, `pyproject.toml`, `README.md` | `tests/unit/test_package.py`, wheel 内容检查 | v0.0.1 | implemented-tested |
 | M1–M12 | `docs/roadmap.md` | 尚未实现 | v0.1.0–v1.0.0 | planned |

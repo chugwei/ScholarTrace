@@ -4,11 +4,13 @@
 
 ## [Unreleased]
 
+## [0.0.1] - 2026-08-09
+
 ### Added
 
 - M0 可安装 Python 包骨架、uv 锁文件、pytest 和 Ruff 配置。
 - 项目治理、长期进度、追溯、ADR 与验证记录骨架。
+- 三个合成、脱敏的农业视觉项目 Fixture 及确定性校验。
+- GitHub Actions 质量门禁和 Apache License 2.0。
 
-## [0.0.1] - 待发布
-
-M0：问题定义与仓库骨架。此版本不包含 LangGraph、RAG、实验、论文或部署能力。
+此版本不包含 LangGraph、RAG、实验、论文或部署能力。

@@ -93,5 +93,12 @@ docker run --rm -v <repository>:/repo -w /repo rhysd/actionlint:latest -color
 
 ## 未通过门禁
 
-- `LICENSE` 尚未创建，许可证类型仍待确认。
+- 许可证提交尚待远端 CI 验证。
 - `v0.0.1` Tag 未创建且不得提前创建。
+
+## 许可证验证
+
+- 许可证：Apache License 2.0；
+- `LICENSE` 与 Apache 官方正文一致，仅将 Appendix 版权占位符替换为项目版权信息；
+- 安装元数据 `License-Expression` 为 `Apache-2.0`；
+- wheel 包含 `scholartrace-0.0.1.dist-info/licenses/LICENSE`。

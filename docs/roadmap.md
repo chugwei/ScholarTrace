@@ -6,7 +6,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 
 | 里程碑 | 版本 | 状态 | 分支 | Tag | 验证 |
 |---|---|---|---|---|---|
-| M0 仓库骨架 | v0.0.1 | in_progress | main | 未创建 | 本地与 CI 通过，等待 LICENSE |
+| M0 仓库骨架 | v0.0.1 | in_progress | main | 未创建 | Apache-2.0 已确认，等待最终 CI/Tag |
 | M1 持久化项目图 | v0.1.0 | pending | feat/m1-project-state | — | — |
 | M2 人工审批与历史 | v0.2.0 | pending | feat/m2-human-approval | — | — |
 | M3 独立文献库 | v0.3.0 | pending | feat/m3-literature-library | — | — |
@@ -29,9 +29,9 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M0.3 | 黄金场景与 Fixture | 3 个脱敏 Fixture 通过确定性 Schema 校验 | completed |
 | M0.4 | CI 与质量门禁 | 本地和 GitHub Actions 执行同一锁定检查 | completed |
 | M0.5 | 独立验收 | 全新环境安装、构建、测试和审查记录通过 | completed |
-| M0.6 | M0 发布 | LICENSE 已确认，main 同步，v0.0.1 Tag 推送 | blocked |
+| M0.6 | M0 发布 | LICENSE 已确认，main 同步，v0.0.1 Tag 推送 | in_progress |
 
-## 当前发布阻塞
+## 当前发布待办
 
-1. 许可证类型尚未确认。
-恢复顺序：确认许可证、添加 `LICENSE`、重跑完整门禁，再创建版本 Tag。
+1. 推送 Apache-2.0 许可证提交并核验 CI。
+2. 执行最终独立验收并创建 `v0.0.1` Tag。
