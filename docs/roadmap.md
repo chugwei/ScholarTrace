@@ -6,8 +6,8 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 
 | 里程碑 | 版本 | 状态 | 分支 | Tag | 验证 |
 |---|---|---|---|---|---|
-| M0 仓库骨架 | v0.0.1 | in_progress | main | 未创建 | 发布候选验收通过，等待 CI/Tag |
-| M1 持久化项目图 | v0.1.0 | pending | feat/m1-project-state | — | — |
+| M0 仓库骨架 | v0.0.1 | completed | main | [v0.0.1](https://github.com/chugwei/ScholarTrace/tree/v0.0.1) | 本地、独立环境、CI 通过 |
+| M1 持久化项目图 | v0.1.0 | in_progress | feat/m1-project-state | — | 任务拆分中 |
 | M2 人工审批与历史 | v0.2.0 | pending | feat/m2-human-approval | — | — |
 | M3 独立文献库 | v0.3.0 | pending | feat/m3-literature-library | — | — |
 | M4 可信证据 RAG | v0.4.0 | pending | feat/m4-evidence-rag | — | — |
@@ -29,9 +29,11 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M0.3 | 黄金场景与 Fixture | 3 个脱敏 Fixture 通过确定性 Schema 校验 | completed |
 | M0.4 | CI 与质量门禁 | 本地和 GitHub Actions 执行同一锁定检查 | completed |
 | M0.5 | 独立验收 | 全新环境安装、构建、测试和审查记录通过 | completed |
-| M0.6 | M0 发布 | LICENSE 已确认，main 同步，v0.0.1 Tag 推送 | in_progress |
+| M0.6 | M0 发布 | LICENSE 已确认，main 同步，v0.0.1 Tag 推送 | completed |
 
-## 当前发布待办
+## M1 入口
 
-1. 推送发布候选验收记录并核验 CI。
-2. 创建并核验 `v0.0.1` Tag。
+1. 创建 `feat/m1-project-state`；
+2. 冻结 ResearchProjectState、ResearchQuestion 与 Repository 契约；
+3. 先写恢复、隔离、Reducer 和幂等测试，再实现最小持久化 Graph；
+4. 通过 M1 门禁后发布 `v0.1.0`。
