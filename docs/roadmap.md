@@ -86,3 +86,12 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M5.2 | 研究设计 Subgraph 与流程图 | 节点、版本和人工批准边界测试 | completed |
 | M5.3 | 数据质量/泄漏检查与方案比较 | 失败路径、版本对比和安全检查 | completed |
 | M5.4 | Markdown/YAML 导出与 M5 发布 | 独立审查、main CI、`v0.5.0` | completed |
+
+## M6 验收批次
+
+| ID | 批次 | 主要证据 | 状态 |
+|---|---|---|---|
+| M6.1 | AlgorithmSpec/Prior Art Map 契约与迁移 | 0009、证据绑定、版本和审批顺序测试 | completed |
+| M6.2 | InnovationCandidate 与方法差异 | 候选结构、差异表和确定性排序测试 | in_progress |
+| M6.3 | 证伪、基线/消融与状态门禁 | 审批阻断、实验入口和真实性测试 | pending |
+| M6.4 | M6 发布 | 独立审查、main CI、`v0.6.0` | pending |

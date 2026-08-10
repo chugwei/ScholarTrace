@@ -44,3 +44,4 @@
 | M5.4 Markdown/YAML 导出 | `src/scholartrace/design/export.py`, `pyproject.toml` | `tests/integration/test_m5_design_export.py`, `docs/verification/m5-design-export.md` | v0.5.0 | implemented-tested |
 | M5 v0.5.0 发布候选 | `pyproject.toml`, `README.md`, `CHANGELOG.md`, `uv.lock` | `docs/verification/m5-release-candidate.md`, `scripts/check.py`, 独立 wheel/CLI/迁移 | v0.5.0 | release-candidate |
 | M5 v0.5.0 发布 | `main`, `v0.5.0` | merge `9aef2d8`, Tag object `c35ed74`, main smoke/门禁 | v0.5.0 | implemented-tested |
+| M6.1 AlgorithmSpec/Prior Art Map | `src/scholartrace/schemas/algorithm.py`, `src/scholartrace/persistence/algorithm_repository.py`, `src/scholartrace/persistence/migrations/versions/0009_add_algorithm_designs.py` | `tests/integration/test_m6_algorithm_repository.py`, `docs/verification/m6-algorithm-contracts.md` | v0.6.0 | implemented-tested |
