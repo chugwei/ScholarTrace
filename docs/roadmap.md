@@ -102,5 +102,5 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 |---|---|---|---|
 | M7.1 | ExperimentPlan、实验矩阵和冻结门禁 | 0011、版本/审批/回滚测试 | completed |
 | M7.2 | Run Manifest 与现有产物导入 | 缺失证据、不完整状态和导入隔离测试 | completed |
-| M7.3 | 指标独立重算、统计汇总和 Claim 更新 | 重算一致性、汇总和 Claim 门禁测试 | in_progress |
-| M7.4 | M7 发布 | 独立审查、main CI、`v0.7.0` | pending |
+| M7.3 | 指标独立重算、统计汇总和 Claim 更新 | 重算一致性、汇总和 Claim 门禁测试 | completed |
+| M7.4 | M7 发布 | 独立审查、main CI、`v0.7.0` | in_progress |

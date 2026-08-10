@@ -13,6 +13,13 @@ MatrixMethodKind = Literal["baseline", "proposed", "ablation"]
 RunImportStatus = Literal["imported", "incomplete", "validated", "failed"]
 MetricSource = Literal["training_log", "imported_report", "independent_recompute"]
 MetricVerificationStatus = Literal["unverifiable", "verified", "rejected"]
+ClaimUpdateStatus = Literal[
+    "planned",
+    "supported",
+    "contradicted",
+    "insufficient",
+    "withdrawn",
+]
 Sha256Text = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
 TextList = list[NonBlankText]
 
@@ -169,3 +176,39 @@ class MetricResult(BaseModel):
                     "verified metrics require data_version and evaluation script provenance"
                 )
         return self
+
+
+class MetricAggregate(BaseModel):
+    """Deterministic summary over verified final MetricResult records only."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    name: NonBlankText
+    split: NonBlankText
+    count: int = Field(ge=1)
+    mean: float
+    population_stddev: float
+    metric_result_ids: list[NonBlankText] = Field(min_length=1)
+
+    @model_validator(mode="after")
+    def validate_statistics(self) -> "MetricAggregate":
+        if not math.isfinite(self.mean) or not math.isfinite(self.population_stddev):
+            raise ValueError("metric aggregate values must be finite")
+        if self.count != len(self.metric_result_ids):
+            raise ValueError("aggregate count must match metric_result_ids")
+        return self
+
+
+class ClaimUpdate(BaseModel):
+    """Append-only claim status update linked to verified metric IDs."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    update_id: NonBlankText
+    project_id: NonBlankText
+    claim_id: NonBlankText
+    status: ClaimUpdateStatus
+    metric_result_ids: list[NonBlankText] = Field(default_factory=list)
+    run_ids: list[NonBlankText] = Field(default_factory=list)
+    reason: NonBlankText
+    created_at: datetime

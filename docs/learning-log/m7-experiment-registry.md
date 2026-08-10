@@ -41,3 +41,9 @@ M6 提供候选和证伪计划；M7.1 只冻结实验意图，M7.2 将导入现�
 `RunManifest` 记录 plan/matrix 身份、代码 SHA、数据版本、配置、环境锁、种子、Checkpoint 和相对 Artifact 路径。导入器先验证它引用的是 frozen 计划，再计算缺失字段；缺失时保存 `incomplete` 和 `missing_requirements`，不丢弃失败信息。相对路径检查阻止把私有绝对路径或 `..` 路径带入 Artifact 根目录。
 
 日志和报告中的数值进入 `MetricResult` 时保留 `source=training_log` 或 `imported_report`、`verification_status=unverifiable`、`is_final=false`。这条边界避免“训练日志最高值”自动变成论文最终指标。M7.3 的独立重算必须另有评估脚本 SHA、数据版本和可重复输入，才能产生 verified/final 结果。
+
+## M7.3 重算、汇总与 Claim
+
+`recompute_metric()` 是一个确定性 Tool：输入显式预测和目标，输出 accuracy、MAE 或 RMSE，不执行训练。只有完整 Run 引用的 frozen plan、相同 `data_version` 和评估脚本 SHA 同时满足，Repository 才写入 verified/final `MetricResult`。聚合器只读取这些记录，报告值即使数值更高也不会混入均值或标准差。
+
+Claim 更新是追加的状态事件。如果所有绑定 MetricResult 都 verified/final，请求的 `supported` 或 `contradicted` 才能保留；只要有日志值或缺失结果，状态就降为 `insufficient` 并保存原因。这让“有一个数字”与“有足够证据支持 Claim”在数据模型中分开。

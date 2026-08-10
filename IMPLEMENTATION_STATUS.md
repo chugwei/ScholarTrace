@@ -80,8 +80,8 @@
 
 - [x] M7.1 ExperimentPlan、实验矩阵和冻结门禁
 - [x] M7.2 Run Manifest、现有产物导入和不可验证状态
-- [ ] M7.3 指标独立重算、统计汇总和 Claim 更新（当前）
-- [ ] M7.4 独立审查、合并 `main` 与 `v0.7.0` 发布
+- [x] M7.3 指标独立重算、统计汇总和 Claim 更新
+- [ ] M7.4 独立审查、合并 `main` 与 `v0.7.0` 发布（当前）
 
 ## 当前验证
 
@@ -184,14 +184,16 @@
 | M7.1 全量质量门禁 | 通过，`scripts/check.py`；122 passed；3 个合成 Fixture |
 | M7.2 Run/Metric 目标测试 | 通过，3 passed；0012 迁移、完整性、相对路径和不可验证指标门禁 |
 | M7.2 全量质量门禁 | 通过，`scripts/check.py`；125 passed；3 个合成 Fixture |
+| M7.3 指标/Claim 目标测试 | 通过，5 passed；独立重算、verified 聚合、数据版本和 Claim 降级 |
+| M7.3 全量质量门禁 | 通过，`scripts/check.py`；127 passed；3 个合成 Fixture |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1 已实现计划冻结，M7.2 已实现 Run/Metric 导入边界；独立重算、论文、Web 和部署能力仍未实现。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级；论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步实现 M7.3 独立指标重算、统计汇总和 Claim 更新；不得把训练日志临时值当作最终指标。
+下一步完成 M7.4：独立审查 M7、构建 v0.7.0 发布候选并合并 `main`；不得把训练日志临时值当作最终指标。

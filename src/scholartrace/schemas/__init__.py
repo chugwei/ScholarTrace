@@ -23,8 +23,10 @@ from scholartrace.schemas.design import (
     PipelineVersionComparison,
 )
 from scholartrace.schemas.experiment import (
+    ClaimUpdate,
     ExperimentMatrixEntry,
     ExperimentPlan,
+    MetricAggregate,
     MetricResult,
     RunManifest,
 )
@@ -45,6 +47,7 @@ __all__ = [
     "CandidateExperimentPlan",
     "CaptureField",
     "ChunkSearchResult",
+    "ClaimUpdate",
     "DataCollectionProtocol",
     "DecisionRecord",
     "DesignFinding",
@@ -60,6 +63,7 @@ __all__ = [
     "InnovationFinding",
     "InnovationValidationReport",
     "MethodDifference",
+    "MetricAggregate",
     "MetricResult",
     "PipelineSpec",
     "PipelineStage",

@@ -3,6 +3,7 @@ from pathlib import Path
 
 import pytest
 
+from scholartrace.experiment import recompute_metric
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.experiment_repository import ExperimentRepository
 from scholartrace.persistence.migrations import (
@@ -15,6 +16,7 @@ from scholartrace.persistence.repository import ProjectRepository
 from scholartrace.persistence.run_repository import (
     RunManifestConflictError,
     RunRepository,
+    RunRepositoryError,
 )
 from scholartrace.schemas import ExperimentMatrixEntry, ExperimentPlan, RunManifest
 
@@ -126,11 +128,11 @@ def setup(database_path: Path) -> None:
 def test_m7_run_migration_rolls_back(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
     upgrade_database(database_path)
+    assert current_revision(database_path) == "0013"
+    downgrade_database(database_path, "0012")
     assert current_revision(database_path) == "0012"
-    downgrade_database(database_path, "0011")
-    assert current_revision(database_path) == "0011"
     upgrade_database(database_path)
-    assert current_revision(database_path) == "0012"
+    assert current_revision(database_path) == "0013"
 
 
 def test_incomplete_manifest_and_reported_metric_never_become_final(
@@ -173,3 +175,86 @@ def test_complete_manifest_is_imported_and_paths_are_sandboxed(tmp_path: Path) -
     with pytest.raises(RunManifestConflictError):
         repository.import_manifest(manifest().model_copy(update={"run_id": "run-001", "seed": 11}))
     repository.close()
+
+
+def test_independent_recompute_aggregation_and_claim_gate(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    setup(database_path)
+    repository = RunRepository(database_path)
+    repository.import_manifest(manifest())
+    repository.import_manifest(manifest(run_id="run-002"))
+    assert recompute_metric("mae", [1, 3], [0, 4]) == 1.0
+    assert recompute_metric("rmse", [1, 3], [0, 4]) == 1.0
+    first = repository.record_recomputed_metric(
+        metric_result_id="metric-recomputed-001",
+        project_id="lychee-m7-run",
+        run_id="run-001",
+        name="mae",
+        split="validation",
+        value=recompute_metric("mae", [1, 3], [0, 4]),
+        data_version="sha256:fixture-v1",
+        evaluation_script_sha256="e" * 64,
+    )
+    second = repository.record_recomputed_metric(
+        metric_result_id="metric-recomputed-002",
+        project_id="lychee-m7-run",
+        run_id="run-002",
+        name="mae",
+        split="validation",
+        value=2.0,
+        data_version="sha256:fixture-v1",
+        evaluation_script_sha256="e" * 64,
+    )
+    assert first.verification_status == "verified"
+    assert second.is_final is True
+    aggregate = repository.aggregate_verified_metrics("lychee-m7-run", "mae", "validation")
+    assert aggregate.count == 2
+    assert aggregate.mean == 1.5
+    assert aggregate.population_stddev == 0.5
+    supported = repository.update_claim(
+        update_id="claim-update-001",
+        project_id="lychee-m7-run",
+        claim_id="claim-mae",
+        status="supported",
+        metric_result_ids=[first.metric_result_id, second.metric_result_id],
+        reason="independent recomputation supports the bounded claim",
+    )
+    assert supported.status == "supported"
+
+    reported = repository.import_reported_metric(
+        metric_result_id="metric-report-001",
+        project_id="lychee-m7-run",
+        run_id="run-001",
+        name="mae",
+        split="validation",
+        value=0.1,
+        source="training_log",
+    )
+    insufficient = repository.update_claim(
+        update_id="claim-update-002",
+        project_id="lychee-m7-run",
+        claim_id="claim-mae",
+        status="supported",
+        metric_result_ids=[reported.metric_result_id],
+        reason="log value only",
+    )
+    assert insufficient.status == "insufficient"
+    with pytest.raises(RunRepositoryError, match="data_version"):
+        repository.record_recomputed_metric(
+            metric_result_id="metric-recomputed-bad",
+            project_id="lychee-m7-run",
+            run_id="run-001",
+            name="mae",
+            split="validation",
+            value=1.0,
+            data_version="sha256:wrong",
+            evaluation_script_sha256="e" * 64,
+        )
+    repository.close()
+
+
+def test_metric_recompute_rejects_unsupported_or_mismatched_inputs() -> None:
+    with pytest.raises(ValueError, match="equal length"):
+        recompute_metric("mae", [1], [1, 2])
+    with pytest.raises(ValueError, match="unsupported metric"):
+        recompute_metric("f1", [1], [1])
