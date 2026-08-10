@@ -16,7 +16,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M7 实验注册与导入 | v0.7.0 | completed | main | [v0.7.0](https://github.com/chugwei/ScholarTrace/tree/v0.7.0) | merge `1cd9280`、main 门禁、Tag 已核验 |
 | M8 Runner 与排错 | v0.8.0 | completed | main | [v0.8.0](https://github.com/chugwei/ScholarTrace/tree/v0.8.0) | merge `99f72e1`、main 门禁、Tag 已核验 |
 | M9 图表系统 | v0.9.0 | completed | main | [v0.9.0](https://github.com/chugwei/ScholarTrace/tree/v0.9.0) | merge `4e60f48`、149 tests、视觉验收和 Tag 已核验 |
-| M10 论文与引用 | v0.10.0 | in progress | feat/m10-manuscript | — | M10.1 契约与 0018 迁移已实现 |
+| M10 论文与引用 | v0.10.0 | in progress | feat/m10-manuscript | — | M10.1–M10.2 已验证，章节一致性门禁待实现 |
 | M11 Web 工作台 | v0.11.0 | pending | feat/m11-web-workbench | — | — |
 | M12 交付与部署 | v1.0.0 | pending | feat/m12-deployment | — | — |
 
@@ -128,6 +128,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | ID | 批次 | 主要证据 | 状态 |
 |---|---|---|---|
 | M10.1 | Manuscript、Section Contract、Claim Ledger 契约与 0018 迁移 | `docs/verification/m10-manuscript-contracts.md`；4 个目标测试、迁移回滚、项目隔离和 evidence gate | completed |
+| M10.2 | 章节生成、BibTeX 和引用解析 | `docs/verification/m10-citations.md`；5 个目标测试、158 个全量测试、缺失引用失败降级 | completed |
 | M10.2 | 章节生成、BibTeX 和引用解析 | — | pending |
 | M10.3 | 章节一致性、证据缺口与数字回溯门禁 | — | pending |
 | M10.4 | 独立审查、合并 `main` 与 `v0.10.0` 发布 | — | pending |

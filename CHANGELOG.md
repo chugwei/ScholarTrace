@@ -13,6 +13,7 @@
 - M9.3 verified-only 图表建议、来源型 Caption、MetricResult 数值一致性和 provenance hash 检查。
 - M9.4 完成 PNG/SVG/PDF 实际视觉验收、独立发布候选检查，并发布 `v0.9.0`。
 - M10.1 建立版本化 Manuscript、Section Contract、Claim Ledger、0018 迁移和项目级 evidence gate。
+- M10.2 增加离线 BibTeX 解析、引用缺失报告和来源绑定的确定性章节草稿模板。
 
 ### Boundary
 

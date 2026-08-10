@@ -34,3 +34,11 @@ M10.1 先把事实存储契约固定下来，尚未新增 Manuscript Graph。后
 - 让 Conclusion 合同允许新 Claim：Schema 在构造时拒绝。
 
 M10.2 将在不改变这些边界的前提下实现 BibTeX、引用解析和章节草稿；M10.3 再实现一致性报告。
+
+## M10.2：BibTeX、引用解析与确定性草稿
+
+`scholartrace.manuscript.citations` 用标准库扫描有限 BibTeX 语法，并要求唯一 key、author、title、year。`validate_citations()` 只把正文里实际出现的 key 与已解析条目比较；缺失 key 形成 failed report。`generate_section_draft()` 先检查 SectionContract 的 Claim 和 citation obligations，再输出带状态和来源 key 的 Markdown 模板。
+
+这里的核心取舍是把“解析是否成功”和“文献是否真实”分开：解析器能证明语法和引用闭环，但不能证明 DOI 属于某位作者或原文支持某个结论。后续可接入 Crossref/OpenAlex 或 CSL Provider，但 Provider 失败时必须保留离线失败报告。
+
+最小运行示例是用 `parse_bibtex()` 读取一个 `@article`，用 `validate_bibtex_citations("[@paper]", bibtex)` 检查 key，再将有 `supported` 状态和 evidence ID 的 Claim 交给 `generate_section_draft()`。测试覆盖缺字段、缺 key、缺 Claim 和不支持的自动补写路径。

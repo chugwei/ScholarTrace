@@ -57,7 +57,14 @@ from scholartrace.schemas.literature import (
     ProjectDocument,
     SourceSpan,
 )
-from scholartrace.schemas.manuscript import Claim, Manuscript, SectionContract
+from scholartrace.schemas.manuscript import (
+    BibTeXEntry,
+    CitationValidationReport,
+    Claim,
+    Manuscript,
+    SectionContract,
+    SectionDraft,
+)
 from scholartrace.schemas.research import ResearchQuestion
 from scholartrace.schemas.runner import (
     ControlledRunEvent,
@@ -73,9 +80,11 @@ from scholartrace.schemas.tracking import DVCDataVersionCheck, TrackingAttempt
 __all__ = [
     "AlgorithmComponent",
     "AlgorithmSpec",
+    "BibTeXEntry",
     "CandidateExperimentPlan",
     "CaptureField",
     "ChunkSearchResult",
+    "CitationValidationReport",
     "Claim",
     "ClaimUpdate",
     "ControlledRunEvent",
@@ -127,6 +136,7 @@ __all__ = [
     "RunEventStream",
     "RunManifest",
     "SectionContract",
+    "SectionDraft",
     "SourceSpan",
     "TrackingAttempt",
 ]

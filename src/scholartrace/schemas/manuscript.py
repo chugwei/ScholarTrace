@@ -30,6 +30,15 @@ SectionKey = Literal[
 SectionContractStatus = Literal["draft", "ready", "blocked", "approved"]
 ClaimType = Literal["literature", "method", "data", "result", "discussion", "limitation"]
 ClaimStatus = Literal["planned", "supported", "contradicted", "insufficient", "withdrawn"]
+BibTeXEntryType = Literal[
+    "article",
+    "book",
+    "incollection",
+    "inproceedings",
+    "misc",
+    "phdthesis",
+    "techreport",
+]
 
 
 def _utc_now() -> datetime:
@@ -73,6 +82,7 @@ class SectionContract(BaseModel):
     required_evidence_ids: list[NonBlankText] = Field(default_factory=list)
     required_metric_result_ids: list[NonBlankText] = Field(default_factory=list)
     required_figure_ids: list[NonBlankText] = Field(default_factory=list)
+    required_citation_keys: list[NonBlankText] = Field(default_factory=list)
     allow_new_claims: bool = True
     word_limit: int | None = Field(default=None, ge=1)
     status: SectionContractStatus = "draft"
@@ -87,12 +97,59 @@ class SectionContract(BaseModel):
             self.required_evidence_ids,
             self.required_metric_result_ids,
             self.required_figure_ids,
+            self.required_citation_keys,
         )
         if any(len(values) != len(set(values)) for values in reference_lists):
             raise ValueError("section contract references must be unique")
         if self.section == "conclusion" and self.allow_new_claims:
             raise ValueError("conclusion contracts cannot allow new claims")
         return self
+
+
+class BibTeXEntry(BaseModel):
+    """A parsed bibliography entry with the fields needed for citation checks."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    citation_key: NonBlankText
+    entry_type: BibTeXEntryType
+    title: NonBlankText
+    authors: list[NonBlankText] = Field(min_length=1)
+    year: int = Field(ge=1000, le=2200)
+    doi: NonBlankText | None = None
+    url: NonBlankText | None = None
+    journal: NonBlankText | None = None
+    booktitle: NonBlankText | None = None
+    publisher: NonBlankText | None = None
+    source_document_id: NonBlankText | None = None
+
+
+class CitationValidationReport(BaseModel):
+    """Deterministic result of resolving manuscript citations."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["passed", "failed"]
+    cited_keys: list[NonBlankText] = Field(default_factory=list)
+    resolved_keys: list[NonBlankText] = Field(default_factory=list)
+    missing_keys: list[NonBlankText] = Field(default_factory=list)
+    duplicate_keys: list[NonBlankText] = Field(default_factory=list)
+    parse_errors: list[NonBlankText] = Field(default_factory=list)
+
+
+class SectionDraft(BaseModel):
+    """A deterministic section draft with explicit source IDs."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    section_id: NonBlankText
+    manuscript_id: NonBlankText
+    markdown: NonBlankText
+    claim_ids: list[NonBlankText] = Field(default_factory=list)
+    citation_keys: list[NonBlankText] = Field(default_factory=list)
+    content_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    generated_by: NonBlankText
+    created_at: datetime = Field(default_factory=_utc_now)
 
 
 class Claim(BaseModel):

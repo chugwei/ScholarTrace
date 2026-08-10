@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M10.1 进行中
+- 项目状态：M10.3 待开始
 - 当前里程碑：M10 — 论文撰写与引用校验
 - 当前版本：`v0.9.0`
 - 当前分支：`feat/m10-manuscript`
@@ -102,7 +102,7 @@
 ## M10 小任务
 
 - [x] M10.1 Manuscript/Section Contract/Claim Ledger 契约与 0018 迁移
-- [ ] M10.2 章节生成、BibTeX 和引用解析
+- [x] M10.2 章节生成、BibTeX 和引用解析
 - [ ] M10.3 章节一致性、证据缺口与数字回溯门禁
 - [ ] M10.4 独立审查、合并 `main` 与 `v0.10.0` 发布
 
@@ -231,6 +231,8 @@
 | M9.4 发布候选 | 通过；wheel/sdist、隔离 venv、0017 迁移、CLI、Apache-2.0、内部文件排除、秘密/大文件扫描和 actionlint |
 | M9.4 main 合并与 v0.9.0 发布 | 通过；merge `4e60f48`；main 149 passed；annotated Tag `v0.9.0` object `0290f40` 已推送，peeled `4e60f48` |
 | M10.1 契约/Repository 目标测试 | 通过，4 passed；0018 回滚、版本父链、项目隔离和 Claim evidence gate |
+| M10.2 BibTeX/章节草稿目标测试 | 通过，5 passed；BibTeX 解析、引用缺失报告、SectionContract 草稿门禁 |
+| M10.2 全量质量门禁 | 通过，`scripts/check.py`；158 passed；3 个合成 Fixture |
 
 ## 当前限制
 
@@ -241,4 +243,4 @@
 
 ## 下一步
 
-下一步完成 M10.1 全量质量门禁并进入 BibTeX/引用解析；不把缺失证据补写成 Claim。
+下一步实现 M10.3 章节一致性、证据缺口和数字回溯门禁；不把缺失证据补写成 Claim。
