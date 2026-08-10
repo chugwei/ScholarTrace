@@ -462,3 +462,83 @@ class ClaimUpdateRow(Base):
     reason: Mapped[str] = mapped_column(Text, nullable=False)
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class ControlledRunRow(Base):
+    """A controlled execution request and its append-only lifecycle fields."""
+
+    __tablename__ = "controlled_runs"
+
+    execution_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    plan_id: Mapped[str] = mapped_column(
+        String(40), ForeignKey("experiment_plans.plan_id"), nullable=False, index=True
+    )
+    matrix_entry_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    backend: Mapped[str] = mapped_column(String(16), nullable=False)
+    command_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    exit_code: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    error: Mapped[str | None] = mapped_column(Text, nullable=True)
+    log_relpath: Mapped[str | None] = mapped_column(Text, nullable=True)
+    staging_relpath: Mapped[str | None] = mapped_column(Text, nullable=True)
+    published_relpath: Mapped[str | None] = mapped_column(Text, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+    started_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    finished_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+
+
+class ControlledRunEventRow(Base):
+    """Append-only event stream for controlled-run logs and state changes."""
+
+    __tablename__ = "controlled_run_events"
+    __table_args__ = (
+        UniqueConstraint(
+            "execution_id",
+            "sequence",
+            name="uq_controlled_run_event_sequence",
+        ),
+    )
+
+    event_id: Mapped[str] = mapped_column(String(80), primary_key=True)
+    execution_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("controlled_runs.execution_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    sequence: Mapped[int] = mapped_column(Integer, nullable=False)
+    stream: Mapped[str] = mapped_column(String(16), nullable=False)
+    message: Mapped[str] = mapped_column(Text, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class DebugCaseRow(Base):
+    """Persisted failure evidence and gated repair lifecycle."""
+
+    __tablename__ = "debug_cases"
+    __table_args__ = (
+        UniqueConstraint("project_id", "execution_id", name="uq_debug_case_project_execution"),
+    )
+
+    case_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    execution_id: Mapped[str] = mapped_column(
+        String(40), ForeignKey("controlled_runs.execution_id"), nullable=False, index=True
+    )
+    status: Mapped[str] = mapped_column(String(24), nullable=False, index=True)
+    category: Mapped[str] = mapped_column(String(24), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

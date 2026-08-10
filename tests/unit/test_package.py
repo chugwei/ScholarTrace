@@ -4,7 +4,7 @@ from scholartrace import __version__
 
 
 def test_package_version_matches_current_release() -> None:
-    assert __version__ == "0.7.0"
+    assert __version__ == "0.8.0"
 
 
 def test_package_declares_apache_2_license() -> None:

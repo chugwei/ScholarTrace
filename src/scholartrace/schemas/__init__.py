@@ -12,6 +12,17 @@ from scholartrace.schemas.algorithm import (
     PriorArtEntry,
     PriorArtMap,
 )
+from scholartrace.schemas.debug import (
+    DebugCase,
+    DebugCaseStatus,
+    DiagnosticFinding,
+    DiagnosticHypothesis,
+    EvidenceRef,
+    FailureCategory,
+    RegressionResult,
+    RepairFileChange,
+    RepairProposal,
+)
 from scholartrace.schemas.decisions import DecisionRecord
 from scholartrace.schemas.design import (
     CaptureField,
@@ -40,6 +51,16 @@ from scholartrace.schemas.literature import (
     SourceSpan,
 )
 from scholartrace.schemas.research import ResearchQuestion
+from scholartrace.schemas.runner import (
+    ControlledRunEvent,
+    ControlledRunRecord,
+    ControlledRunSpec,
+    ControlledRunStatus,
+    ResourceLimits,
+    RunBackend,
+    RunEventStream,
+)
+from scholartrace.schemas.tracking import DVCDataVersionCheck, TrackingAttempt
 
 __all__ = [
     "AlgorithmComponent",
@@ -48,16 +69,27 @@ __all__ = [
     "CaptureField",
     "ChunkSearchResult",
     "ClaimUpdate",
+    "ControlledRunEvent",
+    "ControlledRunRecord",
+    "ControlledRunSpec",
+    "ControlledRunStatus",
+    "DVCDataVersionCheck",
     "DataCollectionProtocol",
+    "DebugCase",
+    "DebugCaseStatus",
     "DecisionRecord",
     "DesignFinding",
     "DesignValidationReport",
+    "DiagnosticFinding",
+    "DiagnosticHypothesis",
     "Document",
     "DocumentChunk",
     "DocumentMetadata",
     "EvidenceCard",
+    "EvidenceRef",
     "ExperimentMatrixEntry",
     "ExperimentPlan",
+    "FailureCategory",
     "InnovationCandidate",
     "InnovationCandidateRanking",
     "InnovationFinding",
@@ -71,7 +103,14 @@ __all__ = [
     "PriorArtEntry",
     "PriorArtMap",
     "ProjectDocument",
+    "RegressionResult",
+    "RepairFileChange",
+    "RepairProposal",
     "ResearchQuestion",
+    "ResourceLimits",
+    "RunBackend",
+    "RunEventStream",
     "RunManifest",
     "SourceSpan",
+    "TrackingAttempt",
 ]
