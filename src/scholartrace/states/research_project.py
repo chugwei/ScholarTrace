@@ -33,6 +33,7 @@ class ResearchProjectState(TypedDict):
     current_goal: str | None
     pending_questions: Annotated[list[str], replace_strings]
     pending_approval: dict[str, Any] | None
+    last_decision_action: str | None
 
     research_question_id: str | None
     draft_research_question: ResearchQuestion | None
@@ -70,6 +71,7 @@ def new_research_project_state(
         current_goal=current_goal,
         pending_questions=[],
         pending_approval=None,
+        last_decision_action=None,
         research_question_id=None,
         draft_research_question=None,
         research_question_payload=None,

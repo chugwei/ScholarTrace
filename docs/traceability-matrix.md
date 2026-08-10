@@ -24,3 +24,5 @@
 | M1 发布候选与独立环境 | `pyproject.toml`, `uv.lock`, `docs/verification/m1-release-candidate.md` | Git archive、wheel、Run #14、actionlint、秘密扫描 | v0.1.0 | implemented-tested |
 | M2.1 缺失信息路由 | `src/scholartrace/graphs/research_question_review.py` | `tests/integration/test_m2_routing.py`, `docs/verification/m2-routing.md` | v0.2.0 | implemented-tested |
 | M2.2 interrupt/resume | `src/scholartrace/graphs/research_question_approval.py`, `src/scholartrace/states/research_project.py` | `tests/integration/test_m2_interrupt_resume.py`, `docs/verification/m2-interrupt-resume.md` | v0.2.0 | implemented-tested |
+| M2.3 DecisionRecord Schema 与迁移 | `src/scholartrace/schemas/decisions.py`, `src/scholartrace/persistence/models.py`, `src/scholartrace/persistence/migrations/versions/0002_add_decision_records.py` | `tests/integration/test_m2_decision_record.py`, `tests/integration/test_project_repository.py`, `docs/verification/m2-decision-record.md` | v0.2.0 | implemented-tested |
+| M2.3 五类审批路径 | `src/scholartrace/graphs/research_question_decision.py` | `tests/integration/test_m2_decision_graph.py`, `docs/verification/m2-decision-record.md` | v0.2.0 | implemented-tested |

@@ -6,6 +6,7 @@ from sqlalchemy import inspect
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.migrations import (
     INITIAL_REVISION,
+    LATEST_REVISION,
     current_revision,
     downgrade_database,
     upgrade_database,
@@ -44,7 +45,17 @@ def test_initial_migration_can_upgrade_and_downgrade(tmp_path: Path) -> None:
     upgrade_database(database_path)
 
     engine = create_sqlite_engine(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
+    assert {"projects", "research_questions", "decision_records"} <= set(
+        inspect(engine).get_table_names()
+    )
+    engine.dispose()
+
+    downgrade_database(database_path, INITIAL_REVISION)
+
+    engine = create_sqlite_engine(database_path)
     assert current_revision(database_path) == INITIAL_REVISION
+    assert "decision_records" not in inspect(engine).get_table_names()
     assert {"projects", "research_questions"} <= set(inspect(engine).get_table_names())
     engine.dispose()
 
@@ -57,7 +68,7 @@ def test_initial_migration_can_upgrade_and_downgrade(tmp_path: Path) -> None:
     engine.dispose()
 
     upgrade_database(database_path)
-    assert current_revision(database_path) == INITIAL_REVISION
+    assert current_revision(database_path) == LATEST_REVISION
 
 
 def test_create_project_is_idempotent_and_persists_after_reopen(tmp_path: Path) -> None:

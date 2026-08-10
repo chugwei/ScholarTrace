@@ -55,7 +55,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 |---|---|---|---|
 | M2.1 | 缺失信息路由 | Conditional Edge 失败测试与农业视觉样例 | completed |
 | M2.2 | 暂停与恢复 | `interrupt()`、`Command(resume=...)` 集成测试 | completed |
-| M2.3 | 审批 DecisionRecord | 批准/拒绝/修改/取消/暂停路径测试 | in_progress |
+| M2.3 | 审批 DecisionRecord | 批准/拒绝/修改/取消/暂停路径测试 | completed |
 | M2.4 | 研究问题版本 | 冻结、新版本和内容哈希测试 | pending |
 | M2.5 | 历史与回滚 | Checkpoint History、回滚、审计测试 | pending |
 | M2.6 | M2 发布 | 独立审查、main CI、`v0.2.0` | pending |

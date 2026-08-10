@@ -12,8 +12,14 @@ from sqlalchemy.orm import Session
 
 from scholartrace.identifiers import validate_identifier
 from scholartrace.persistence.database import create_sqlite_engine
-from scholartrace.persistence.models import ProjectRow, ResearchQuestionRow
+from scholartrace.persistence.models import (
+    DecisionRecordRow,
+    ProjectRow,
+    ResearchQuestionRow,
+    utc_now_naive,
+)
 from scholartrace.schemas import ResearchQuestion
+from scholartrace.schemas.decisions import DecisionRecord
 
 
 class ProjectRepositoryError(RuntimeError):
@@ -30,6 +36,10 @@ class ProjectIdentityConflictError(ProjectRepositoryError):
 
 class ResearchQuestionNotFoundError(ProjectRepositoryError):
     """Raised when a research question is not present in the requested project."""
+
+
+class DecisionConflictError(ProjectRepositoryError):
+    """Raised when a decision ID is replayed with different content."""
 
 
 @dataclass(frozen=True, slots=True)
@@ -113,6 +123,19 @@ class ProjectRepository:
         with Session(self._engine) as session:
             rows = session.scalars(select(ProjectRow).order_by(ProjectRow.project_id)).all()
             return [_project_record(row) for row in rows]
+
+    def update_project_stage(self, project_id: str, active_stage: str) -> ProjectRecord:
+        """Update the durable workflow stage without changing project identity."""
+
+        project_id = validate_identifier(project_id)
+        active_stage = validate_identifier(active_stage)
+        with Session(self._engine) as session, session.begin():
+            project = session.get(ProjectRow, project_id)
+            if project is None:
+                raise ProjectNotFoundError(f"project {project_id!r} was not found")
+            project.active_stage = active_stage
+            session.flush()
+            return _project_record(project)
 
     def save_research_question(
         self,
@@ -200,6 +223,80 @@ class ProjectRepository:
             ).all()
             return [_research_question_record(row) for row in rows]
 
+    def record_decision(
+        self,
+        decision_id: str,
+        project_id: str,
+        thread_id: str,
+        target_type: str,
+        target_id: str,
+        action: str,
+        actor_id: str,
+        reason: str | None = None,
+        payload: dict[str, object] | None = None,
+        created_at: datetime | str | None = None,
+    ) -> DecisionRecord:
+        project_id = validate_identifier(project_id)
+        thread_id = validate_identifier(thread_id)
+        target_id = validate_identifier(target_id)
+        record = DecisionRecord.model_validate(
+            {
+                "decision_id": decision_id,
+                "project_id": project_id,
+                "thread_id": thread_id,
+                "target_type": target_type,
+                "target_id": target_id,
+                "action": action,
+                "actor_id": actor_id,
+                "reason": reason,
+                "payload": payload or {},
+                "created_at": created_at or utc_now_naive(),
+            }
+        )
+        with Session(self._engine) as session, session.begin():
+            project = session.get(ProjectRow, project_id)
+            if project is None:
+                raise ProjectNotFoundError(f"project {project_id!r} was not found")
+            if project.thread_id != thread_id:
+                raise ProjectIdentityConflictError(
+                    f"thread_id {thread_id!r} is not assigned to project {project_id!r}"
+                )
+            existing = session.get(DecisionRecordRow, record.decision_id)
+            if existing is not None:
+                existing_record = _decision_record(existing)
+                if _same_decision_except_time(existing_record, record):
+                    return existing_record
+                raise DecisionConflictError(
+                    f"decision_id {record.decision_id!r} already has different content"
+                )
+            row = DecisionRecordRow(
+                decision_id=record.decision_id,
+                project_id=record.project_id,
+                thread_id=record.thread_id,
+                target_type=record.target_type,
+                target_id=record.target_id,
+                action=record.action,
+                actor_id=record.actor_id,
+                reason=record.reason,
+                payload=record.payload,
+                created_at=record.created_at.replace(tzinfo=None),
+            )
+            session.add(row)
+            session.flush()
+            return _decision_record(row)
+
+    def list_decisions(self, project_id: str) -> list[DecisionRecord]:
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            if session.get(ProjectRow, project_id) is None:
+                raise ProjectNotFoundError(f"project {project_id!r} was not found")
+            rows = session.scalars(
+                select(DecisionRecordRow)
+                .where(DecisionRecordRow.project_id == project_id)
+                .order_by(DecisionRecordRow.created_at, DecisionRecordRow.decision_id)
+            ).all()
+            return [_decision_record(row) for row in rows]
+
 
 def _project_record(row: ProjectRow) -> ProjectRecord:
     return ProjectRecord(
@@ -221,3 +318,24 @@ def _research_question_record(row: ResearchQuestionRow) -> ResearchQuestionRecor
         question=ResearchQuestion.model_validate(row.payload),
         created_at=row.created_at,
     )
+
+
+def _decision_record(row: DecisionRecordRow) -> DecisionRecord:
+    return DecisionRecord.model_validate(
+        {
+            "decision_id": row.decision_id,
+            "project_id": row.project_id,
+            "thread_id": row.thread_id,
+            "target_type": row.target_type,
+            "target_id": row.target_id,
+            "action": row.action,
+            "actor_id": row.actor_id,
+            "reason": row.reason,
+            "payload": row.payload,
+            "created_at": row.created_at,
+        }
+    )
+
+
+def _same_decision_except_time(left: DecisionRecord, right: DecisionRecord) -> bool:
+    return left.model_dump(exclude={"created_at"}) == right.model_dump(exclude={"created_at"})

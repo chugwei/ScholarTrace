@@ -70,4 +70,20 @@ M2.1 在研究问题输入进入校验前计算缺失字段，不用模型补全
 
 M2.2 的 `clarify` 节点调用 `interrupt()` 返回结构化 `kind`、缺失字段和当前 payload。第一次运行只提交 checkpoint，不写正式研究问题；客户端必须用同一 `thread_id` 和 `Command(resume=answer)` 恢复。恢复会从 `clarify` 节点开头重放，合并人工补充后回到 `intake`，重新计算缺口，再决定保存或再次暂停。
 
-`pending_questions` 从 M2.2 起使用替换型 Reducer：它代表当前缺口集合，而不是历史并集。历史审计不依赖这个字段，后续 M2.3 的 DecisionRecord 将保存每次人工决定及输入。
+`pending_questions` 从 M2.2 起使用替换型 Reducer：它代表当前缺口集合，而不是历史并集。历史审计不依赖这个字段。
+
+## M2.3 审批与 DecisionRecord
+
+M2.3 在研究问题完整后进入独立的审批图：
+
+```text
+START → intake ──(缺字段)──> clarify ──> intake
+             └─(完整)────> request_decision → apply_decision
+                                             ├─ approved → save → END
+                                             ├─ modified → request_decision
+                                             └─ rejected/cancelled/paused → finish → END
+```
+
+`request_decision` 的 `interrupt()` 请求包含目标类型、稳定的待审批目标 ID、当前 payload 和允许动作；恢复值必须经过 `DecisionRecord` 的结构校验，空白 actor、缺失非批准理由和未知动作都会被拒绝。`record_decision()` 在业务数据库中以 `decision_id` 做幂等键：相同内容重放返回原记录，内容冲突显式失败。
+
+`modified` 只接受 ResearchQuestion 已知字段，先校验合并后的完整问题，再回到下一次审批；`approved` 通过 Repository 保存正式问题，其他三个终止动作只更新项目阶段并保留审计记录。SQLite 迁移可从 `0002` 回退到 `0001`，不会把 DecisionRecord 表残留在旧 Schema 中。

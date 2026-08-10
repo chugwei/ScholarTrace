@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 已发布，进入 M2
+- 项目状态：M1 已发布，M2.3 已完成，继续 M2
 - 当前里程碑：M2 — 人工澄清、审批与版本历史
 - 当前版本：`v0.1.0`
-- 当前分支：`main`
+- 当前分支：`feat/m2-human-approval`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-10（Asia/Shanghai）
 
@@ -42,10 +42,10 @@
 
 - [x] M2.1 缺失信息路由与 Conditional Edge
 - [x] M2.2 `interrupt()` / `Command(resume=...)` 的暂停恢复契约
-- [ ] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord（当前）
+- [x] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
 - [ ] M2.4 研究问题冻结与新版本创建
 - [ ] M2.5 Checkpoint History、回滚和审计查询
-- [ ] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布（当前）
+- [ ] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布
 
 ## 当前验证
 
@@ -54,9 +54,9 @@
 | `uv sync --all-groups` | 通过，CPython 3.12.13 |
 | `uv run ruff format --check src tests scripts` | 通过 |
 | `uv run ruff check src tests scripts` | 通过 |
-| `uv run pytest` | 通过，50 passed |
+| `uv run pytest` | 通过，73 passed |
 | `uv run python scripts/validate_fixtures.py` | 通过，3 个合成 Fixture |
-| `uv run python scripts/check.py` | 通过，50 passed |
+| `uv run python scripts/check.py` | 通过，73 passed |
 | M1.1 State/Schema/Reducer 目标测试 | 通过，16 passed |
 | M1.1 后全量 pytest | 通过，25 passed |
 | M1.2 Repository/迁移集成测试 | 通过，12 passed |
@@ -89,13 +89,17 @@
 | 安装包 `License-Expression` | `Apache-2.0` |
 | wheel 许可证文件 | 包含 `dist-info/licenses/LICENSE` |
 | `v0.0.1^{}` | `42238c1072675763d59a3c6455896eaa289f6b1a` |
+| M2.3 DecisionRecord/审批图目标测试 | 通过，11 passed |
+| M2.3 后全量 pytest | 通过，73 passed |
+| M2.3 迁移 `0002 → 0001 → base → head` | 通过，DecisionRecord 表正确移除并恢复 |
+| M2.3 Ruff format/lint | 通过，38 files formatted、无诊断 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
-- M2.1–M2.2 已实现缺失信息路由和真实 interrupt/resume；DecisionRecord、审批结果、版本冻结、历史回滚仍未实现。
+- M2.1–M2.3 已实现缺失信息路由、真实 interrupt/resume、DecisionRecord 和五类审批；版本冻结、历史回滚仍未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-从 M2.3 开始：先为五类人工决定建立 DecisionRecord Schema 和失败测试，再接入审批节点。
+下一步进入 M2.4：研究问题冻结、新版本创建和修改后的版本追溯；完成前不发布 `v0.2.0`。
