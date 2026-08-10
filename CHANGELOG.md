@@ -4,7 +4,14 @@
 
 ## [Unreleased]
 
-后续变更将在下一版本记录。
+### Added
+
+- M8.1 绑定 frozen `ExperimentPlan` 的受控执行契约、资源上限和 0014 `controlled_runs` 迁移。
+- argv 命令白名单、shell 注入拒绝、相对路径隔离和 Docker 无网络/只读工作区命令构造。
+
+### Boundary
+
+- M8.1 只建立可审计的 queued 执行身份；启动、取消、超时、实时日志、排错和真实容器运行将在后续批次验证。
 
 ## [0.7.0] - 2026-08-11
 

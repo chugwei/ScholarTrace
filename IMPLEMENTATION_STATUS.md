@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M7 已发布，M8 待开始
-- 当前里程碑：M7 — 实验计划与结果导入
+- 项目状态：M7 已发布，M8.1 进行中
+- 当前里程碑：M8 — 受控实验执行与排错
 - 当前版本：`v0.7.0`
-- 当前分支：`main`
+- 当前分支：`feat/m8-runner-debugging`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -82,6 +82,13 @@
 - [x] M7.2 Run Manifest、现有产物导入和不可验证状态
 - [x] M7.3 指标独立重算、统计汇总和 Claim 更新
 - [x] M7.4 独立审查、合并 `main` 与 `v0.7.0` 发布
+
+## M8 小任务
+
+- [x] M8.1 受控执行契约、命令白名单、资源限制和 0014 迁移
+- [ ] M8.2 启动、取消、超时、流式日志和失败产物隔离
+- [ ] M8.3 DebugCase、诊断假设排序、安全修复分支和回归门禁
+- [ ] M8.4 MLflow/DVC 可替换适配、独立审查、合并 `main` 与 `v0.8.0` 发布
 
 ## 当前验证
 
@@ -188,14 +195,16 @@
 | M7.3 全量质量门禁 | 通过，`scripts/check.py`；127 passed；3 个合成 Fixture |
 | M7.4 发布候选 | 通过，v0.7.0 wheel/sdist、隔离 venv、CLI、迁移 0013、actionlint、Apache-2.0、内部文件排除和秘密扫描；详见 `docs/verification/m7-release-candidate.md` |
 | M7 main 合并与发布 | 通过，merge `1cd9280`；main smoke/全量 127 passed；Tag object `95af661`，peeled `1cd9280` |
+| M8.1 受控 Runner 契约目标测试 | 通过，6 passed；0014 迁移升降级、冻结计划门禁、命令白名单、路径隔离和 Docker argv 构造 |
+| M8.1 Ruff format/lint | 通过；95 files formatted/unchanged，All checks passed |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级；论文、Web 和部署能力仍未实现。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8.1 仅提供绑定 frozen plan 的受控执行契约与安全命令构造，尚未启动真实实验、流式日志、排错或 MLflow/DVC 运行集成；论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步创建 `feat/m8-runner-debugging`，实现受控 Run 启动/取消/超时、日志和 DebugCase；外部命令必须有白名单、资源限制和注入防护。
+下一步实现 M8.2 的异步启动、取消、超时、流式日志和失败产物隔离；所有外部命令继续使用 argv、白名单和资源限制。

@@ -54,3 +54,7 @@
 | M7.3 指标独立重算、统计汇总和 Claim 更新 | `src/scholartrace/experiment/metrics.py`, `src/scholartrace/persistence/run_repository.py`, `src/scholartrace/persistence/migrations/versions/0013_add_claim_updates.py` | `tests/integration/test_m7_run_repository.py`, `docs/verification/m7-metrics.md` | v0.7.0 | implemented-tested |
 | M7 v0.7.0 发布候选 | `pyproject.toml`, `uv.lock`, `README.md`, `CHANGELOG.md` | `docs/verification/m7-release-candidate.md`, `scripts/check.py`, 独立 wheel/CLI/迁移 | v0.7.0 | release-candidate |
 | M7 v0.7.0 发布 | `main`, `v0.7.0` | merge `1cd9280`, Tag object `95af661`, main smoke/门禁 | v0.7.0 | implemented-tested |
+| M8.1 受控执行契约、资源限制与命令白名单 | `src/scholartrace/schemas/runner.py`, `src/scholartrace/runner/policy.py`, `src/scholartrace/persistence/runner_repository.py`, `src/scholartrace/persistence/migrations/versions/0014_add_controlled_runs.py` | `tests/integration/test_m8_runner_policy.py`, `docs/verification/m8-runner-policy.md` | v0.8.0 | implemented-tested |
+| M8.2 启动、取消、超时与流式日志 | — | — | v0.8.0 | planned |
+| M8.3 DebugCase、诊断与安全修复回归 | — | — | v0.8.0 | planned |
+| M8.4 MLflow/DVC 初步集成与 M8 发布 | — | — | v0.8.0 | planned |

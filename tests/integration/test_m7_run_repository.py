@@ -7,6 +7,7 @@ from scholartrace.experiment import recompute_metric
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.experiment_repository import ExperimentRepository
 from scholartrace.persistence.migrations import (
+    LATEST_REVISION,
     current_revision,
     downgrade_database,
     upgrade_database,
@@ -128,11 +129,11 @@ def setup(database_path: Path) -> None:
 def test_m7_run_migration_rolls_back(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
     upgrade_database(database_path)
-    assert current_revision(database_path) == "0013"
+    assert current_revision(database_path) == LATEST_REVISION
     downgrade_database(database_path, "0012")
     assert current_revision(database_path) == "0012"
     upgrade_database(database_path)
-    assert current_revision(database_path) == "0013"
+    assert current_revision(database_path) == LATEST_REVISION
 
 
 def test_incomplete_manifest_and_reported_metric_never_become_final(

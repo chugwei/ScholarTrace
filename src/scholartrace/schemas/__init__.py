@@ -40,6 +40,13 @@ from scholartrace.schemas.literature import (
     SourceSpan,
 )
 from scholartrace.schemas.research import ResearchQuestion
+from scholartrace.schemas.runner import (
+    ControlledRunRecord,
+    ControlledRunSpec,
+    ControlledRunStatus,
+    ResourceLimits,
+    RunBackend,
+)
 
 __all__ = [
     "AlgorithmComponent",
@@ -48,6 +55,9 @@ __all__ = [
     "CaptureField",
     "ChunkSearchResult",
     "ClaimUpdate",
+    "ControlledRunRecord",
+    "ControlledRunSpec",
+    "ControlledRunStatus",
     "DataCollectionProtocol",
     "DecisionRecord",
     "DesignFinding",
@@ -72,6 +82,8 @@ __all__ = [
     "PriorArtMap",
     "ProjectDocument",
     "ResearchQuestion",
+    "ResourceLimits",
+    "RunBackend",
     "RunManifest",
     "SourceSpan",
 ]
