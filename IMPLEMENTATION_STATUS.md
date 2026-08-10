@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M2 发布候选已完成，待合并与 Tag
+- 项目状态：M2 已发布，进入 M3
 - 当前里程碑：M2 — 人工澄清、审批与版本历史
 - 当前版本：`v0.2.0`
-- 当前分支：`feat/m2-human-approval`
+- 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-10（Asia/Shanghai）
 
@@ -45,7 +45,7 @@
 - [x] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
 - [x] M2.4 研究问题冻结与新版本创建
 - [x] M2.5 Checkpoint History、回滚和审计查询
-- [x] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布候选
+- [x] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布
 
 ## 当前验证
 
@@ -105,13 +105,15 @@
 | 独立 wheel venv 安装/import/CLI/迁移 | 通过，版本 0.2.0，迁移 0003 |
 | `actionlint` Docker | 通过，无诊断 |
 | 发布候选秘密/个人路径/大文件扫描 | 通过，0 matches、tracked >5MB 为 0 |
+| M2 main 合并 | 通过，merge commit `6689572`，main smoke test 与全量门禁通过 |
+| `v0.2.0` annotated Tag | 通过，tag object `f4990a7d`，peeled commit `6689572`，远端已核验 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
-- M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和发布候选审查；合并 `main`、远端 CI 和 `v0.2.0` Tag 仍待完成。
+- M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M2.6：独立审查、合并 `main`、运行发布候选门禁并创建 `v0.2.0`；在此之前不宣称 M2 发布。
+下一步进入 M3：独立文献库；不把 M2 的离线 Fixture 结果宣传为真实文献或真实场景证据。

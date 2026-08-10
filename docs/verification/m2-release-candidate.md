@@ -44,6 +44,13 @@ tracked secret/personal-path scan
 
 `pip-audit` 仍因当前环境访问 PyPI 超时未验证；GitHub Actions API 当前因 SSL 连接失败未读取，因此 CI 状态不能猜测为通过。发布 Tag 只在功能分支推送、合并 `main`、本地 smoke test 和远端 Ref 核验后创建。
 
+## 发布结果
+
+- 功能分支已非 squash 合并到 `main`，merge commit：`668957271a6b7253a62984bb07ee62a3fdd197bf`；
+- `main` 已推送并核验为 `6689572`；
+- annotated Tag `v0.2.0` 已推送；Tag object：`f4990a7d3ca8ea65b0b3c90910a73ba8ac72e6bb`，peeled commit：`6689572`；
+- M2 已发布；M3 文献库及后续能力仍未实现。
+
 ## 能力边界
 
 测试使用合成、脱敏农业视觉 Fixture，证明的是结构化流程、恢复和审计契约，不是真实果园现场验证。M2 不是完整产品交付，后续 M3–M12 仍必须按路线实现和验收。
