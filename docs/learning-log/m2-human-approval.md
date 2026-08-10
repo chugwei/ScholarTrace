@@ -75,3 +75,11 @@ with open_research_question_decision_graph(domain_db, checkpoint_db) as graph:
 这解决的是科研审计中的覆盖问题：荔枝病虫害研究问题在批准后仍可因“增加雨季和晴天采集约束”而演进，但新约束只能出现在版本 2，版本 1 的内容哈希、冻结人和冻结时间保持不变。审批图在状态中携带父版本 ID，新的批准记录对应新的内容 ID，形成“决定 → 版本 → payload”的可查询链。
 
 迁移测试实际走过 `0003 → 0002 → 0001 → base → head`，确认旧版本 Schema 不会残留生命周期列；这也是回滚兼容性的一部分，而不是只检查当前表结构。
+
+## M2.5 已验证的历史与回滚
+
+LangGraph 的 `get_state_history()` 返回的是 checkpoint 快照序列，不是当前 State 的一个可变列表。项目按 thread 读取快照并选择明确的 `checkpoint_id`；回滚使用 `update_state()` 写出新 checkpoint，旧记录仍可用于审计和再次重放。由于不同阶段的下一节点不同，代码只允许已知的“快照阶段 → 产生它的节点”映射，无法判断时直接拒绝。
+
+回滚审批前的荔枝病虫害问题会恢复到 `awaiting_approval`，但不会从业务库删除已批准的 ResearchQuestion。系统另外写入 `target_type=checkpoint`、`action=rolled_back` 的 DecisionRecord，记录来源和目标 ID。这样 State 历史回答“工作流回到了哪里”，ResearchQuestion 版本回答“领域事实曾经批准过什么”，两条证据不会混为一谈。
+
+常见错误是把目标快照直接覆盖当前 checkpoint，或把回滚误做成删除数据库实体；M2.5 测试分别断言新 checkpoint 数量增加、旧快照仍存在、未知 ID 不产生审计，以及已冻结研究问题仍可查询。

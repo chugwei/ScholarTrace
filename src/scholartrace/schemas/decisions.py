@@ -5,7 +5,15 @@ from typing import Annotated, Any, Literal
 
 from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
-DecisionAction = Literal["approved", "rejected", "modified", "cancelled", "paused"]
+DecisionAction = Literal[
+    "approved",
+    "rejected",
+    "modified",
+    "cancelled",
+    "paused",
+    "rolled_back",
+]
+DecisionTargetType = Literal["research_question", "checkpoint"]
 NonBlankText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 
@@ -17,7 +25,7 @@ class DecisionRecord(BaseModel):
     decision_id: NonBlankText
     project_id: NonBlankText
     thread_id: NonBlankText
-    target_type: Literal["research_question"]
+    target_type: DecisionTargetType
     target_id: NonBlankText
     action: DecisionAction
     actor_id: NonBlankText

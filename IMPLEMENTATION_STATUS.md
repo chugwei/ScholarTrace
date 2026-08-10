@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 已发布，M2.4 实现完成，继续 M2
+- 项目状态：M1 已发布，M2.5 实现完成，继续 M2
 - 当前里程碑：M2 — 人工澄清、审批与版本历史
 - 当前版本：`v0.1.0`
 - 当前分支：`feat/m2-human-approval`
@@ -44,7 +44,7 @@
 - [x] M2.2 `interrupt()` / `Command(resume=...)` 的暂停恢复契约
 - [x] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
 - [x] M2.4 研究问题冻结与新版本创建
-- [ ] M2.5 Checkpoint History、回滚和审计查询
+- [x] M2.5 Checkpoint History、回滚和审计查询
 - [ ] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布
 
 ## 当前验证
@@ -98,13 +98,15 @@
 | M2.4 生命周期/版本目标测试 | 通过，29 passed |
 | M2.4 后全量质量门禁 | 通过，75 passed；Ruff 39 files formatted；3 个 Fixture |
 | M2.4 迁移 `0003 → 0002 → 0001 → base → head` | 通过，生命周期列正确移除并恢复 |
+| M2.5 History/rollback 目标测试 | 通过，13 passed |
+| M2.5 后全量质量门禁 | 通过，76 passed；Ruff 39 files formatted；3 个 Fixture |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
-- M2.1–M2.4 已实现缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批和研究问题版本冻结；Checkpoint 历史、回滚查询仍未实现。
+- M2.1–M2.5 已实现缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结和受控 checkpoint 回滚；M2.6 发布审查仍未完成。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M2.5：Checkpoint History、版本回滚和审计查询；完成 M2.5/M2.6 门禁前不发布 `v0.2.0`。
+下一步进入 M2.6：独立审查、合并 `main`、运行发布候选门禁并创建 `v0.2.0`；在此之前不宣称 M2 发布。

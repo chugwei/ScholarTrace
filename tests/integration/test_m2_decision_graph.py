@@ -4,6 +4,7 @@ import pytest
 from langgraph.types import Command
 
 from scholartrace.graphs.research_question_decision import (
+    CheckpointNotFoundError,
     open_research_question_decision_graph,
 )
 from scholartrace.persistence.migrations import upgrade_database
@@ -210,3 +211,65 @@ def test_modified_decision_rejects_unknown_fields_before_recording(tmp_path: Pat
     repository = ProjectRepository(database_path)
     assert repository.list_decisions(project_id) == []
     repository.close()
+
+
+def test_checkpoint_history_rollback_creates_new_checkpoint_and_audit_record(
+    tmp_path: Path,
+) -> None:
+    project_id = "decision-history"
+    database_path = tmp_path / "domain.db"
+    checkpoint_path = tmp_path / "checkpoints.db"
+
+    with open_research_question_decision_graph(database_path, checkpoint_path) as workflow:
+        start_decision(workflow, initial_state(project_id))
+        before_approval = next(
+            snapshot
+            for snapshot in workflow.history(project_id)
+            if snapshot.values.get("active_stage") == "awaiting_approval"
+        )
+        before_id = before_approval.config["configurable"]["checkpoint_id"]
+        initial_history_length = len(workflow.history(project_id))
+
+        workflow.resume(
+            project_id,
+            Command(
+                resume={
+                    "decision_id": "decision-history-approved",
+                    "action": "approved",
+                    "actor_id": "researcher-001",
+                    "reason": "先批准以验证回滚",
+                }
+            ),
+        )
+        completed = workflow.get_state(project_id)
+        assert completed.values["active_stage"] == "completed"
+
+        restored = workflow.rollback(
+            project_id,
+            before_id,
+            actor_id="researcher-001",
+            reason="重新检查批准前的研究问题边界",
+        )
+        assert restored["active_stage"] == "awaiting_approval"
+        assert restored["research_question_id"] is None
+        assert len(workflow.history(project_id)) > initial_history_length
+
+        with pytest.raises(CheckpointNotFoundError, match="was not found"):
+            workflow.rollback(
+                project_id,
+                "missing-checkpoint",
+                actor_id="researcher-001",
+                reason="不存在的 checkpoint",
+            )
+
+    repository = ProjectRepository(database_path)
+    audits = repository.list_audit_records(project_id)
+    assert [item.action for item in audits] == ["approved", "rolled_back"]
+    assert audits[-1].target_type == "checkpoint"
+    assert audits[-1].target_id == before_id
+    assert repository.list_decisions(project_id, action="rolled_back") == [audits[-1]]
+    repository.close()
+
+    with open_research_question_decision_graph(database_path, checkpoint_path) as reopened:
+        assert reopened.get_state(project_id).values["active_stage"] == "awaiting_approval"
+        assert len(reopened.get_state_history(project_id, limit=2)) == 2

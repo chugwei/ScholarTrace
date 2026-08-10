@@ -15,6 +15,7 @@ from scholartrace.graphs.research_question_review import (
     _payload_from_state,
     find_missing_question_fields,
 )
+from scholartrace.identifiers import validate_identifier
 from scholartrace.persistence.migrations import upgrade_database
 from scholartrace.persistence.models import utc_now_naive
 from scholartrace.persistence.repository import ProjectRepository, research_question_id_for
@@ -33,11 +34,20 @@ _QUESTION_FIELDS = {
 }
 
 
+class CheckpointHistoryError(RuntimeError):
+    """Raised when checkpoint history cannot be queried or restored safely."""
+
+
+class CheckpointNotFoundError(CheckpointHistoryError):
+    """Raised when a requested thread or checkpoint ID is absent."""
+
+
 class ResearchQuestionDecisionGraph:
     """Compiled graph facade with an explicit, thread-bound resume method."""
 
-    def __init__(self, graph: Any) -> None:
+    def __init__(self, graph: Any, repository: ProjectRepository) -> None:
         self.graph = graph
+        self.repository = repository
 
     def invoke(self, state: ResearchProjectState) -> dict[str, Any]:
         return cast(dict[str, Any], self.graph.invoke(state, _config(state["thread_id"])))
@@ -47,6 +57,81 @@ class ResearchQuestionDecisionGraph:
 
     def get_state(self, thread_id: str) -> Any:
         return self.graph.get_state(_config(thread_id))
+
+    def history(self, thread_id: str, limit: int | None = None) -> list[Any]:
+        """Return persisted StateSnapshots, newest first, for one thread."""
+
+        thread_id = validate_identifier(thread_id)
+        snapshots = list(self.graph.get_state_history(_config(thread_id), limit=limit))
+        if not snapshots:
+            raise CheckpointHistoryError(f"checkpoint history for thread {thread_id!r} is empty")
+        return snapshots
+
+    def get_state_history(self, thread_id: str, limit: int | None = None) -> list[Any]:
+        """Alias matching LangGraph's native history method."""
+
+        return self.history(thread_id, limit=limit)
+
+    def rollback(
+        self,
+        thread_id: str,
+        checkpoint_id: str,
+        actor_id: str,
+        reason: str,
+    ) -> dict[str, Any]:
+        """Restore a historical state into a new checkpoint and audit the action."""
+
+        thread_id = validate_identifier(thread_id)
+        checkpoint_id = validate_identifier(checkpoint_id)
+        actor_id = validate_identifier(actor_id)
+        if not reason.strip():
+            raise ValueError("reason is required for rollback")
+        snapshots = self.history(thread_id)
+        target = next(
+            (
+                snapshot
+                for snapshot in snapshots
+                if snapshot.config["configurable"].get("checkpoint_id") == checkpoint_id
+            ),
+            None,
+        )
+        if target is None:
+            raise CheckpointNotFoundError(
+                f"checkpoint {checkpoint_id!r} was not found for thread {thread_id!r}"
+            )
+        current = self.graph.get_state(_config(thread_id))
+        current_checkpoint_id = current.config["configurable"].get("checkpoint_id", "none")
+        updated_config = self.graph.update_state(
+            _config(thread_id),
+            target.values,
+            as_node=_rollback_source_node(target),
+        )
+        restored = self.graph.get_state(updated_config)
+        project_id = restored.values.get("project_id") or target.values.get("project_id")
+        if not project_id:
+            raise CheckpointHistoryError("checkpoint does not contain a project_id")
+        audit_id = _rollback_decision_id(thread_id, current_checkpoint_id, checkpoint_id)
+        self.repository.record_decision(
+            decision_id=audit_id,
+            project_id=project_id,
+            thread_id=thread_id,
+            target_type="checkpoint",
+            target_id=checkpoint_id,
+            action="rolled_back",
+            actor_id=actor_id,
+            reason=reason,
+            payload={
+                "from_checkpoint_id": current_checkpoint_id,
+                "to_checkpoint_id": checkpoint_id,
+                "restored_active_stage": restored.values.get("active_stage"),
+            },
+        )
+        return cast(dict[str, Any], restored.values)
+
+    def list_audit_records(self, project_id: str) -> list[DecisionRecord]:
+        """Query domain and checkpoint decisions for a project."""
+
+        return self.repository.list_audit_records(project_id)
 
 
 def build_research_question_decision_graph(
@@ -217,7 +302,7 @@ def build_research_question_decision_graph(
     )
     builder.add_edge("save", END)
     builder.add_edge("finish", END)
-    return ResearchQuestionDecisionGraph(builder.compile(checkpointer=checkpointer))
+    return ResearchQuestionDecisionGraph(builder.compile(checkpointer=checkpointer), repository)
 
 
 @contextmanager
@@ -303,3 +388,29 @@ def _target_id(state: ResearchProjectState) -> str:
 
 def _config(thread_id: str) -> dict[str, dict[str, str]]:
     return {"configurable": {"thread_id": thread_id}}
+
+
+def _rollback_source_node(snapshot: Any) -> str:
+    """Map a snapshot's materialized state to the node that produced it."""
+
+    active_stage = snapshot.values.get("active_stage")
+    if active_stage in {None, "intake"} and snapshot.metadata.get("step") == -1:
+        return "__start__"
+    if active_stage in {"awaiting_clarification", "awaiting_approval"}:
+        return "intake"
+    if active_stage == "recording_decision":
+        return "request_decision"
+    if active_stage == "approved":
+        return "apply_decision"
+    if active_stage == "completed":
+        return "save"
+    if active_stage in {"rejected", "cancelled", "paused"}:
+        return "apply_decision"
+    raise CheckpointHistoryError(
+        f"cannot determine rollback source node for active_stage={active_stage!r}"
+    )
+
+
+def _rollback_decision_id(thread_id: str, from_checkpoint: str, to_checkpoint: str) -> str:
+    digest = sha256(f"{thread_id}\0{from_checkpoint}\0{to_checkpoint}".encode()).hexdigest()[:32]
+    return f"rollback_{digest}"

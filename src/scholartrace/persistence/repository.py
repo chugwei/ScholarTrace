@@ -396,17 +396,31 @@ class ProjectRepository:
             session.flush()
             return _decision_record(row)
 
-    def list_decisions(self, project_id: str) -> list[DecisionRecord]:
+    def list_decisions(
+        self,
+        project_id: str,
+        *,
+        target_type: str | None = None,
+        action: str | None = None,
+    ) -> list[DecisionRecord]:
         project_id = validate_identifier(project_id)
         with Session(self._engine) as session:
             if session.get(ProjectRow, project_id) is None:
                 raise ProjectNotFoundError(f"project {project_id!r} was not found")
+            statement = select(DecisionRecordRow).where(DecisionRecordRow.project_id == project_id)
+            if target_type is not None:
+                statement = statement.where(DecisionRecordRow.target_type == target_type)
+            if action is not None:
+                statement = statement.where(DecisionRecordRow.action == action)
             rows = session.scalars(
-                select(DecisionRecordRow)
-                .where(DecisionRecordRow.project_id == project_id)
-                .order_by(DecisionRecordRow.created_at, DecisionRecordRow.decision_id)
+                statement.order_by(DecisionRecordRow.created_at, DecisionRecordRow.decision_id)
             ).all()
             return [_decision_record(row) for row in rows]
+
+    def list_audit_records(self, project_id: str) -> list[DecisionRecord]:
+        """Return all human and checkpoint audit records in chronological order."""
+
+        return self.list_decisions(project_id)
 
 
 def _project_record(row: ProjectRow) -> ProjectRecord:

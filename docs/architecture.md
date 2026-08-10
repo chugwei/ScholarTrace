@@ -93,3 +93,9 @@ START → intake ──(缺字段)──> clarify ──> intake
 研究问题版本在 `0003` Schema 中有明确的 `draft/frozen` 状态，以及 `frozen_at`、`frozen_by` 和 `parent_research_question_id`。普通保存只创建 draft；审批图的批准分支保存后立即冻结当前版本。冻结记录不可直接写入不同内容，Repository 会要求调用 `create_research_question_version()`，并验证父版本是项目当前的 frozen 版本。
 
 版本 ID 仍由 `project_id + canonical payload` 的 SHA-256 派生，内容相同的重放返回同一记录；内容改变时递增 `version` 并保存父版本 ID。这样荔枝病虫害研究问题从“增加雨季采集约束”得到的新版本可以回到上一冻结版本，且不会覆盖已批准的问题。`freeze_research_question()` 对同一 actor 重放幂等，对不同 actor 或过期版本显式拒绝。
+
+## M2.5 Checkpoint History、回滚与审计
+
+审批图 facade 暴露 `history()` / `get_state_history()`，返回同一 `thread_id` 的 LangGraph `StateSnapshot`，按新到旧排列；查询不跨线程，也不修改历史记录。`rollback(thread_id, checkpoint_id, actor_id, reason)` 先确认目标 checkpoint 属于该 thread，再使用 `update_state()` 将目标 State 写入一个新的 checkpoint。旧 checkpoint 永不被覆盖，新的 State 会保留目标的下一节点语义。
+
+回滚完成后写入一个 `DecisionRecord(target_type="checkpoint", action="rolled_back")`，payload 同时记录来源 checkpoint、目标 checkpoint 和恢复后的阶段。`list_audit_records()` 与 `list_decisions()` 支持按 target/action 查询，因此“谁在何时把哪个 thread 从哪里恢复到哪里”可以独立于 Graph State 查询。回滚只恢复工作流 State，不删除已经批准的领域版本；若要修改研究问题，仍必须走 M2.4 的新版本审批链。
