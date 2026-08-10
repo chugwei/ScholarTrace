@@ -338,6 +338,32 @@ class LiteratureRepository:
             ).all()
             return [_chunk_model(row) for row in rows]
 
+    def get_approved_chunk(self, project_id: str, chunk_id: str) -> tuple[DocumentChunk, Document]:
+        """Load a Chunk and its Document only through an approved project link."""
+
+        project_id = validate_identifier(project_id)
+        chunk_id = validate_identifier(chunk_id)
+        with Session(self._engine) as session:
+            result = session.execute(
+                select(DocumentChunkRow, DocumentRow)
+                .join(DocumentRow, DocumentRow.document_id == DocumentChunkRow.document_id)
+                .join(
+                    ProjectDocumentRow,
+                    ProjectDocumentRow.document_id == DocumentChunkRow.document_id,
+                )
+                .where(
+                    DocumentChunkRow.chunk_id == chunk_id,
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "approved",
+                )
+            ).one_or_none()
+            if result is None:
+                raise ProjectDocumentConflictError(
+                    "chunk must belong to an approved project document"
+                )
+            chunk_row, document_row = result
+            return _chunk_model(chunk_row), _document_model(document_row)
+
     def list_project_documents(self, project_id: str) -> list[ProjectDocument]:
         project_id = validate_identifier(project_id)
         with Session(self._engine) as session:

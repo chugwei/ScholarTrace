@@ -103,3 +103,42 @@ class ChunkSearchResult(BaseModel):
     vector_score: float = Field(ge=0)
     score: float = Field(ge=0)
     index_generation: NonBlankText
+
+
+SourceLocatorKind = Literal["doi", "url", "local"]
+
+
+class SourceSpan(BaseModel):
+    """A quoted span that can be located inside one persisted DocumentChunk."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_id: NonBlankText
+    chunk_id: NonBlankText
+    quote: str = Field(min_length=1)
+    start_offset: int = Field(ge=0)
+    end_offset: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def validate_span(self) -> "SourceSpan":
+        if self.end_offset <= self.start_offset:
+            raise ValueError("end_offset must be greater than start_offset")
+        if not self.quote.strip():
+            raise ValueError("quote cannot be blank")
+        return self
+
+
+class EvidenceCard(BaseModel):
+    """A verified project-scoped evidence statement with a source locator."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    evidence_card_id: NonBlankText
+    project_id: NonBlankText
+    statement: NonBlankText
+    source_span: SourceSpan
+    locator_kind: SourceLocatorKind
+    locator_value: NonBlankText
+    verification_status: Literal["verified"] = "verified"
+    verified_by: NonBlankText
+    created_at: datetime

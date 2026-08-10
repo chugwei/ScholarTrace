@@ -1,5 +1,10 @@
 """Independent literature ingestion and metadata providers."""
 
+from scholartrace.literature.evidence import (
+    EvidenceCardService,
+    EvidenceValidationError,
+    citation_locator_for,
+)
 from scholartrace.literature.ingestion import DocumentIngestError, DocumentLibrary
 from scholartrace.literature.providers import (
     CrossrefClient,
@@ -23,6 +28,8 @@ __all__ = [
     "DocumentIngestError",
     "DocumentLibrary",
     "EmbeddingProvider",
+    "EvidenceCardService",
+    "EvidenceValidationError",
     "HashingEmbeddingProvider",
     "HybridChunkIndex",
     "HybridIndexError",
@@ -32,5 +39,6 @@ __all__ = [
     "MetadataLookupBundle",
     "MetadataLookupResult",
     "OpenAlexClient",
+    "citation_locator_for",
     "metadata_document_from_lookup",
 ]

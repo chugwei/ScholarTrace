@@ -131,3 +131,9 @@ M4 在 M3 全局目录之上维护项目级 `ProjectDocument` 状态：新关联
 `HybridChunkIndex.rebuild_project()` 只从 `list_approved_chunks()` 获取项目内容。索引快照同时保存 BM25 词频/文档频率、可替换 Vector provider 的向量和 Chunk 完整来源字段。默认 `HashingEmbeddingProvider` 仅用于离线、确定性验证，不是语义质量证明；部署时可以注入具有相同契约的真实向量 provider。
 
 重建先在内存中完成并写入 `.tmp` 文件，成功后才原子替换项目的 active JSON 快照。Vector provider 异常、维度错误或序列化失败都不会触碰旧快照，因此旧索引仍可查询。搜索结果返回 Chunk、BM25 分数、Vector 分数和 `index_generation`，为 M4.3 的 EvidenceCard 片段定位保留完整链路。
+
+## M4.3 EvidenceCard 与引用校验
+
+`EvidenceCardService.create_card()` 首先通过 `get_approved_chunk()` 检查项目关系，随后要求用户提供的 quote 精确出现在 Chunk 中，并将 Chunk 内相对位置转换为原文绝对偏移。它从 Document 的 DOI、HTTP(S) URL 或安全的相对本地路径中选择 locator；没有可解析来源时不写卡片。配置运行时文本根目录后，还会再次读取原文并校验绝对偏移，防止存储文件被替换。
+
+持久化的 EvidenceCard 固定为 `verified`，包含 statement、SourceSpan、locator、审核者和创建时间。它是有来源的证据记录，不是模型自动生成的科研结论；statement 仍需要研究者判断。`tests/fixtures/retrieval/m4-regression.json` 提供 10 条合成农业视觉查询，验证当前离线索引的 top-1 基线，真实文献召回仍需后续数据和人工标注。

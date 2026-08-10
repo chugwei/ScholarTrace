@@ -160,3 +160,45 @@ class DocumentChunkRow(Base):
     end_offset: Mapped[int] = mapped_column(Integer, nullable=False)
     content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class EvidenceCardRow(Base):
+    __tablename__ = "evidence_cards"
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id",
+            "chunk_id",
+            "source_start_offset",
+            "source_end_offset",
+            name="uq_evidence_card_project_span",
+        ),
+    )
+
+    evidence_card_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    document_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("documents.document_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    chunk_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("document_chunks.chunk_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    statement: Mapped[str] = mapped_column(Text, nullable=False)
+    quote: Mapped[str] = mapped_column(Text, nullable=False)
+    source_start_offset: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_end_offset: Mapped[int] = mapped_column(Integer, nullable=False)
+    locator_kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    locator_value: Mapped[str] = mapped_column(Text, nullable=False)
+    verification_status: Mapped[str] = mapped_column(String(16), nullable=False)
+    verified_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

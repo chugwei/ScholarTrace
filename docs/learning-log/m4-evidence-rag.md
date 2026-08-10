@@ -81,3 +81,13 @@ assert (
 ```
 
 M4.2 的索引仍不是 Rerank，也没有 EvidenceCard 或引用解析；下一批次会把 DOI/URL/原文片段校验作为进入可信证据集的第二道门。
+
+## M4.3 EvidenceCard 与来源链
+
+EvidenceCard 的核心不是“写一段听起来合理的话”，而是把一条项目 statement 绑定到 approved DocumentChunk 的精确 SourceSpan。服务先检查项目审核状态，再用 `str.find()` 定位 quote，计算文档绝对偏移，并从 DOI、URL 或安全的本地相对路径中选择 locator。配置源文本根目录时，系统还会重新读取文本并比对偏移片段；文件被篡改或 quote 不在 Chunk 中都会失败。
+
+这一步把引用校验和生成内容分开：EvidenceCard 只保存经过结构和来源校验的记录，statement 本身仍由研究者负责，不代表自动证明了因果关系、统计显著性或创新性。重复提交相同项目、Chunk、片段和 statement 返回已有卡片，避免重试制造重复证据。
+
+固定回归集包含 10 条合成农业视觉查询，覆盖荔枝病害、麦田产量和果园计数三个主题。它验证当前离线 hashing vector + BM25 的 top-1 可重复性，不等同于真实文献 Top-k 基线；后续应使用人工标注的真实或授权语料替换/扩展回归集。
+
+M4.3 与 LangGraph 的关系仍保持清晰：EvidenceCardService 是可重放的领域服务，不是自动放行的 Node；未来 Graph Node 可以调用它，Edge 可以根据“待补来源/已验证”路由，但 Checkpointer 不能替代数据库中的来源审计。

@@ -6,7 +6,9 @@ from scholartrace.schemas.literature import (
     Document,
     DocumentChunk,
     DocumentMetadata,
+    EvidenceCard,
     ProjectDocument,
+    SourceSpan,
 )
 from scholartrace.schemas.research import ResearchQuestion
 
@@ -16,6 +18,8 @@ __all__ = [
     "Document",
     "DocumentChunk",
     "DocumentMetadata",
+    "EvidenceCard",
     "ProjectDocument",
     "ResearchQuestion",
+    "SourceSpan",
 ]
