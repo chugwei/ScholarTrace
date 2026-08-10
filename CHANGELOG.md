@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+后续变更将在下一版本记录。
+
+## [0.4.0] - 2026-08-11
+
 ### Added
 
 - M4.1 项目文献 `candidate` / `approved` / `rejected` 状态、确定性相关度和人工审核元数据。

@@ -1,8 +1,8 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M3 已发布，M4 进行中
+- 项目状态：M4 发布候选准备中
 - 当前里程碑：M4 — 项目文献筛选与可信证据
-- 当前版本：`v0.3.0`
+- 当前版本：`v0.4.0`
 - 当前分支：`feat/m4-evidence-rag`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
@@ -59,7 +59,7 @@
 - [x] M4.1 项目文献 `candidate/approved/rejected`、确定性相关度与人工审核门禁
 - [x] M4.2 Chunk/全文索引、BM25 + Vector 兼容检索与旧索引保留
 - [x] M4.3 EvidenceCard、来源片段校验与固定检索回归集
-- [ ] M4.4 独立审查、合并 `main` 与 `v0.4.0` 发布（当前）
+- [ ] M4.4 独立审查、合并 `main` 与 `v0.4.0` 发布（发布候选）
 
 ## 当前验证
 
@@ -138,6 +138,7 @@
 | M4.2 全量质量门禁 | 通过，`scripts/check.py`；93 passed；3 个合成 Fixture |
 | M4.3 EvidenceCard/回归目标测试 | 通过，5 passed；0007 迁移、approved 门禁、locator/片段校验、幂等和 10 条回归 |
 | M4.3 全量质量门禁 | 通过，`scripts/check.py`；98 passed；3 个合成 Fixture |
+| M4.4 发布候选全量门禁 | 通过，98 passed；v0.4.0 wheel、独立 venv、CLI、迁移 0007、actionlint 和许可证检查通过 |
 
 ## 当前限制
 
