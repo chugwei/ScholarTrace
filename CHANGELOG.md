@@ -6,6 +6,8 @@
 
 后续变更将在下一版本记录。
 
+## [0.3.0] - 2026-08-11
+
 ### Added
 
 - M3.1 独立文献目录的 `Document` / `ProjectDocument` Schema、0004 迁移和 SHA-256 去重。
