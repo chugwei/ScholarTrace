@@ -4,7 +4,7 @@
 
 研迹 ScholarTrace 是一个从研究问题、文献证据、数据与实验，到论文和真实部署的可追溯科研工作台。
 
-当前版本为 `v0.8.0`。它包含研究问题与项目生命周期、SQLite Checkpoint、人工审批和版本审计，独立文献目录、SHA-256 去重、合法 PDF 入库、Crossref/OpenAlex 元数据查询、项目级可信证据链，版本化 PipelineSpec/DataCollectionProtocol，证据绑定的算法候选，冻结 ExperimentPlan、Run Manifest provenance、报告指标隔离、独立 MAE/RMSE/accuracy 重算和 Claim 证据门禁，以及受控 argv Runner、取消/超时/日志事件、失败 staging 隔离、DebugCase 审批和隔离回归。M4 的 hashing Vector、M5/M6 的合成方案、M7 的合成 Run/Metric 和 M8 的合成脚本只证明离线契约；Docker、MLflow、真实农业视觉训练、真实文献召回、真实采集和现场结果仍需独立环境或真实场景证据。
+当前版本为 `v0.9.0`。它包含研究问题与项目生命周期、SQLite Checkpoint、人工审批和版本审计，独立文献目录、SHA-256 去重、合法 PDF 入库、Crossref/OpenAlex 元数据查询、项目级可信证据链，版本化 PipelineSpec/DataCollectionProtocol，证据绑定的算法候选，冻结 ExperimentPlan、Run Manifest provenance、报告指标隔离、独立 MAE/RMSE/accuracy 重算和 Claim 证据门禁，受控 argv Runner、取消/超时/日志事件、失败 staging 隔离、DebugCase 审批和隔离回归，以及由 verified MetricResult 驱动、可重建并带数据与脚本溯源的 PNG/SVG/PDF 图表 Bundle。M4 的 hashing Vector、M5/M6 的合成方案、M7 的合成 Run/Metric、M8 的合成脚本和 M9 的合成图表只证明离线契约；Docker、MLflow、真实农业视觉训练、真实文献召回、真实采集、论文、Web 工作台和现场结果仍需独立环境或真实场景证据。
 
 ## 环境要求
 
