@@ -6,6 +6,18 @@
 
 后续变更将在下一版本记录。
 
+## [0.6.0] - 2026-08-11
+
+### Added
+
+- M6.1 版本化 `AlgorithmSpec` / `PriorArtMap`、EvidenceCard 绑定和先验工作审批门禁。
+- M6.2 `InnovationCandidate`、方法差异表和确定性完整度排序。
+- M6.3 证伪计划、基线/消融要求，以及只允许进入验证的 `approved_for_experiment` 状态门禁。
+
+### Boundary
+
+- M6 不生成实验指标或“已证明创新”结论；候选必须在后续 M7 通过可追溯实验验证。
+
 ## [0.5.0] - 2026-08-11
 
 ### Added

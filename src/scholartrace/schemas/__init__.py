@@ -1,5 +1,17 @@
 """Validated domain contracts used by ScholarTrace workflows."""
 
+from scholartrace.schemas.algorithm import (
+    AlgorithmComponent,
+    AlgorithmSpec,
+    CandidateExperimentPlan,
+    InnovationCandidate,
+    InnovationCandidateRanking,
+    InnovationFinding,
+    InnovationValidationReport,
+    MethodDifference,
+    PriorArtEntry,
+    PriorArtMap,
+)
 from scholartrace.schemas.decisions import DecisionRecord
 from scholartrace.schemas.design import (
     CaptureField,
@@ -22,6 +34,9 @@ from scholartrace.schemas.literature import (
 from scholartrace.schemas.research import ResearchQuestion
 
 __all__ = [
+    "AlgorithmComponent",
+    "AlgorithmSpec",
+    "CandidateExperimentPlan",
     "CaptureField",
     "ChunkSearchResult",
     "DataCollectionProtocol",
@@ -32,9 +47,16 @@ __all__ = [
     "DocumentChunk",
     "DocumentMetadata",
     "EvidenceCard",
+    "InnovationCandidate",
+    "InnovationCandidateRanking",
+    "InnovationFinding",
+    "InnovationValidationReport",
+    "MethodDifference",
     "PipelineSpec",
     "PipelineStage",
     "PipelineVersionComparison",
+    "PriorArtEntry",
+    "PriorArtMap",
     "ProjectDocument",
     "ResearchQuestion",
     "SourceSpan",
