@@ -10,6 +10,7 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
+from scholartrace.design.validation import DesignValidationError, validate_design_pair
 from scholartrace.identifiers import validate_identifier
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.models import (
@@ -192,6 +193,34 @@ class DesignRepository:
             row = self._protocol_for_update(session, project_id, protocol_id)
             self._approve_row(session, row, actor_id, reason)
             return _protocol_model(row)
+
+    def approve_design_pair(
+        self,
+        project_id: str,
+        pipeline_id: str,
+        protocol_id: str,
+        actor_id: str,
+        reason: str,
+    ) -> tuple[PipelineSpec, DataCollectionProtocol]:
+        """Validate and approve both design documents in one database transaction."""
+
+        project_id = validate_identifier(project_id)
+        pipeline_id = validate_identifier(pipeline_id)
+        protocol_id = validate_identifier(protocol_id)
+        actor_id = validate_identifier(actor_id)
+        if not reason.strip():
+            raise ValueError("approval reason is required")
+        with Session(self._engine) as session, session.begin():
+            pipeline_row = self._pipeline_for_update(session, project_id, pipeline_id)
+            protocol_row = self._protocol_for_update(session, project_id, protocol_id)
+            report = validate_design_pair(
+                _pipeline_model(pipeline_row), _protocol_model(protocol_row)
+            )
+            if not report.passed:
+                raise DesignValidationError(report)
+            self._approve_row(session, pipeline_row, actor_id, reason)
+            self._approve_row(session, protocol_row, actor_id, reason)
+            return _pipeline_model(pipeline_row), _protocol_model(protocol_row)
 
     def reject_protocol(
         self, project_id: str, protocol_id: str, actor_id: str, reason: str

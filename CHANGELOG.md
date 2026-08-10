@@ -10,6 +10,7 @@
 
 - M5.1 版本化 `PipelineSpec` / `DataCollectionProtocol` 契约、内容哈希和人工批准门禁。
 - M5.2 研究设计 Subgraph、人工 interrupt/resume、设计 DecisionRecord 审计和确定性 Mermaid 流程图。
+- M5.3 管线连通性、数据划分泄漏检查、版本差异报告和批准前质量门禁。
 
 ## [0.4.0] - 2026-08-11
 

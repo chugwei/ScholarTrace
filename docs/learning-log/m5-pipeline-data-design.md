@@ -43,3 +43,11 @@ protocol = repository.save_protocol(protocol_draft)
 常见错误是直接编辑已批准方案、重复 stage/field 名称或把同一场景同时放进 inclusion/exclusion。Schema 测试拒绝这些结构；Repository 测试验证 0008 升降级、幂等保存、项目隔离、批准/拒绝和显式父版本。所有样例是合成/脱敏的农业视觉描述，不是用户真实采集授权。
 
 M4 提供 approved 文献和 EvidenceCard 来源链；M5.1 把它们作为研究设计输入。M5.2 将增加 Subgraph 与流程图，M5.3 增加质量/泄漏执行检查，M5.4 再导出并发布 v0.5.0。
+
+## M5.3 质量门禁与比较
+
+质量检查的目标是阻止明显不可审计的设计进入批准状态，而不是替研究者做出科研判断。PipelineSpec 检查相邻阶段的输入/输出是否连通；DataCollectionProtocol 检查划分和泄漏控制是否明确说明分组、会话、来源、主体或重复边界。每个 finding 有稳定 code、severity、message 和 path，可在 UI 或导出中展示。
+
+版本比较忽略审核时间等元数据，只报告真正改变的字段以及新增/删除的 stage ID。例如在荔枝方案中增加 `report` 阶段会得到 `changed_fields=["stages"]` 和 `added_stage_ids=["report"]`。报告描述结构差异，不证明数据已经通过质量检查；真实采集后仍需要样本级验证。
+
+批准流程先生成完整 `DesignValidationReport`，有 error 就抛出 `DesignValidationError`，事务保持两个草案状态且不写批准审计。通过后由 `approve_design_pair()` 在一个事务中批准两个契约，避免管线已批准而采集协议仍是草案。

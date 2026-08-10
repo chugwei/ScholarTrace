@@ -159,3 +159,9 @@ START → intake → persist_drafts → request_approval(interrupt)
 `intake` 创建/确认项目，`persist_drafts` 通过 DesignRepository 保存两个 draft，`request_approval` 暂停并返回目标 ID/允许动作，`apply_decision` 将批准或拒绝写入既有 DecisionRecord 的 `design` target，并只在批准分支将两个版本转为 approved。取消/暂停不会把 draft 宣称为正式方案。Graph State 只保存 design ID、draft 引用和当前审批信息，不保存大型数据或图表。
 
 `pipeline_to_mermaid()` 按 PipelineStage 顺序生成稳定的 `stage_0 → stage_1` 流程图，标签同时包含名称和稳定 stage ID，便于文档审查。它是设计可视化，不是执行引擎；M5.3 才会在流程上运行数据质量和泄漏检查。
+
+## M5.3 设计质量与版本比较
+
+`validate_design_pair()` 在批准前运行两个确定性检查：PipelineSpec 的相邻阶段必须有输入/输出连接；DataCollectionProtocol 的 split strategy 和 leakage controls 必须显式提到 group、session、source、subject、duplicate 或 leak 等边界。检查结果由 `DesignValidationReport` 保存 code、severity、message 和 path，任何 error 都阻断 `approve_design_pair()`，事务不会把草案改成 approved。
+
+`compare_pipeline_versions()` 不比较时间戳、审核者或版本 ID，而是报告 canonical 设计字段、新增/删除 stage ID，供人工比较方案变化。它不宣称数据已经满足质量要求，也不替代真实采样后的 CSV/图像检查；M5.4 才导出可读报告。

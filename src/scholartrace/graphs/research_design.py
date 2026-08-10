@@ -13,6 +13,7 @@ from langgraph.checkpoint.sqlite import SqliteSaver
 from langgraph.graph import END, START, StateGraph
 from langgraph.types import Command, interrupt
 
+from scholartrace.design.validation import DesignValidationError, validate_design_pair
 from scholartrace.identifiers import validate_identifier
 from scholartrace.persistence.design_repository import DesignRepository
 from scholartrace.persistence.migrations import upgrade_database
@@ -114,6 +115,14 @@ def build_research_design_graph(
         if not pipeline_id or not protocol_id:
             raise ValueError("design IDs are required before approval")
         target_id = design_target_id(pipeline_id, protocol_id)
+        validation_findings: list[dict[str, str]] = []
+        if action == "approved":
+            pipeline = design_repository.get_pipeline(state["project_id"], pipeline_id)
+            protocol = design_repository.get_protocol(state["project_id"], protocol_id)
+            report = validate_design_pair(pipeline, protocol)
+            if not report.passed:
+                raise DesignValidationError(report)
+            validation_findings = [finding.model_dump() for finding in report.findings]
         decision_id = raw.get("decision_id") or _decision_id(
             state["project_id"], state["thread_id"], target_id, action, actor_id
         )
@@ -130,6 +139,7 @@ def build_research_design_graph(
                 "payload": {
                     "pipeline_id": pipeline_id,
                     "protocol_id": protocol_id,
+                    "validation_findings": validation_findings,
                 },
                 "created_at": raw.get("created_at") or utc_now_naive(),
             }
@@ -147,11 +157,12 @@ def build_research_design_graph(
             created_at=record.created_at,
         )
         if action == "approved":
-            design_repository.approve_pipeline(
-                state["project_id"], pipeline_id, actor_id, reason.strip()
-            )
-            design_repository.approve_protocol(
-                state["project_id"], protocol_id, actor_id, reason.strip()
+            design_repository.approve_design_pair(
+                state["project_id"],
+                pipeline_id,
+                protocol_id,
+                actor_id,
+                reason.strip(),
             )
         elif action == "rejected":
             design_repository.reject_pipeline(

@@ -8,6 +8,7 @@ from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_vali
 from scholartrace.schemas.research import NonBlankText
 
 DesignStatus = Literal["draft", "approved", "rejected", "superseded"]
+FindingSeverity = Literal["error", "warning", "info"]
 Sha256Text = Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
 TextList = list[NonBlankText]
 
@@ -104,3 +105,38 @@ class DataCollectionProtocol(BaseModel):
         if excluded:
             raise ValueError("inclusion and exclusion criteria must not overlap")
         return self
+
+
+class DesignFinding(BaseModel):
+    """One deterministic quality or leakage finding."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    code: NonBlankText
+    severity: FindingSeverity
+    message: NonBlankText
+    path: NonBlankText
+
+
+class DesignValidationReport(BaseModel):
+    """Validation output that must be clean before a design pair is approved."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    passed: bool
+    findings: list[DesignFinding] = Field(default_factory=list)
+
+
+class PipelineVersionComparison(BaseModel):
+    """Auditable summary of changes between two pipeline versions."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    project_id: NonBlankText
+    from_pipeline_id: NonBlankText
+    to_pipeline_id: NonBlankText
+    from_version: int = Field(ge=1)
+    to_version: int = Field(ge=1)
+    changed_fields: list[NonBlankText] = Field(default_factory=list)
+    added_stage_ids: list[NonBlankText] = Field(default_factory=list)
+    removed_stage_ids: list[NonBlankText] = Field(default_factory=list)
