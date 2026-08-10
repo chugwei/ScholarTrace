@@ -13,6 +13,7 @@ from scholartrace.persistence.algorithm_repository import (
 )
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.migrations import (
+    LATEST_REVISION,
     current_revision,
     downgrade_database,
     upgrade_database,
@@ -22,6 +23,8 @@ from scholartrace.persistence.repository import ProjectRepository
 from scholartrace.schemas import (
     AlgorithmComponent,
     AlgorithmSpec,
+    InnovationCandidate,
+    MethodDifference,
     PriorArtEntry,
     PriorArtMap,
 )
@@ -96,6 +99,57 @@ def prior_art_map(*, project_id: str = "lychee-m6", algorithm_id: str = "algo-v1
     )
 
 
+def candidate(
+    *,
+    candidate_id: str = "candidate-v1",
+    version: int = 1,
+    parent: str | None = None,
+    extra_difference: bool = False,
+) -> InnovationCandidate:
+    differences = [
+        MethodDifference(
+            dimension="visibility supervision",
+            prior_art_entry_id="prior-art-001",
+            prior_art_approach="uses a single visibility score",
+            proposed_approach="separates visibility from box regression",
+            expected_effect="reduce errors under partial occlusion",
+        )
+    ]
+    if extra_difference:
+        differences.append(
+            MethodDifference(
+                dimension="split control",
+                prior_art_entry_id="prior-art-001",
+                prior_art_approach="random image split",
+                proposed_approach="source-grouped split",
+                expected_effect="reduce source leakage",
+            )
+        )
+    return InnovationCandidate(
+        candidate_id=candidate_id,
+        project_id="lychee-m6",
+        algorithm_id="algo-v1",
+        prior_art_map_id="map-v1",
+        version=version,
+        title="Visibility-aware head candidate",
+        problem="Count visible fruit under canopy occlusion",
+        prior_art_entry_ids=["prior-art-001"],
+        prior_art_evidence_ids=["evidence-001"],
+        differences=differences,
+        identified_gap="source grouping and visibility are not jointly tested",
+        proposed_change="add a visibility-aware head and source-grouped evaluation",
+        expected_mechanism="visibility supervision separates occluded and visible features",
+        expected_benefit="fewer false negatives under occlusion",
+        falsification_experiment="remove visibility supervision and compare held-out recall",
+        required_baselines=["standard detector"],
+        required_ablations=["without visibility head"],
+        risks=["additional labels may be noisy"],
+        parent_candidate_id=parent,
+        created_by="researcher-001",
+        created_at=CREATED_AT,
+    )
+
+
 def create_project(database_path: Path, project_id: str = "lychee-m6") -> None:
     repository = ProjectRepository(database_path)
     repository.create_project(project_id, project_id)
@@ -156,11 +210,21 @@ def add_evidence_card(database_path: Path, project_id: str = "lychee-m6") -> Non
 def test_m6_migration_rolls_back_algorithm_tables(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
     upgrade_database(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
+
+
+def test_m6_candidate_migration_rolls_back_candidate_table(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    upgrade_database(database_path)
+    assert current_revision(database_path) == "0010"
+    downgrade_database(database_path, "0009")
     assert current_revision(database_path) == "0009"
+    upgrade_database(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
     downgrade_database(database_path, "0008")
     assert current_revision(database_path) == "0008"
     upgrade_database(database_path)
-    assert current_revision(database_path) == "0009"
+    assert current_revision(database_path) == LATEST_REVISION
 
 
 def test_algorithm_is_idempotent_and_approval_requires_resolved_evidence(tmp_path: Path) -> None:
@@ -206,6 +270,44 @@ def test_prior_art_map_requires_approved_algorithm_and_evidence(tmp_path: Path) 
     )
     assert approved_map.status == "approved"
     assert repository.get_prior_art_map("lychee-m6", "map-v1").status == "approved"
+    repository.close()
+
+
+def test_candidate_requires_map_references_and_has_deterministic_rank(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    upgrade_database(database_path)
+    create_project(database_path)
+    add_evidence_card(database_path)
+    repository = AlgorithmRepository(database_path)
+    repository.save_algorithm(algorithm())
+    repository.approve_algorithm("lychee-m6", "algo-v1", "researcher-001", "approved")
+    repository.save_prior_art_map(prior_art_map())
+    repository.approve_prior_art_map("lychee-m6", "map-v1", "researcher-001", "checked")
+
+    saved = repository.save_candidate(candidate())
+    assert repository.save_candidate(candidate()) == saved
+    assert saved.status == "draft"
+    assert saved.novelty_status == "unverified"
+    with pytest.raises(AlgorithmRepositoryError, match="unknown prior-art entries"):
+        repository.save_candidate(
+            candidate(candidate_id="candidate-invalid").model_copy(
+                update={"prior_art_entry_ids": ["missing-entry"]}
+            )
+        )
+
+    second = repository.save_candidate(
+        candidate(
+            candidate_id="candidate-v2",
+            version=2,
+            parent="candidate-v1",
+            extra_difference=True,
+        ).model_copy(update={"title": "Visibility-aware head candidate v2"})
+    )
+    assert second.version == 2
+    ranked = repository.rank_candidates("lychee-m6")
+    assert ranked[0].candidate_id == "candidate-v2"
+    assert ranked[0].score > ranked[1].score
+    assert "does not establish novelty" in ranked[0].rationale[-1]
     repository.close()
 
 

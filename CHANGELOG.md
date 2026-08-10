@@ -4,7 +4,7 @@
 
 ## [Unreleased]
 
-- M6.1 增加版本化 `AlgorithmSpec` / `PriorArtMap` 契约、EvidenceCard 绑定和先验工作审批门禁；该开发内容尚未成为 `v0.5.0` 发布能力。
+- M6.1 增加版本化 `AlgorithmSpec` / `PriorArtMap` 契约、EvidenceCard 绑定和先验工作审批门禁；M6.2 增加 `InnovationCandidate`、方法差异表和确定性完整度排序。该开发内容尚未成为 `v0.5.0` 发布能力。
 
 ## [0.5.0] - 2026-08-11
 

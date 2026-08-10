@@ -10,17 +10,28 @@ from sqlalchemy import select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
-from scholartrace.algorithm.validation import validate_algorithm_spec, validate_prior_art_map
+from scholartrace.algorithm.ranking import rank_innovation_candidates
+from scholartrace.algorithm.validation import (
+    validate_algorithm_spec,
+    validate_innovation_candidate,
+    validate_prior_art_map,
+)
 from scholartrace.identifiers import validate_identifier
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.models import (
     AlgorithmSpecRow,
     EvidenceCardRow,
+    InnovationCandidateRow,
     PriorArtMapRow,
     ProjectRow,
     utc_now_naive,
 )
-from scholartrace.schemas import AlgorithmSpec, PriorArtMap
+from scholartrace.schemas import (
+    AlgorithmSpec,
+    InnovationCandidate,
+    InnovationCandidateRanking,
+    PriorArtMap,
+)
 
 
 class AlgorithmRepositoryError(RuntimeError):
@@ -45,6 +56,10 @@ class AlgorithmDecisionConflictError(AlgorithmRepositoryError):
 
 class PriorArtDecisionConflictError(AlgorithmRepositoryError):
     """Raised when a prior-art decision cannot be applied safely."""
+
+
+class InnovationCandidateConflictError(AlgorithmRepositoryError):
+    """Raised when a candidate cannot be persisted with traceable references."""
 
 
 class AlgorithmRepository:
@@ -306,6 +321,120 @@ class AlgorithmRepository:
             ).all()
             return [_prior_art_map_model(row) for row in rows]
 
+    def save_candidate(self, candidate: InnovationCandidate) -> InnovationCandidate:
+        """Persist a draft only after its map and evidence references are coherent."""
+
+        if candidate.status != "draft":
+            raise ValueError("new innovation candidates must start as draft")
+        project_id = validate_identifier(candidate.project_id)
+        content_sha256 = candidate_content_sha256(candidate)
+        if candidate.content_sha256 is not None and candidate.content_sha256 != content_sha256:
+            raise ValueError("candidate content_sha256 does not match the canonical payload")
+        normalized = candidate.model_copy(update={"content_sha256": content_sha256})
+        with Session(self._engine) as session, session.begin():
+            self._require_project(session, project_id)
+            algorithm = session.get(AlgorithmSpecRow, normalized.algorithm_id)
+            prior_art_map = session.get(PriorArtMapRow, normalized.prior_art_map_id)
+            if algorithm is None or algorithm.project_id != project_id:
+                raise InnovationCandidateConflictError(
+                    f"algorithm {normalized.algorithm_id!r} was not found in project {project_id!r}"
+                )
+            if (
+                prior_art_map is None
+                or prior_art_map.project_id != project_id
+                or prior_art_map.algorithm_id != normalized.algorithm_id
+            ):
+                raise InnovationCandidateConflictError(
+                    f"prior-art map {normalized.prior_art_map_id!r} does not match the candidate"
+                )
+            report = validate_innovation_candidate(
+                normalized,
+                _prior_art_map_model(prior_art_map),
+                available_evidence_ids=self._evidence_ids(session, project_id),
+            )
+            if not report.passed:
+                raise InnovationCandidateConflictError(
+                    "; ".join(finding.message for finding in report.findings)
+                )
+            existing = session.scalar(
+                select(InnovationCandidateRow).where(
+                    InnovationCandidateRow.project_id == project_id,
+                    InnovationCandidateRow.content_sha256 == content_sha256,
+                )
+            )
+            if existing is not None:
+                return _candidate_model(existing)
+            if session.get(InnovationCandidateRow, normalized.candidate_id) is not None:
+                raise InnovationCandidateConflictError(
+                    f"candidate_id {normalized.candidate_id!r} is already persisted"
+                )
+            latest = session.scalar(
+                select(InnovationCandidateRow)
+                .where(
+                    InnovationCandidateRow.project_id == project_id,
+                    InnovationCandidateRow.algorithm_id == normalized.algorithm_id,
+                )
+                .order_by(InnovationCandidateRow.version.desc())
+            )
+            self._validate_new_version(
+                session,
+                normalized.version,
+                normalized.parent_candidate_id,
+                latest,
+                "innovation candidate",
+            )
+            row = InnovationCandidateRow(
+                candidate_id=normalized.candidate_id,
+                project_id=project_id,
+                algorithm_id=normalized.algorithm_id,
+                prior_art_map_id=normalized.prior_art_map_id,
+                version=normalized.version,
+                content_sha256=content_sha256,
+                payload=normalized.model_dump(mode="json"),
+                status="draft",
+                parent_candidate_id=normalized.parent_candidate_id,
+                created_by=normalized.created_by,
+                decision_reason=normalized.decision_reason,
+                created_at=normalized.created_at.replace(tzinfo=None),
+            )
+            session.add(row)
+            self._flush_or_conflict(session, "innovation candidate version is already persisted")
+            return _candidate_model(row)
+
+    def get_candidate(self, project_id: str, candidate_id: str) -> InnovationCandidate:
+        project_id = validate_identifier(project_id)
+        candidate_id = validate_identifier(candidate_id)
+        with Session(self._engine) as session:
+            return _candidate_model(self._candidate_for_update(session, project_id, candidate_id))
+
+    def list_candidates(
+        self, project_id: str, algorithm_id: str | None = None
+    ) -> list[InnovationCandidate]:
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            self._require_project(session, project_id)
+            statement = select(InnovationCandidateRow).where(
+                InnovationCandidateRow.project_id == project_id
+            )
+            if algorithm_id is not None:
+                statement = statement.where(
+                    InnovationCandidateRow.algorithm_id == validate_identifier(algorithm_id)
+                )
+            rows = session.scalars(
+                statement.order_by(
+                    InnovationCandidateRow.version,
+                    InnovationCandidateRow.candidate_id,
+                )
+            ).all()
+            return [_candidate_model(row) for row in rows]
+
+    def rank_candidates(
+        self, project_id: str, algorithm_id: str | None = None
+    ) -> list[InnovationCandidateRanking]:
+        """Return deterministic completeness ranks, never a novelty verdict."""
+
+        return rank_innovation_candidates(self.list_candidates(project_id, algorithm_id))
+
     @staticmethod
     def _require_project(session: Session, project_id: str) -> None:
         if session.get(ProjectRow, project_id) is None:
@@ -316,7 +445,7 @@ class AlgorithmRepository:
         session: Session,
         version: int,
         parent_id: str | None,
-        latest: AlgorithmSpecRow | PriorArtMapRow | None,
+        latest: AlgorithmSpecRow | PriorArtMapRow | InnovationCandidateRow | None,
         label: str,
     ) -> None:
         if latest is None:
@@ -327,7 +456,12 @@ class AlgorithmRepository:
             return
         if version != latest.version + 1:
             raise AlgorithmVersionConflictError(f"{label} versions must increment by one")
-        latest_id = latest.algorithm_id if isinstance(latest, AlgorithmSpecRow) else latest.map_id
+        if isinstance(latest, AlgorithmSpecRow):
+            latest_id = latest.algorithm_id
+        elif isinstance(latest, PriorArtMapRow):
+            latest_id = latest.map_id
+        else:
+            latest_id = latest.candidate_id
         if latest.status in {"approved", "superseded"}:
             if parent_id != latest_id:
                 raise AlgorithmVersionConflictError(
@@ -396,6 +530,22 @@ class AlgorithmRepository:
         return row
 
     @staticmethod
+    def _candidate_for_update(
+        session: Session, project_id: str, candidate_id: str
+    ) -> InnovationCandidateRow:
+        row = session.scalar(
+            select(InnovationCandidateRow).where(
+                InnovationCandidateRow.project_id == project_id,
+                InnovationCandidateRow.candidate_id == candidate_id,
+            )
+        )
+        if row is None:
+            raise InnovationCandidateConflictError(
+                f"candidate {candidate_id!r} was not found in project {project_id!r}"
+            )
+        return row
+
+    @staticmethod
     def _evidence_ids(session: Session, project_id: str) -> set[str]:
         return set(
             session.scalars(
@@ -438,6 +588,27 @@ def prior_art_map_content_sha256(prior_art_map: PriorArtMap) -> str:
                 "status",
                 "content_sha256",
                 "parent_map_id",
+                "created_by",
+                "decision_reason",
+                "approved_by",
+                "approved_at",
+                "created_at",
+            },
+        )
+    )
+
+
+def candidate_content_sha256(candidate: InnovationCandidate) -> str:
+    return _content_sha256(
+        candidate.model_dump(
+            mode="json",
+            exclude={
+                "candidate_id",
+                "project_id",
+                "version",
+                "status",
+                "content_sha256",
+                "parent_candidate_id",
                 "created_by",
                 "decision_reason",
                 "approved_by",
@@ -492,3 +663,25 @@ def _prior_art_map_model(row: PriorArtMapRow) -> PriorArtMap:
         }
     )
     return PriorArtMap.model_validate(payload)
+
+
+def _candidate_model(row: InnovationCandidateRow) -> InnovationCandidate:
+    payload = dict(row.payload)
+    payload.update(
+        {
+            "candidate_id": row.candidate_id,
+            "project_id": row.project_id,
+            "algorithm_id": row.algorithm_id,
+            "prior_art_map_id": row.prior_art_map_id,
+            "version": row.version,
+            "content_sha256": row.content_sha256,
+            "status": row.status,
+            "parent_candidate_id": row.parent_candidate_id,
+            "created_by": row.created_by,
+            "decision_reason": row.decision_reason,
+            "approved_by": row.approved_by,
+            "approved_at": row.approved_at,
+            "created_at": row.created_at,
+        }
+    )
+    return InnovationCandidate.model_validate(payload)

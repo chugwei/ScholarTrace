@@ -317,3 +317,46 @@ class PriorArtMapRow(Base):
     approved_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
     approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class InnovationCandidateRow(Base):
+    __tablename__ = "innovation_candidates"
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id",
+            "algorithm_id",
+            "version",
+            name="uq_innovation_candidate_version",
+        ),
+        UniqueConstraint("project_id", "content_sha256", name="uq_innovation_candidate_content"),
+    )
+
+    candidate_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    algorithm_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("algorithm_specs.algorithm_id"),
+        nullable=False,
+        index=True,
+    )
+    prior_art_map_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("prior_art_maps.map_id"),
+        nullable=False,
+        index=True,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(32), nullable=False)
+    parent_candidate_id: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    decision_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

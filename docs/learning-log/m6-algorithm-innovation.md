@@ -52,3 +52,11 @@ approved_map = repository.approve_prior_art_map(
 常见错误包括重复使用同一版本号、修改已批准记录、把不存在的 EvidenceCard ID 当作文献依据以及在算法尚未批准时批准先验地图。集成测试覆盖这些失败路径、数据库回滚、幂等保存和项目隔离。`unresolved_search_gaps` 只产生 warning，提醒继续检索，不会输出“没有先验工作”。
 
 M5 提供批准的管线和采集协议；M6.1 只建立算法和先验工作契约，M6.2 将增加方法差异和创新候选，M6.3 再增加证伪、基线/消融和“仅可进入实验”的状态门禁，M7 才能把候选接入实验计划与结果导入。
+
+## M6.2 候选与差异表
+
+`InnovationCandidate` 将一个候选拆成先验条目、EvidenceCard ID、方法差异、识别出的 gap、提议改动、预期机制、预期收益和风险。`MethodDifference` 要明确“先验方法做什么、候选改变什么、预期影响是什么”，避免只写“效果更好”。候选保存前会检查它引用的条目确实属于对应的 `PriorArtMap`，并检查证据 ID 属于当前项目。
+
+候选的完整度排序是可重复的审查队列：证据引用、差异、机制、证伪实验、基线和消融分别贡献固定权重；同分按 ID 稳定排序。这个分数不表示原创性，也不替代人工决定。候选在后续审批前保持 `draft` 和 `novelty_status=unverified`。
+
+最小数据流为：`approved PriorArtMap → InnovationCandidate draft → completeness ranking → M6.3 experiment gate`。M6.3 才会允许一个候选进入实验计划，且状态名称会明确是“允许验证”，不是“已证明创新”。

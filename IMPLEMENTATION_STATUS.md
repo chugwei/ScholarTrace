@@ -72,8 +72,8 @@
 ## M6 小任务
 
 - [x] M6.1 AlgorithmSpec/Prior Art Map 契约与迁移
-- [ ] M6.2 InnovationCandidate、差异表和机制假设（当前）
-- [ ] M6.3 证伪实验、基线/消融建议和创新状态门禁
+- [x] M6.2 InnovationCandidate、差异表和机制假设
+- [ ] M6.3 证伪实验、基线/消融建议和创新状态门禁（当前）
 - [ ] M6.4 独立审查、合并 `main` 与 `v0.6.0` 发布
 
 ## 当前验证
@@ -167,14 +167,16 @@
 | M5 发布候选独立验收 | 通过，v0.5.0 wheel/sdist、独立 venv、PyYAML、CLI、迁移 0008、actionlint 和许可证检查通过 |
 | M6.1 算法契约目标测试 | 通过，4 passed；0009 迁移升降级、证据绑定、审批顺序和项目隔离 |
 | M6.1 全量质量门禁 | 通过，`scripts/check.py`；115 passed；3 个合成 Fixture |
+| M6.2 候选目标测试 | 通过，6 passed；0010 迁移、引用一致性、版本父链和确定性排序 |
+| M6.2 全量质量门禁 | 通过，`scripts/check.py`；117 passed；3 个合成 Fixture |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1 已实现 AlgorithmSpec/PriorArtMap 和 EvidenceCard 存在性门禁；InnovationCandidate、证伪实验、实验、论文、Web 和部署能力仍未实现。
+- M6.1–M6.2 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异和完整度排序；候选仍不能宣称创新成立，证伪实验、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M6.2：实现 InnovationCandidate、方法差异表和确定性候选排序；继续保持“创新候选”而非已证明创新的状态边界，不把合成方案或离线证据宣传为真实科研结论。
+下一步进入 M6.3：实现证伪实验、基线/消融建议和“允许进入验证”状态门禁；继续保持“创新候选”而非已证明创新的状态边界。
