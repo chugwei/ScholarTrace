@@ -13,8 +13,8 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M4 可信证据 RAG | v0.4.0 | completed | main | [v0.4.0](https://github.com/chugwei/ScholarTrace/tree/v0.4.0) | merge `a193291`、main 门禁、Tag 已核验 |
 | M5 管线与数据设计 | v0.5.0 | completed | main | [v0.5.0](https://github.com/chugwei/ScholarTrace/tree/v0.5.0) | merge `9aef2d8`、main 门禁、Tag 已核验 |
 | M6 算法与创新候选 | v0.6.0 | completed | main | [v0.6.0](https://github.com/chugwei/ScholarTrace/tree/v0.6.0) | merge `0161739`、main 门禁、Tag 已核验 |
-| M7 实验注册与导入 | v0.7.0 | release-candidate | feat/m7-experiment-registry | — | M7.1–M7.3 通过，发布候选审查中 |
-| M8 Runner 与排错 | v0.8.0 | pending | feat/m8-runner-debugging | — | — |
+| M7 实验注册与导入 | v0.7.0 | completed | main | [v0.7.0](https://github.com/chugwei/ScholarTrace/tree/v0.7.0) | merge `1cd9280`、main 门禁、Tag 已核验 |
+| M8 Runner 与排错 | v0.8.0 | pending | feat/m8-runner-debugging | — | M7 已发布，入口待打开 |
 | M9 图表系统 | v0.9.0 | pending | feat/m9-figures | — | — |
 | M10 论文与引用 | v0.10.0 | pending | feat/m10-manuscript | — | — |
 | M11 Web 工作台 | v0.11.0 | pending | feat/m11-web-workbench | — | — |
@@ -103,4 +103,4 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M7.1 | ExperimentPlan、实验矩阵和冻结门禁 | 0011、版本/审批/回滚测试 | completed |
 | M7.2 | Run Manifest 与现有产物导入 | 缺失证据、不完整状态和导入隔离测试 | completed |
 | M7.3 | 指标独立重算、统计汇总和 Claim 更新 | 重算一致性、汇总和 Claim 门禁测试 | completed |
-| M7.4 | M7 发布 | 独立审查、main CI、`v0.7.0` | release-candidate |
+| M7.4 | M7 发布 | 独立审查、main CI、`v0.7.0` | completed |

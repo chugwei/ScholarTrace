@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M7 发布候选准备中
+- 项目状态：M7 已发布，M8 待开始
 - 当前里程碑：M7 — 实验计划与结果导入
 - 当前版本：`v0.7.0`
-- 当前分支：`feat/m7-experiment-registry`
+- 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -81,7 +81,7 @@
 - [x] M7.1 ExperimentPlan、实验矩阵和冻结门禁
 - [x] M7.2 Run Manifest、现有产物导入和不可验证状态
 - [x] M7.3 指标独立重算、统计汇总和 Claim 更新
-- [ ] M7.4 独立审查、合并 `main` 与 `v0.7.0` 发布（发布候选）
+- [x] M7.4 独立审查、合并 `main` 与 `v0.7.0` 发布
 
 ## 当前验证
 
@@ -187,6 +187,7 @@
 | M7.3 指标/Claim 目标测试 | 通过，5 passed；独立重算、verified 聚合、数据版本和 Claim 降级 |
 | M7.3 全量质量门禁 | 通过，`scripts/check.py`；127 passed；3 个合成 Fixture |
 | M7.4 发布候选 | 通过，v0.7.0 wheel/sdist、隔离 venv、CLI、迁移 0013、actionlint、Apache-2.0、内部文件排除和秘密扫描；详见 `docs/verification/m7-release-candidate.md` |
+| M7 main 合并与发布 | 通过，merge `1cd9280`；main smoke/全量 127 passed；Tag object `95af661`，peeled `1cd9280` |
 
 ## 当前限制
 
@@ -197,4 +198,4 @@
 
 ## 下一步
 
-下一步完成 M7.4：独立审查 M7、构建 v0.7.0 发布候选并合并 `main`；不得把训练日志临时值当作最终指标。
+下一步创建 `feat/m8-runner-debugging`，实现受控 Run 启动/取消/超时、日志和 DebugCase；外部命令必须有白名单、资源限制和注入防护。

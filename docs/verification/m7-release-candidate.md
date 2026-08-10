@@ -43,3 +43,10 @@ GitHub Actions 状态如果因 API rate limit 无法读取，只记录为“未�
 ## 发布边界
 
 Run、指标和 Claim 测试使用合成/脱敏农业视觉数据。它们证明的是 provenance 和状态门禁，不是实际训练效果、统计显著性或真实场景结果。`v0.7.0` 发布后 M8 才会进入受控执行与排错。
+
+## 发布结果
+
+- 功能分支已非 squash 合并到 `main`，merge commit：`1cd928089a203513bd3aebb2ff06c6b9c1e38221`；
+- `main` 已推送并核验为 `1cd9280`，main smoke/全量门禁 127 passed；
+- annotated Tag `v0.7.0` 已推送；Tag object：`95af6612c0d2a50d2d558d38faa3bed7a3eb17fa`，peeled commit：`1cd9280`；
+- M7 已发布；M8–M12 仍未完成。
