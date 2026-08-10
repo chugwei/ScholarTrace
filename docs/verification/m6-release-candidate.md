@@ -43,3 +43,10 @@ GitHub Actions 状态如果因 API rate limit 无法读取，只记录为“未�
 ## 发布边界
 
 M6 的算法和创新材料使用合成/脱敏农业视觉输入，不能作为真实文献、真实实验或真实场景证据。`v0.6.0` 只发布可追溯候选设计和验证门禁；实验指标必须在后续 M7 通过独立 Run 导入或执行后产生。
+
+## 发布结果
+
+- 功能分支已非 squash 合并到 `main`，merge commit：`01617393620713585395105b13c23f008bb2efff`；
+- `main` 已推送并核验为 `0161739`，main smoke/全量门禁 119 passed；
+- annotated Tag `v0.6.0` 已推送；Tag object：`9bfc324925095042d296f3430e06aa3454ec42f4`，peeled commit：`0161739`；
+- M6 已发布；M7–M12 仍未完成。
