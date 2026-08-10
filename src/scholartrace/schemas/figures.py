@@ -13,6 +13,7 @@ FigureKind = Literal["line", "bar", "scatter", "histogram", "confusion_matrix", 
 FigureFormat = Literal["png", "svg", "pdf"]
 FigureStatus = Literal["draft", "approved", "rejected"]
 FigureSourceKind = Literal["metric_results", "dataset", "manual"]
+FigureCheckStatus = Literal["passed", "failed"]
 
 
 class FigurePoint(BaseModel):
@@ -88,3 +89,26 @@ class FigureArtifactBundle(BaseModel):
     script_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     metric_result_ids: list[NonBlankText] = Field(default_factory=list)
     created_at: datetime
+
+
+class FigureSuggestion(BaseModel):
+    """A deterministic chart recommendation grounded in available metrics."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    kind: FigureKind
+    priority: int = Field(ge=1)
+    metric_names: list[NonBlankText] = Field(min_length=1)
+    rationale: NonBlankText
+
+
+class FigureValidationReport(BaseModel):
+    """Numeric and file provenance checks for a rendered bundle."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    figure_id: NonBlankText
+    numeric_status: FigureCheckStatus
+    provenance_status: FigureCheckStatus
+    mismatches: list[NonBlankText] = Field(default_factory=list)
+    checked_at: datetime

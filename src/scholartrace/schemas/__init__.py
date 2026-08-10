@@ -41,7 +41,13 @@ from scholartrace.schemas.experiment import (
     MetricResult,
     RunManifest,
 )
-from scholartrace.schemas.figures import FigureArtifactBundle, FigurePoint, FigureSpec
+from scholartrace.schemas.figures import (
+    FigureArtifactBundle,
+    FigurePoint,
+    FigureSpec,
+    FigureSuggestion,
+    FigureValidationReport,
+)
 from scholartrace.schemas.literature import (
     ChunkSearchResult,
     Document,
@@ -94,6 +100,8 @@ __all__ = [
     "FigureArtifactBundle",
     "FigurePoint",
     "FigureSpec",
+    "FigureSuggestion",
+    "FigureValidationReport",
     "InnovationCandidate",
     "InnovationCandidateRanking",
     "InnovationFinding",

@@ -35,3 +35,9 @@ M9.1 的 SQLite 0017 只保存 FigureSpec 设计和状态。真正的文件 Arti
 `FigureRenderer` 先把输入点写为确定性 CSV，再生成只依赖 bundle 内 CSV 的 `generate_figure.py`。渲染器使用 Matplotlib `Agg` 后端，避免 GUI 状态影响 CI，并输出 FigureSpec 要求的 PNG、SVG 和 PDF。`provenance.json` 保存 data/script SHA-256、data_version 和 MetricResult IDs；Bundle 通过临时目录改名发布，避免半成品目录被当成正式图表。
 
 删除三个图像文件后，测试重新运行 bundle 脚本并恢复所有输出，输入 CSV hash 保持不变。这证明的是可重建性，不是视觉质量或真实科研结论；M9.3 还要检查图中数值与 MetricResult 一致，M9.4 才做人工视觉验收。
+
+## M9.3：建议、Caption 和数值门禁
+
+`recommend_figure_types()` 只接收 verified/final MetricResult；没有验证结果时返回空建议，避免把训练日志或猜测变成图。`build_caption()` 明确列出 MetricResult IDs 和 data_version，不引入因果或性能结论。`validate_bundle_numeric_consistency()` 同时读取 CSV、FigureSpec、MetricResult 和 provenance.json，检查每个 label/value、data/script SHA-256 和 metric IDs；任何篡改都会形成 failed 报告。
+
+M9.3 仍不等于视觉验收：数值报告通过只能说明数据链一致，不能证明坐标、字体、图例和布局适合论文。M9.4 将实际打开生成图并记录视觉证据。

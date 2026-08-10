@@ -6,7 +6,13 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
-from scholartrace.figures import FigureRenderer, FigureRenderError
+from scholartrace.figures import (
+    FigureRenderer,
+    FigureRenderError,
+    build_caption,
+    recommend_figure_types,
+    validate_bundle_numeric_consistency,
+)
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.figure_repository import (
     FigureDecisionConflictError,
@@ -26,7 +32,7 @@ from scholartrace.persistence.models import (
     RunManifestRow,
 )
 from scholartrace.persistence.repository import ProjectRepository
-from scholartrace.schemas import FigurePoint, FigureSpec
+from scholartrace.schemas import FigurePoint, FigureSpec, MetricResult
 
 CREATED_AT = datetime(2026, 8, 11, tzinfo=UTC)
 
@@ -230,4 +236,62 @@ def test_renderer_requires_approval_and_rejects_unsupported_kind(tmp_path: Path)
     unsupported = approved.model_copy(update={"kind": "confusion_matrix"})
     with pytest.raises(FigureRenderError, match="not supported"):
         FigureRenderer().render(unsupported, tmp_path / "unsupported")
+    repository.close()
+
+
+def metric(*, value: float = 0.9, verified: bool = True) -> MetricResult:
+    return MetricResult(
+        metric_result_id="metric-m9",
+        project_id="lychee-m9",
+        run_id="run-m9",
+        name="accuracy",
+        split="validation",
+        value=value,
+        source="independent_recompute",
+        verification_status="verified" if verified else "unverifiable",
+        is_final=verified,
+        data_version="sha256:data-v1",
+        evaluation_script_sha256="e" * 64,
+        created_at=CREATED_AT,
+    )
+
+
+def test_figure_caption_suggestions_and_numeric_provenance_checks(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    setup_database(database_path)
+    repository = FigureRepository(database_path)
+    repository.save_spec(spec())
+    approved = repository.approve_spec(
+        "lychee-m9",
+        "figure-m9",
+        actor_id="researcher-001",
+        reason="numeric validation",
+    )
+    bundle_root = tmp_path / "artifacts"
+    bundle = FigureRenderer().render(approved, bundle_root)
+    verified = metric()
+    report = validate_bundle_numeric_consistency(
+        approved,
+        bundle,
+        bundle_root / "figure-m9",
+        [verified],
+    )
+    assert report.numeric_status == "passed"
+    assert report.provenance_status == "passed"
+    assert recommend_figure_types([verified])[0].kind == "bar"
+    assert recommend_figure_types([metric(verified=False)]) == []
+    assert "metric-m9" in build_caption(approved, [verified])
+    with pytest.raises(ValueError, match="verified final"):
+        build_caption(approved, [metric(verified=False)])
+    (bundle_root / "figure-m9" / "input-data.csv").write_text(
+        "label,value,metric_result_id\nproposed,0.8,metric-m9\n",
+        encoding="utf-8",
+    )
+    failed = validate_bundle_numeric_consistency(
+        approved,
+        bundle,
+        bundle_root / "figure-m9",
+        [verified],
+    )
+    assert failed.numeric_status == "failed"
     repository.close()
