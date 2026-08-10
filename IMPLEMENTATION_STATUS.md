@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M4 发布候选准备中
-- 当前里程碑：M4 — 项目文献筛选与可信证据
+- 项目状态：M4 已发布，M5 进行中
+- 当前里程碑：M5 — 管线与数据采集设计
 - 当前版本：`v0.4.0`
-- 当前分支：`feat/m4-evidence-rag`
+- 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -59,7 +59,14 @@
 - [x] M4.1 项目文献 `candidate/approved/rejected`、确定性相关度与人工审核门禁
 - [x] M4.2 Chunk/全文索引、BM25 + Vector 兼容检索与旧索引保留
 - [x] M4.3 EvidenceCard、来源片段校验与固定检索回归集
-- [ ] M4.4 独立审查、合并 `main` 与 `v0.4.0` 发布（发布候选）
+- [x] M4.4 独立审查、合并 `main` 与 `v0.4.0` 发布
+
+## M5 小任务
+
+- [ ] M5.1 PipelineSpec/DataCollectionProtocol 契约与迁移（当前）
+- [ ] M5.2 研究设计 Subgraph 与流程图
+- [ ] M5.3 数据质量/泄漏检查与方案比较
+- [ ] M5.4 Markdown/YAML 导出、独立审查、合并 `main` 与 `v0.5.0` 发布
 
 ## 当前验证
 
@@ -139,6 +146,7 @@
 | M4.3 EvidenceCard/回归目标测试 | 通过，5 passed；0007 迁移、approved 门禁、locator/片段校验、幂等和 10 条回归 |
 | M4.3 全量质量门禁 | 通过，`scripts/check.py`；98 passed；3 个合成 Fixture |
 | M4.4 发布候选全量门禁 | 通过，98 passed；v0.4.0 wheel、独立 venv、CLI、迁移 0007、actionlint 和许可证检查通过 |
+| M4 main 合并与发布 | 通过，merge `a193291`；main smoke/全量 98 passed；Tag object `11593b0`，peeled `a193291` |
 
 ## 当前限制
 
@@ -149,4 +157,4 @@
 
 ## 下一步
 
-下一步进入 M4.4：完成 M4 独立审查、发布候选、合并 `main` 并发布 `v0.4.0`；不把 MockTransport、合成 PDF、hashing vector、离线回归或 token overlap 结果宣传为真实文献事实。
+下一步进入 M5.1：冻结 PipelineSpec/DataCollectionProtocol 契约并设计兼容迁移；不把 M4 的离线回归或合成文献结果宣传为真实场景证据。

@@ -41,7 +41,12 @@ server 28.3.2; no diagnostics
 
 wheel 中的许可证文件和 `License-Expression=Apache-2.0` 已由独立环境检查；GitHub Actions API 当前若返回 rate limit，CI 状态保持“未验证”，不猜测通过。
 
-Tag 只在该候选提交推送、合并 `main`、main smoke test 和远端 Ref 核验后创建。当前文档记录的是候选，不是已经发布的 Tag。
+## 发布结果
+
+- 功能分支已非 squash 合并到 `main`，merge commit：`a193291799472460958406b0b0e0301dbff9adfa`；
+- `main` 已推送并核验为 `a193291`，main smoke/全量门禁 98 passed；
+- annotated Tag `v0.4.0` 已推送；Tag object：`11593b05591fc030965f852f13e2a5f20c08cb80`，peeled commit：`a193291`；
+- M4 已发布；M5 管线与数据采集设计已打开，M5–M12 仍未完成。
 
 ## 能力边界
 
