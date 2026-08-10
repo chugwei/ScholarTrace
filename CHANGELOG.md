@@ -15,10 +15,22 @@
 - M10.1 建立版本化 Manuscript、Section Contract、Claim Ledger、0018 迁移和项目级 evidence gate。
 - M10.2 增加离线 BibTeX 解析、引用缺失报告和来源绑定的确定性章节草稿模板。
 - M10.3 增加显式 Claim/MetricResult 标记、章节一致性、证据缺口和 Conclusion 新 Claim 门禁。
+- M10.4 完成独立发布候选审查，并发布 `v0.10.0`。
 
 ### Boundary
 
 - 图表输入仍必须来自 verified/final `MetricResult`；当前 Bundle 使用合成/脱敏农业视觉指标，不能当作真实科研结果。
+
+## [0.10.0] - 2026-08-11
+
+### Added
+
+- M10 论文契约：版本化 Manuscript、Section Contract、Claim Ledger、0018 迁移、离线 BibTeX、引用解析和章节一致性检查。
+- 确定性章节草稿模板保留 Claim/MetricResult/citation 来源标记，缺失证据和数字漂移会阻断验收。
+
+### Boundary
+
+- M10 的论文对象和草稿使用合成/脱敏数据完成离线验收；未证明真实文献支持、真实实验结论或可投稿论文。
 
 ## [0.9.0] - 2026-08-11
 

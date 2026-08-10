@@ -1,8 +1,8 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M10.4 发布候选待开始
+- 项目状态：M10.4 发布候选审查中
 - 当前里程碑：M10 — 论文撰写与引用校验
-- 当前版本：`v0.9.0`
+- 当前版本：`v0.10.0`
 - 当前分支：`feat/m10-manuscript`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
@@ -235,6 +235,7 @@
 | M10.2 全量质量门禁 | 通过，`scripts/check.py`；158 passed；3 个合成 Fixture |
 | M10.3 一致性目标测试 | 通过，4 passed；Claim/citation/MetricResult 显式标记、数字漂移和 Conclusion 新 Claim |
 | M10.3 全量质量门禁 | 通过，`scripts/check.py`；162 passed；3 个合成 Fixture |
+| M10.4 发布候选 | 通过；v0.10.0 wheel/sdist、独立 venv、0018 迁移、许可证、秘密/大文件扫描、Git archive、Docker actionlint 和 Python smoke |
 
 ## 当前限制
 
@@ -245,4 +246,4 @@
 
 ## 下一步
 
-下一步完成 M10.4 独立审查、发布候选和 `v0.10.0`；不把缺失证据补写成 Claim。
+下一步完成 M10.4 独立审查、合并 `main`、推送 annotated `v0.10.0` Tag；不把缺失证据补写成 Claim。

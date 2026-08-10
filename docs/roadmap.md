@@ -130,6 +130,4 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M10.1 | Manuscript、Section Contract、Claim Ledger 契约与 0018 迁移 | `docs/verification/m10-manuscript-contracts.md`；4 个目标测试、迁移回滚、项目隔离和 evidence gate | completed |
 | M10.2 | 章节生成、BibTeX 和引用解析 | `docs/verification/m10-citations.md`；5 个目标测试、158 个全量测试、缺失引用失败降级 | completed |
 | M10.3 | 章节一致性、证据缺口与数字回溯门禁 | `docs/verification/m10-consistency.md`；4 个目标测试、162 个全量测试、显式 Claim/MetricResult 标记 | completed |
-| M10.2 | 章节生成、BibTeX 和引用解析 | — | pending |
-| M10.3 | 章节一致性、证据缺口与数字回溯门禁 | — | pending |
-| M10.4 | 独立审查、合并 `main` 与 `v0.10.0` 发布 | — | pending |
+| M10.4 | 独立审查、合并 `main` 与 `v0.10.0` 发布 | 发布候选门禁待执行 | in progress |
