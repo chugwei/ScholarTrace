@@ -22,6 +22,7 @@ from scholartrace.schemas.design import (
     PipelineStage,
     PipelineVersionComparison,
 )
+from scholartrace.schemas.experiment import ExperimentMatrixEntry, ExperimentPlan
 from scholartrace.schemas.literature import (
     ChunkSearchResult,
     Document,
@@ -47,6 +48,8 @@ __all__ = [
     "DocumentChunk",
     "DocumentMetadata",
     "EvidenceCard",
+    "ExperimentMatrixEntry",
+    "ExperimentPlan",
     "InnovationCandidate",
     "InnovationCandidateRanking",
     "InnovationFinding",

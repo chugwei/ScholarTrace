@@ -360,3 +360,35 @@ class InnovationCandidateRow(Base):
     approved_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
     approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class ExperimentPlanRow(Base):
+    __tablename__ = "experiment_plans"
+    __table_args__ = (
+        UniqueConstraint("project_id", "version", name="uq_experiment_plan_version"),
+        UniqueConstraint("project_id", "content_sha256", name="uq_experiment_plan_content"),
+    )
+
+    plan_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    algorithm_id: Mapped[str] = mapped_column(
+        String(40), ForeignKey("algorithm_specs.algorithm_id"), nullable=False, index=True
+    )
+    candidate_id: Mapped[str | None] = mapped_column(
+        String(40), ForeignKey("innovation_candidates.candidate_id"), nullable=True, index=True
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    parent_plan_id: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    decision_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
