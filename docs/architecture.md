@@ -137,3 +137,35 @@ M4 在 M3 全局目录之上维护项目级 `ProjectDocument` 状态：新关联
 `EvidenceCardService.create_card()` 首先通过 `get_approved_chunk()` 检查项目关系，随后要求用户提供的 quote 精确出现在 Chunk 中，并将 Chunk 内相对位置转换为原文绝对偏移。它从 Document 的 DOI、HTTP(S) URL 或安全的相对本地路径中选择 locator；没有可解析来源时不写卡片。配置运行时文本根目录后，还会再次读取原文并校验绝对偏移，防止存储文件被替换。
 
 持久化的 EvidenceCard 固定为 `verified`，包含 statement、SourceSpan、locator、审核者和创建时间。它是有来源的证据记录，不是模型自动生成的科研结论；statement 仍需要研究者判断。`tests/fixtures/retrieval/m4-regression.json` 提供 10 条合成农业视觉查询，验证当前离线索引的 top-1 基线，真实文献召回仍需后续数据和人工标注。
+
+## M5.1 版本化研究设计契约
+
+`PipelineSpec` 把数据采集、训练、评估和交付阶段保存为有序 `PipelineStage` 列表；`DataCollectionProtocol` 描述目标群体、抽样、采集字段、标注策略、数据划分和泄漏控制。两者都使用 Pydantic `extra="forbid"`，在边界拒绝未知字段和重复 stage/field 名称，并由 Repository 计算 canonical content SHA-256。
+
+`DesignRepository` 将每个版本写入独立 SQLite 表。新设计从 `draft` 开始；批准写入 actor、理由和时间，并把旧的 approved 版本标记为 `superseded`。批准版本不能被隐式覆盖，修改必须使用递增版本号和当前批准父 ID；相同内容重放返回原记录。0008 迁移支持完整回退，JSON payload 保留 Schema 之外的可审计原始结构。
+
+本批次还没有研究设计 Subgraph、流程图、数据泄漏执行检查或 Markdown/YAML 导出。Repository 是领域持久化边界，不冒充 LangGraph Node；M5.2 才把这些契约接入可重放的 Subgraph 和人工发布流程。
+
+## M5.2 研究设计 Subgraph
+
+`open_research_design_graph()` 将 M5.1 契约接入一个 thread-bound LangGraph：
+
+```text
+START → intake → persist_drafts → request_approval(interrupt)
+                                      ↓ Command(resume)
+                              apply_decision → finish → END
+```
+
+`intake` 创建/确认项目，`persist_drafts` 通过 DesignRepository 保存两个 draft，`request_approval` 暂停并返回目标 ID/允许动作，`apply_decision` 将批准或拒绝写入既有 DecisionRecord 的 `design` target，并只在批准分支将两个版本转为 approved。取消/暂停不会把 draft 宣称为正式方案。Graph State 只保存 design ID、draft 引用和当前审批信息，不保存大型数据或图表。
+
+`pipeline_to_mermaid()` 按 PipelineStage 顺序生成稳定的 `stage_0 → stage_1` 流程图，标签同时包含名称和稳定 stage ID，便于文档审查。它是设计可视化，不是执行引擎；M5.3 才会在流程上运行数据质量和泄漏检查。
+
+## M5.3 设计质量与版本比较
+
+`validate_design_pair()` 在批准前运行两个确定性检查：PipelineSpec 的相邻阶段必须有输入/输出连接；DataCollectionProtocol 的 split strategy 和 leakage controls 必须显式提到 group、session、source、subject、duplicate 或 leak 等边界。检查结果由 `DesignValidationReport` 保存 code、severity、message 和 path，任何 error 都阻断 `approve_design_pair()`，事务不会把草案改成 approved。
+
+`compare_pipeline_versions()` 不比较时间戳、审核者或版本 ID，而是报告 canonical 设计字段、新增/删除 stage ID，供人工比较方案变化。它不宣称数据已经满足质量要求，也不替代真实采样后的 CSV/图像检查；M5.4 才导出可读报告。
+
+## M5.4 方案导出
+
+`export_design_bundle()` 只接受两个 `approved` 且属于同一项目的设计，生成带版本、状态、父记录和 content SHA-256 的 Markdown 与 YAML 文件；draft、rejected 或项目不匹配会在写文件前失败。临时文件替换避免半写入，重复导出在同一输入下字节一致。导出是正式方案的可读快照，不代表采集已经执行。

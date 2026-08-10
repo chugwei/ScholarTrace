@@ -7,6 +7,7 @@ from langchain_core.messages import AnyMessage
 from langgraph.graph.message import add_messages
 
 from scholartrace.identifiers import validate_identifier
+from scholartrace.schemas.design import DataCollectionProtocol, PipelineSpec
 from scholartrace.schemas.research import ResearchQuestion
 
 
@@ -46,6 +47,9 @@ class ResearchProjectState(TypedDict):
 
     active_pipeline_id: str | None
     active_data_protocol_id: str | None
+    draft_pipeline_spec: PipelineSpec | None
+    draft_data_protocol: DataCollectionProtocol | None
+    pending_design_approval: dict[str, Any] | None
     active_algorithm_id: str | None
     active_experiment_plan_id: str | None
     active_run_ids: Annotated[list[str], merge_unique_strings]
@@ -84,6 +88,9 @@ def new_research_project_state(
         claim_ids=[],
         active_pipeline_id=None,
         active_data_protocol_id=None,
+        draft_pipeline_spec=None,
+        draft_data_protocol=None,
+        pending_design_approval=None,
         active_algorithm_id=None,
         active_experiment_plan_id=None,
         active_run_ids=[],

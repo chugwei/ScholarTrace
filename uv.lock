@@ -848,7 +848,7 @@ wheels = [
 
 [[package]]
 name = "scholartrace"
-version = "0.4.0"
+version = "0.5.0"
 source = { editable = "." }
 dependencies = [
     { name = "alembic" },
@@ -858,6 +858,7 @@ dependencies = [
     { name = "langgraph-checkpoint-sqlite" },
     { name = "pydantic" },
     { name = "pypdf" },
+    { name = "pyyaml" },
     { name = "sqlalchemy" },
     { name = "typer" },
 ]
@@ -877,6 +878,7 @@ requires-dist = [
     { name = "langgraph-checkpoint-sqlite", specifier = ">=3.1,<4" },
     { name = "pydantic", specifier = ">=2.11,<3" },
     { name = "pypdf", specifier = ">=5,<7" },
+    { name = "pyyaml", specifier = ">=6,<7" },
     { name = "sqlalchemy", specifier = ">=2.0,<3" },
     { name = "typer", specifier = ">=0.27,<1" },
 ]

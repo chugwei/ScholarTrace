@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M4 已发布，M5 进行中
+- 项目状态：M5 发布候选准备中
 - 当前里程碑：M5 — 管线与数据采集设计
-- 当前版本：`v0.4.0`
-- 当前分支：`main`
+- 当前版本：`v0.5.0`
+- 当前分支：`feat/m5-pipeline-data-design`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -63,10 +63,11 @@
 
 ## M5 小任务
 
-- [ ] M5.1 PipelineSpec/DataCollectionProtocol 契约与迁移（当前）
-- [ ] M5.2 研究设计 Subgraph 与流程图
-- [ ] M5.3 数据质量/泄漏检查与方案比较
-- [ ] M5.4 Markdown/YAML 导出、独立审查、合并 `main` 与 `v0.5.0` 发布
+- [x] M5.1 PipelineSpec/DataCollectionProtocol 契约与迁移
+- [x] M5.2 研究设计 Subgraph 与流程图
+- [x] M5.3 数据质量/泄漏检查与方案比较
+- [x] M5.4 Markdown/YAML 导出
+- [ ] M5.4 独立审查、合并 `main` 与 `v0.5.0` 发布（发布候选）
 
 ## 当前验证
 
@@ -147,14 +148,23 @@
 | M4.3 全量质量门禁 | 通过，`scripts/check.py`；98 passed；3 个合成 Fixture |
 | M4.4 发布候选全量门禁 | 通过，98 passed；v0.4.0 wheel、独立 venv、CLI、迁移 0007、actionlint 和许可证检查通过 |
 | M4 main 合并与发布 | 通过，merge `a193291`；main smoke/全量 98 passed；Tag object `11593b0`，peeled `a193291` |
+| M5.1 设计 Repository 目标测试 | 通过，4 passed；0008 迁移、版本幂等、批准/拒绝、父版本和项目隔离 |
+| M5.1 全量质量门禁 | 通过，`scripts/check.py`；102 passed；3 个合成 Fixture |
+| M5.2 Subgraph/流程图目标测试 | 通过，3 passed；interrupt/resume、批准/拒绝审计、未批准降级和 Mermaid 输出 |
+| M5.2 全量质量门禁 | 通过，`scripts/check.py`；105 passed；3 个合成 Fixture |
+| M5.3 质量/版本比较目标测试 | 通过，4 passed；管线连通性、泄漏控制、版本差异和批准阻断 |
+| M5.3 全量质量门禁 | 通过，`scripts/check.py`；109 passed；3 个合成 Fixture |
+| M5.4 导出目标测试 | 通过，2 passed；draft 阻断、approved Markdown/YAML 确定性输出和版本/SHA-256 保留 |
+| M5.4 全量质量门禁 | 通过，`scripts/check.py`；111 passed；3 个合成 Fixture |
+| M5 发布候选独立验收 | 通过，v0.5.0 wheel/sdist、独立 venv、PyYAML、CLI、迁移 0008、actionlint 和许可证检查通过 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
-- M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4.1–M4.3 已实现项目审核、Chunk、可替换混合检索、EvidenceCard 和离线回归，但 M4.4 发布审查仍未完成。
+- M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5.1–M5.4 已实现版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出；M5 发布候选仍需独立环境验收。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M5.1：冻结 PipelineSpec/DataCollectionProtocol 契约并设计兼容迁移；不把 M4 的离线回归或合成文献结果宣传为真实场景证据。
+下一步完成 M5 发布候选：独立 wheel、迁移 0008、导出样例和 main 合并/Tag；不把合成方案或离线测试结果宣传为真实采集方案或现场证据。
