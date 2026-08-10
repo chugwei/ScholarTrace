@@ -147,9 +147,26 @@ class SectionDraft(BaseModel):
     markdown: NonBlankText
     claim_ids: list[NonBlankText] = Field(default_factory=list)
     citation_keys: list[NonBlankText] = Field(default_factory=list)
+    metric_result_ids: list[NonBlankText] = Field(default_factory=list)
     content_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     generated_by: NonBlankText
     created_at: datetime = Field(default_factory=_utc_now)
+
+
+class ManuscriptConsistencyReport(BaseModel):
+    """Cross-section checks for claims, citations, and MetricResult markers."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["passed", "failed"]
+    citation_report: CitationValidationReport
+    checked_sections: list[NonBlankText] = Field(default_factory=list)
+    missing_evidence: list[NonBlankText] = Field(default_factory=list)
+    unsupported_claim_ids: list[NonBlankText] = Field(default_factory=list)
+    missing_claim_ids: list[NonBlankText] = Field(default_factory=list)
+    unbound_metric_markers: list[NonBlankText] = Field(default_factory=list)
+    numeric_mismatches: list[NonBlankText] = Field(default_factory=list)
+    conclusion_new_claim_ids: list[NonBlankText] = Field(default_factory=list)
 
 
 class Claim(BaseModel):

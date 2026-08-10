@@ -62,6 +62,7 @@ from scholartrace.schemas.manuscript import (
     CitationValidationReport,
     Claim,
     Manuscript,
+    ManuscriptConsistencyReport,
     SectionContract,
     SectionDraft,
 )
@@ -118,6 +119,7 @@ __all__ = [
     "InnovationFinding",
     "InnovationValidationReport",
     "Manuscript",
+    "ManuscriptConsistencyReport",
     "MethodDifference",
     "MetricAggregate",
     "MetricResult",

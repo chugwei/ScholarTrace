@@ -14,6 +14,7 @@
 - M9.4 完成 PNG/SVG/PDF 实际视觉验收、独立发布候选检查，并发布 `v0.9.0`。
 - M10.1 建立版本化 Manuscript、Section Contract、Claim Ledger、0018 迁移和项目级 evidence gate。
 - M10.2 增加离线 BibTeX 解析、引用缺失报告和来源绑定的确定性章节草稿模板。
+- M10.3 增加显式 Claim/MetricResult 标记、章节一致性、证据缺口和 Conclusion 新 Claim 门禁。
 
 ### Boundary
 

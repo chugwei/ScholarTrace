@@ -42,3 +42,9 @@ M10.2 将在不改变这些边界的前提下实现 BibTeX、引用解析和章�
 这里的核心取舍是把“解析是否成功”和“文献是否真实”分开：解析器能证明语法和引用闭环，但不能证明 DOI 属于某位作者或原文支持某个结论。后续可接入 Crossref/OpenAlex 或 CSL Provider，但 Provider 失败时必须保留离线失败报告。
 
 最小运行示例是用 `parse_bibtex()` 读取一个 `@article`，用 `validate_bibtex_citations("[@paper]", bibtex)` 检查 key，再将有 `supported` 状态和 evidence ID 的 Claim 交给 `generate_section_draft()`。测试覆盖缺字段、缺 key、缺 Claim 和不支持的自动补写路径。
+
+## M10.3：章节一致性、证据缺口与数字回溯
+
+普通段落中的 `0.9` 无法可靠判断它是 accuracy、年份还是样本比例，因此 M10.3 采用显式 `{{metric:...}}` 标记。检查器先把每个标记解析为 metric ID/value，再与 verified/final `MetricResult` 比较；同一 ID 在 Abstract、Results、Conclusion 中出现时还要保持数值一致。`{{claim:...}}` 标记则把章节位置回连到 Claim Ledger，并阻断 Conclusion 新 Claim。
+
+这批次体现了 State/Node/Tool 的边界：章节状态可以由 State 保存，Node 可以整理缺口，确定性 Tool 执行标记解析和数值比较，Reducer 不得修改 metric value；人工修订完成后仍需重新运行检查。`ManuscriptConsistencyReport` 把缺失证据列出来，而不是让生成器补写。

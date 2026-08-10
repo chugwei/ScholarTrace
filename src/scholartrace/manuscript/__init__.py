@@ -8,6 +8,7 @@ from scholartrace.manuscript.citations import (
     validate_bibtex_citations,
     validate_citations,
 )
+from scholartrace.manuscript.consistency import validate_manuscript_consistency
 from scholartrace.manuscript.generation import SectionGenerationError, generate_section_draft
 
 __all__ = [
@@ -19,4 +20,5 @@ __all__ = [
     "render_bibtex",
     "validate_bibtex_citations",
     "validate_citations",
+    "validate_manuscript_consistency",
 ]

@@ -5,7 +5,7 @@ from __future__ import annotations
 import hashlib
 from collections.abc import Iterable
 
-from scholartrace.schemas import BibTeXEntry, Claim, SectionContract, SectionDraft
+from scholartrace.schemas import BibTeXEntry, Claim, MetricResult, SectionContract, SectionDraft
 
 
 class SectionGenerationError(ValueError):
@@ -17,6 +17,7 @@ def generate_section_draft(
     claims: Iterable[Claim],
     *,
     bibliography: Iterable[BibTeXEntry] = (),
+    metric_results: Iterable[MetricResult] = (),
 ) -> SectionDraft:
     """Build a source-labelled Markdown draft without inventing facts or numbers."""
 
@@ -38,6 +39,26 @@ def generate_section_draft(
         raise SectionGenerationError(
             "section contract is missing citations: " + ", ".join(missing_citations)
         )
+    metric_map = {metric.metric_result_id: metric for metric in metric_results}
+    missing_metrics = [
+        metric_id
+        for metric_id in contract.required_metric_result_ids
+        if metric_id not in metric_map
+    ]
+    if missing_metrics:
+        raise SectionGenerationError(
+            "section contract is missing metrics: " + ", ".join(missing_metrics)
+        )
+    unverified_metrics = [
+        metric_id
+        for metric_id in contract.required_metric_result_ids
+        if metric_map[metric_id].verification_status != "verified"
+        or not metric_map[metric_id].is_final
+    ]
+    if unverified_metrics:
+        raise SectionGenerationError(
+            "section drafts require verified final metrics: " + ", ".join(unverified_metrics)
+        )
     lines = [
         f"## {contract.section.replace('_', ' ').title()}",
         "",
@@ -48,7 +69,9 @@ def generate_section_draft(
     for claim_id in contract.required_claim_ids:
         claim = claim_map[claim_id]
         status_note = " (insufficient evidence)" if claim.status == "insufficient" else ""
-        lines.append(f"- `{claim.claim_id}` [{claim.status}{status_note}]: {claim.text}")
+        lines.append(
+            f"- {{\u007bclaim:{claim.claim_id}\u007d}} [{claim.status}{status_note}]: {claim.text}"
+        )
     if not contract.required_claim_ids:
         lines.append("- No Claim is approved for this section yet.")
     if contract.required_citation_keys:
@@ -57,6 +80,17 @@ def generate_section_draft(
                 "",
                 "### Sources",
                 *[f"- [@{key}]" for key in contract.required_citation_keys],
+            ]
+        )
+    if contract.required_metric_result_ids:
+        lines.extend(
+            [
+                "",
+                "### Verified metrics",
+                *[
+                    f"- {{\u007bmetric:{metric_id} value={metric_map[metric_id].value:.17g}\u007d}}"
+                    for metric_id in contract.required_metric_result_ids
+                ],
             ]
         )
     lines.extend(
@@ -73,6 +107,7 @@ def generate_section_draft(
         markdown=markdown,
         claim_ids=list(contract.required_claim_ids),
         citation_keys=list(contract.required_citation_keys),
+        metric_result_ids=list(contract.required_metric_result_ids),
         content_sha256=digest,
         generated_by="deterministic-template-v1",
     )
