@@ -165,3 +165,7 @@ START → intake → persist_drafts → request_approval(interrupt)
 `validate_design_pair()` 在批准前运行两个确定性检查：PipelineSpec 的相邻阶段必须有输入/输出连接；DataCollectionProtocol 的 split strategy 和 leakage controls 必须显式提到 group、session、source、subject、duplicate 或 leak 等边界。检查结果由 `DesignValidationReport` 保存 code、severity、message 和 path，任何 error 都阻断 `approve_design_pair()`，事务不会把草案改成 approved。
 
 `compare_pipeline_versions()` 不比较时间戳、审核者或版本 ID，而是报告 canonical 设计字段、新增/删除 stage ID，供人工比较方案变化。它不宣称数据已经满足质量要求，也不替代真实采样后的 CSV/图像检查；M5.4 才导出可读报告。
+
+## M5.4 方案导出
+
+`export_design_bundle()` 只接受两个 `approved` 且属于同一项目的设计，生成带版本、状态、父记录和 content SHA-256 的 Markdown 与 YAML 文件；draft、rejected 或项目不匹配会在写文件前失败。临时文件替换避免半写入，重复导出在同一输入下字节一致。导出是正式方案的可读快照，不代表采集已经执行。

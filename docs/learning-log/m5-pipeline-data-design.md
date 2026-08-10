@@ -51,3 +51,9 @@ M4 提供 approved 文献和 EvidenceCard 来源链；M5.1 把它们作为研究
 版本比较忽略审核时间等元数据，只报告真正改变的字段以及新增/删除的 stage ID。例如在荔枝方案中增加 `report` 阶段会得到 `changed_fields=["stages"]` 和 `added_stage_ids=["report"]`。报告描述结构差异，不证明数据已经通过质量检查；真实采集后仍需要样本级验证。
 
 批准流程先生成完整 `DesignValidationReport`，有 error 就抛出 `DesignValidationError`，事务保持两个草案状态且不写批准审计。通过后由 `approve_design_pair()` 在一个事务中批准两个契约，避免管线已批准而采集协议仍是草案。
+
+## M5.4 导出与发布边界
+
+导出器把“已批准的结构化方案”和“仅供编辑的草案”明确分开：`export_design_bundle()` 在写文件前检查两个 status 都是 `approved`，并在 Markdown/YAML 中保留版本、父 ID、审核者和 canonical SHA-256。这样导出的 YAML 可以被下游工具重读，Markdown 可供研究者审查；两者都不伪称采集或实验已经发生。
+
+同一输入重复导出字节一致，临时文件替换避免部分结果。M5 的学习链路从 M4 approved EvidenceCard 开始，经 M5.1 Schema、M5.2 Subgraph、M5.3 质量/泄漏门禁到 M5.4 正式方案快照；M6 才消费批准方案生成算法与创新候选。
