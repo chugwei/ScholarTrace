@@ -15,7 +15,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M6 算法与创新候选 | v0.6.0 | completed | main | [v0.6.0](https://github.com/chugwei/ScholarTrace/tree/v0.6.0) | merge `0161739`、main 门禁、Tag 已核验 |
 | M7 实验注册与导入 | v0.7.0 | completed | main | [v0.7.0](https://github.com/chugwei/ScholarTrace/tree/v0.7.0) | merge `1cd9280`、main 门禁、Tag 已核验 |
 | M8 Runner 与排错 | v0.8.0 | completed | main | [v0.8.0](https://github.com/chugwei/ScholarTrace/tree/v0.8.0) | merge `99f72e1`、main 门禁、Tag 已核验 |
-| M9 图表系统 | v0.9.0 | in progress | feat/m9-figures | — | M9.1–M9.3 已验证，视觉验收与发布审查待实现 |
+| M9 图表系统 | v0.9.0 | in progress | feat/m9-figures | — | M9.1–M9.4 候选门禁通过，等待 main 合并和 Tag |
 | M10 论文与引用 | v0.10.0 | pending | feat/m10-manuscript | — | — |
 | M11 Web 工作台 | v0.11.0 | pending | feat/m11-web-workbench | — | — |
 | M12 交付与部署 | v1.0.0 | pending | feat/m12-deployment | — | — |
@@ -121,4 +121,13 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M9.1 | FigureSpec、输入数据契约、Artifact 元数据和 0017 迁移 | 3 个目标测试、verified MetricResult/data_version 门禁 | completed |
 | M9.2 | 确定性绘图脚本与 PNG/SVG/PDF 输出 | 5 个目标测试、148 个全量测试、删除后脚本重建 | completed |
 | M9.3 | Caption、图表建议、数据/脚本溯源和数值一致性 | 6 个目标测试、149 个全量测试 | completed |
-| M9.4 | 视觉验收、独立审查和 `v0.9.0` 发布 | — | pending |
+| M9.4 | 视觉验收、独立审查和 `v0.9.0` 发布 | 候选视觉验收、149 个全量测试、独立 wheel/venv、迁移 0017 和 actionlint 已通过；main/Tag 待完成 | in progress |
+
+## M10 验收批次
+
+| ID | 批次 | 主要证据 | 状态 |
+|---|---|---|---|
+| M10.1 | Manuscript、Section Contract、Claim Ledger 契约与迁移 | — | pending |
+| M10.2 | 章节生成、BibTeX 和引用解析 | — | pending |
+| M10.3 | 章节一致性、证据缺口与数字回溯门禁 | — | pending |
+| M10.4 | 独立审查、合并 `main` 与 `v0.10.0` 发布 | — | pending |

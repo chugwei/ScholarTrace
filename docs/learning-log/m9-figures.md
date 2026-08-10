@@ -41,3 +41,9 @@ M9.1 的 SQLite 0017 只保存 FigureSpec 设计和状态。真正的文件 Arti
 `recommend_figure_types()` 只接收 verified/final MetricResult；没有验证结果时返回空建议，避免把训练日志或猜测变成图。`build_caption()` 明确列出 MetricResult IDs 和 data_version，不引入因果或性能结论。`validate_bundle_numeric_consistency()` 同时读取 CSV、FigureSpec、MetricResult 和 provenance.json，检查每个 label/value、data/script SHA-256 和 metric IDs；任何篡改都会形成 failed 报告。
 
 M9.3 仍不等于视觉验收：数值报告通过只能说明数据链一致，不能证明坐标、字体、图例和布局适合论文。M9.4 将实际打开生成图并记录视觉证据。
+
+## M9.4：视觉验收与发布
+
+视觉验收把“文件存在”和“图形可读”分开。PNG 和 SVG 直接打开检查画布边界、标题、坐标轴、图例和数据标签；PDF 先用 Poppler 转为 PNG，再检查渲染结果，避免仅凭文件头或页数判断质量。此次输入是合成/脱敏农业视觉指标，因此验收证明的是 Bundle 的离线可重建性与视觉可读性，不是真实研究结果。
+
+发布前还要从 sdist/wheel 安装到独立环境，运行迁移、CLI、全量质量门禁和内部文件排除检查。M9 的发布只表示图表系统达到当前离线契约；论文、Web、部署和真实场景证据仍留在后续里程碑。

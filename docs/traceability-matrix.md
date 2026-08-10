@@ -63,4 +63,4 @@
 | M9.1 FigureSpec 与 MetricResult/data_version 门禁 | `src/scholartrace/schemas/figures.py`, `src/scholartrace/persistence/figure_repository.py`, `src/scholartrace/persistence/migrations/versions/0017_add_figure_specs.py` | `tests/integration/test_m9_figure_repository.py`, `docs/verification/m9-figure-specs.md` | v0.9.0 | implemented-tested |
 | M9.2 绘图脚本与 PNG/SVG/PDF | `src/scholartrace/figures/render.py`, `pyproject.toml` | `tests/integration/test_m9_figure_repository.py`, `docs/verification/m9-rendering.md` | v0.9.0 | implemented-tested |
 | M9.3 Caption、溯源与数值一致性 | `src/scholartrace/figures/validation.py`, `src/scholartrace/schemas/figures.py` | `tests/integration/test_m9_figure_repository.py`, `docs/verification/m9-validation.md` | v0.9.0 | implemented-tested |
-| M9.4 视觉验收与 M9 发布 | — | — | v0.9.0 | planned |
+| M9.4 视觉验收与 M9 发布 | `README.md`, `CHANGELOG.md`, `docs/verification/m9-visual-acceptance.md`, `docs/verification/m9-release-candidate.md` | `tests/integration/test_m9_figure_repository.py`, `scripts/check.py`, 独立 wheel/venv、Poppler PDF 渲染和人工视觉检查 | v0.9.0 | release-pending |
