@@ -61,6 +61,6 @@
 | M8.4.2 M8 发布候选 | `pyproject.toml`, `uv.lock`, `README.md`, `CHANGELOG.md` | `docs/verification/m8-release-candidate.md`, 独立 wheel/venv/迁移/秘密扫描 | v0.8.0 | implemented-tested |
 | M8.4.3 v0.8.0 发布 | `main`, `v0.8.0` | `docs/verification/m8-release.md`, merge `99f72e1`, main 143 passed, peeled Tag | v0.8.0 | implemented-tested |
 | M9.1 FigureSpec 与 MetricResult/data_version 门禁 | `src/scholartrace/schemas/figures.py`, `src/scholartrace/persistence/figure_repository.py`, `src/scholartrace/persistence/migrations/versions/0017_add_figure_specs.py` | `tests/integration/test_m9_figure_repository.py`, `docs/verification/m9-figure-specs.md` | v0.9.0 | implemented-tested |
-| M9.2 绘图脚本与 PNG/SVG/PDF | — | — | v0.9.0 | planned |
+| M9.2 绘图脚本与 PNG/SVG/PDF | `src/scholartrace/figures/render.py`, `pyproject.toml` | `tests/integration/test_m9_figure_repository.py`, `docs/verification/m9-rendering.md` | v0.9.0 | implemented-tested |
 | M9.3 Caption、溯源与数值一致性 | — | — | v0.9.0 | planned |
 | M9.4 视觉验收与 M9 发布 | — | — | v0.9.0 | planned |

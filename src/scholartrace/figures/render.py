@@ -1,0 +1,256 @@
+"""Deterministic Artifact Bundle generation for approved FigureSpecs."""
+
+from __future__ import annotations
+
+import csv
+import hashlib
+import json
+import os
+import shutil
+import subprocess
+import sys
+from pathlib import Path
+
+import yaml
+
+from scholartrace.schemas import FigureArtifactBundle, FigureSpec
+
+
+class FigureRenderError(RuntimeError):
+    """Raised when a FigureSpec cannot be rendered safely."""
+
+
+class FigureRenderer:
+    """Render an approved FigureSpec into an atomic, self-contained bundle."""
+
+    def render(self, spec: FigureSpec, output_root: Path) -> FigureArtifactBundle:
+        if spec.status != "approved":
+            raise FigureRenderError("only approved FigureSpecs can publish an Artifact Bundle")
+        output_root = output_root.expanduser().resolve()
+        output_root.mkdir(parents=True, exist_ok=True)
+        destination = output_root / spec.figure_id
+        if destination.exists():
+            raise FigureRenderError(
+                "figure Artifact Bundle already exists; remove it before rebuilding"
+            )
+        temporary = output_root / f".{spec.figure_id}.rendering"
+        if temporary.exists():
+            raise FigureRenderError("stale figure rendering directory exists")
+        temporary.mkdir(parents=True)
+        try:
+            self._write_bundle(spec, temporary)
+            os.replace(temporary, destination)
+        except Exception:
+            if temporary.exists():
+                shutil.rmtree(temporary, ignore_errors=True)
+            raise
+        return _bundle_model(spec, destination, output_root)
+
+    def _write_bundle(self, spec: FigureSpec, bundle: Path) -> None:
+        data_path = bundle / spec.data_relpath
+        script_path = bundle / spec.script_relpath
+        data_path.parent.mkdir(parents=True, exist_ok=True)
+        script_path.parent.mkdir(parents=True, exist_ok=True)
+        _write_data_csv(spec, data_path)
+        script_path.write_text(_script_text(spec), encoding="utf-8", newline="")
+        script_sha256 = _sha256(script_path)
+        _write_spec_yaml(spec, bundle / "figure-spec.yaml")
+        _render_with_matplotlib(spec, bundle)
+        (bundle / "caption.md").write_text(f"{spec.caption}\n", encoding="utf-8", newline="")
+        data_sha256 = _sha256(data_path)
+        provenance = {
+            "figure_id": spec.figure_id,
+            "project_id": spec.project_id,
+            "data_version": spec.data_version,
+            "data_sha256": data_sha256,
+            "script_sha256": script_sha256,
+            "metric_result_ids": spec.metric_result_ids,
+            "created_at": spec.created_at.isoformat(),
+            "output_formats": spec.output_formats,
+        }
+        (bundle / "provenance.json").write_text(
+            json.dumps(provenance, ensure_ascii=False, sort_keys=True, indent=2) + "\n",
+            encoding="utf-8",
+            newline="",
+        )
+
+    def rebuild_from_script(self, bundle: Path) -> None:
+        """Run the committed bundle script without changing its input data."""
+
+        bundle = bundle.expanduser().resolve()
+        script = bundle / "generate_figure.py"
+        if not script.is_file():
+            raise FigureRenderError("figure generation script is missing")
+        completed = subprocess.run(
+            [sys.executable, script.name],
+            cwd=bundle,
+            capture_output=True,
+            text=True,
+            encoding="utf-8",
+            errors="replace",
+            shell=False,
+            check=False,
+        )
+        if completed.returncode != 0:
+            raise FigureRenderError(
+                "figure script failed with exit code "
+                f"{completed.returncode}: {completed.stderr[-2000:]}"
+            )
+
+
+def _write_data_csv(spec: FigureSpec, path: Path) -> None:
+    with path.open("w", encoding="utf-8", newline="") as handle:
+        writer = csv.writer(handle, lineterminator="\n")
+        writer.writerow(["label", "value", "metric_result_id"])
+        for point in spec.points:
+            writer.writerow(
+                [point.label, format(point.value, ".17g"), point.metric_result_id or ""]
+            )
+
+
+def _write_spec_yaml(spec: FigureSpec, path: Path) -> None:
+    payload = spec.model_dump(mode="json")
+    path.write_text(
+        yaml.safe_dump(payload, allow_unicode=True, sort_keys=True),
+        encoding="utf-8",
+        newline="",
+    )
+
+
+def _script_text(spec: FigureSpec) -> str:
+    settings = {
+        "title": spec.title,
+        "kind": spec.kind,
+        "x_label": spec.x_label,
+        "y_label": spec.y_label,
+        "width_inches": spec.width_inches,
+        "height_inches": spec.height_inches,
+        "dpi": spec.dpi,
+        "output_formats": spec.output_formats,
+    }
+    settings_json = json.dumps(settings, ensure_ascii=False, sort_keys=True, indent=2)
+    return f'''"""Generated by ScholarTrace from an approved FigureSpec."""
+
+import csv
+import json
+from pathlib import Path
+
+import matplotlib
+
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+SETTINGS = {settings_json}
+BUNDLE = Path(__file__).resolve().parent
+
+
+def load_points():
+    with (BUNDLE / "{spec.data_relpath}").open(encoding="utf-8", newline="") as handle:
+        return list(csv.DictReader(handle))
+
+
+def render():
+    points = load_points()
+    labels = [row["label"] for row in points]
+    values = [float(row["value"]) for row in points]
+    figure, axis = plt.subplots(
+        figsize=(SETTINGS["width_inches"], SETTINGS["height_inches"]),
+        dpi=SETTINGS["dpi"],
+    )
+    kind = SETTINGS["kind"]
+    if kind == "bar":
+        axis.bar(labels, values, color="#2f6f95")
+    elif kind == "line":
+        axis.plot(labels, values, marker="o", color="#2f6f95")
+    elif kind == "scatter":
+        axis.scatter(range(len(values)), values, color="#2f6f95")
+        axis.set_xticks(range(len(labels)), labels)
+    elif kind == "histogram":
+        axis.hist(values, bins=max(1, min(10, len(values))), color="#2f6f95")
+    elif kind == "table":
+        axis.axis("off")
+        axis.table(cellText=[[label, value] for label, value in zip(labels, values)],
+                   colLabels=[SETTINGS["x_label"], SETTINGS["y_label"]], loc="center")
+    else:
+        raise ValueError(f"unsupported figure kind: {{kind}}")
+    axis.set_title(SETTINGS["title"])
+    axis.set_xlabel(SETTINGS["x_label"])
+    axis.set_ylabel(SETTINGS["y_label"])
+    figure.tight_layout()
+    for extension in SETTINGS["output_formats"]:
+        figure.savefig(BUNDLE / f"figure.{{extension}}", metadata={{"Creator": "ScholarTrace"}})
+    plt.close(figure)
+
+
+if __name__ == "__main__":
+    render()
+'''
+
+
+def _render_with_matplotlib(spec: FigureSpec, bundle: Path) -> None:
+    import matplotlib
+
+    matplotlib.use("Agg")
+    import matplotlib.pyplot as plt
+
+    points = spec.points
+    labels = [point.label for point in points]
+    values = [point.value for point in points]
+    figure, axis = plt.subplots(figsize=(spec.width_inches, spec.height_inches), dpi=spec.dpi)
+    if spec.kind == "bar":
+        axis.bar(labels, values, color="#2f6f95")
+    elif spec.kind == "line":
+        axis.plot(labels, values, marker="o", color="#2f6f95")
+    elif spec.kind == "scatter":
+        axis.scatter(range(len(values)), values, color="#2f6f95")
+        axis.set_xticks(range(len(labels)), labels)
+    elif spec.kind == "histogram":
+        axis.hist(values, bins=max(1, min(10, len(values))), color="#2f6f95")
+    elif spec.kind == "table":
+        axis.axis("off")
+        axis.table(
+            cellText=[[label, value] for label, value in zip(labels, values, strict=True)],
+            colLabels=[spec.x_label, spec.y_label],
+            loc="center",
+        )
+    else:
+        plt.close(figure)
+        raise FigureRenderError(f"figure kind {spec.kind!r} is not supported by this renderer")
+    axis.set_title(spec.title)
+    axis.set_xlabel(spec.x_label)
+    axis.set_ylabel(spec.y_label)
+    figure.tight_layout()
+    for extension in spec.output_formats:
+        figure.savefig(bundle / f"figure.{extension}", metadata={"Creator": "ScholarTrace"})
+    plt.close(figure)
+
+
+def _bundle_model(spec: FigureSpec, destination: Path, output_root: Path) -> FigureArtifactBundle:
+    data_path = destination / spec.data_relpath
+    script_path = destination / spec.script_relpath
+    return FigureArtifactBundle(
+        figure_id=spec.figure_id,
+        project_id=spec.project_id,
+        bundle_relpath=destination.relative_to(output_root).as_posix(),
+        data_relpath=destination.joinpath(spec.data_relpath).relative_to(output_root).as_posix(),
+        script_relpath=destination.joinpath(spec.script_relpath)
+        .relative_to(output_root)
+        .as_posix(),
+        caption_relpath=f"{spec.figure_id}/caption.md",
+        provenance_relpath=f"{spec.figure_id}/provenance.json",
+        output_relpaths={
+            extension: f"{spec.figure_id}/figure.{extension}" for extension in spec.output_formats
+        },
+        data_sha256=_sha256(data_path),
+        script_sha256=_sha256(script_path),
+        metric_result_ids=spec.metric_result_ids,
+        created_at=spec.created_at,
+    )
+
+
+def _sha256(path: Path) -> str:
+    digest = hashlib.sha256()
+    with path.open("rb") as handle:
+        for chunk in iter(lambda: handle.read(65_536), b""):
+            digest.update(chunk)
+    return digest.hexdigest()

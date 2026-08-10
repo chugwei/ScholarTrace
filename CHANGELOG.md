@@ -9,10 +9,11 @@
 ### Added
 
 - M9.1 版本化 `FigureSpec`、输入点契约、Artifact Bundle 元数据，以及只允许 verified/final `MetricResult` 的图表数据门禁。
+- M9.2 批准 FigureSpec 的 CSV、可重建 `generate_figure.py`、PNG/SVG/PDF、Caption 和 provenance Bundle。
 
 ### Boundary
 
-- M9.1 尚未生成 PNG/SVG/PDF 或完成视觉验收；图表数字必须继续回到 MetricResult，不能从论文文字猜测。
+- M9.2 尚未完成图表数值一致性和人工视觉验收；图表数字必须继续回到 MetricResult，不能从论文文字猜测。
 
 ## [0.8.0] - 2026-08-11
 

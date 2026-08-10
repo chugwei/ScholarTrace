@@ -29,3 +29,9 @@ M9.1 的 SQLite 0017 只保存 FigureSpec 设计和状态。真正的文件 Arti
 - **Tool** 是 CSV 校验、哈希、绘图和数值比较；图表结果不能反向制造 MetricResult。
 
 当前示例仍是合成/脱敏农业视觉指标，不是实际论文图或真实场景结果。
+
+## M9.2：Artifact Bundle 与脚本重建
+
+`FigureRenderer` 先把输入点写为确定性 CSV，再生成只依赖 bundle 内 CSV 的 `generate_figure.py`。渲染器使用 Matplotlib `Agg` 后端，避免 GUI 状态影响 CI，并输出 FigureSpec 要求的 PNG、SVG 和 PDF。`provenance.json` 保存 data/script SHA-256、data_version 和 MetricResult IDs；Bundle 通过临时目录改名发布，避免半成品目录被当成正式图表。
+
+删除三个图像文件后，测试重新运行 bundle 脚本并恢复所有输出，输入 CSV hash 保持不变。这证明的是可重建性，不是视觉质量或真实科研结论；M9.3 还要检查图中数值与 MetricResult 一致，M9.4 才做人工视觉验收。
