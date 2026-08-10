@@ -4,10 +4,12 @@ from scholartrace.states.research_project import (
     ResearchProjectState,
     merge_unique_strings,
     new_research_project_state,
+    replace_strings,
 )
 
 __all__ = [
     "ResearchProjectState",
     "merge_unique_strings",
     "new_research_project_state",
+    "replace_strings",
 ]

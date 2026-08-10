@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 已发布，进入 M2
+- 项目状态：M2 发布候选已完成，待合并与 Tag
 - 当前里程碑：M2 — 人工澄清、审批与版本历史
-- 当前版本：`v0.1.0`
-- 当前分支：`main`
+- 当前版本：`v0.2.0`
+- 当前分支：`feat/m2-human-approval`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-10（Asia/Shanghai）
 
@@ -40,12 +40,12 @@
 
 ## M2 小任务
 
-- [ ] M2.1 缺失信息路由与 Conditional Edge
-- [ ] M2.2 `interrupt()` / `Command(resume=...)` 的暂停恢复契约
-- [ ] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
-- [ ] M2.4 研究问题冻结与新版本创建
-- [ ] M2.5 Checkpoint History、回滚和审计查询
-- [ ] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布（当前）
+- [x] M2.1 缺失信息路由与 Conditional Edge
+- [x] M2.2 `interrupt()` / `Command(resume=...)` 的暂停恢复契约
+- [x] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
+- [x] M2.4 研究问题冻结与新版本创建
+- [x] M2.5 Checkpoint History、回滚和审计查询
+- [x] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布候选
 
 ## 当前验证
 
@@ -54,9 +54,9 @@
 | `uv sync --all-groups` | 通过，CPython 3.12.13 |
 | `uv run ruff format --check src tests scripts` | 通过 |
 | `uv run ruff check src tests scripts` | 通过 |
-| `uv run pytest` | 通过，50 passed |
+| `uv run pytest` | 通过，75 passed |
 | `uv run python scripts/validate_fixtures.py` | 通过，3 个合成 Fixture |
-| `uv run python scripts/check.py` | 通过，50 passed |
+| `uv run python scripts/check.py` | 通过，75 passed |
 | M1.1 State/Schema/Reducer 目标测试 | 通过，16 passed |
 | M1.1 后全量 pytest | 通过，25 passed |
 | M1.2 Repository/迁移集成测试 | 通过，12 passed |
@@ -75,6 +75,10 @@
 | GitHub Actions quality Run #14 | 通过，commit `52bf99f` |
 | GitHub Actions quality Run #16 | 通过，merge commit `986eee3` |
 | `v0.1.0` annotated Tag | 远端对象 `a7ef171`，peeled commit `986eee3` |
+| M2.1 Conditional Edge 集成测试 | 通过，8 passed |
+| M2.1 后全量 pytest | 通过，58 passed |
+| M2.2 interrupt/resume 集成测试 | 通过，4 passed |
+| M2.2 后全量 pytest | 通过，62 passed |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
 | `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.1.0 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
@@ -85,12 +89,29 @@
 | 安装包 `License-Expression` | `Apache-2.0` |
 | wheel 许可证文件 | 包含 `dist-info/licenses/LICENSE` |
 | `v0.0.1^{}` | `42238c1072675763d59a3c6455896eaa289f6b1a` |
+| M2.3 DecisionRecord/审批图目标测试 | 通过，11 passed |
+| M2.3 后全量 pytest | 通过，73 passed |
+| M2.3 迁移 `0002 → 0001 → base → head` | 通过，DecisionRecord 表正确移除并恢复 |
+| M2.3 Ruff format/lint | 通过，38 files formatted、无诊断 |
+| M2.3 提交与远端 Ref | `b467522`；`origin/feat/m2-human-approval` 已核验同步 |
+| M2.3 GitHub Actions | 未验证：当前环境访问 GitHub Actions API 发生 SSL 连接错误 |
+| M2.4 生命周期/版本目标测试 | 通过，29 passed |
+| M2.4 后全量质量门禁 | 通过，75 passed；Ruff 39 files formatted；3 个 Fixture |
+| M2.4 迁移 `0003 → 0002 → 0001 → base → head` | 通过，生命周期列正确移除并恢复 |
+| M2.5 History/rollback 目标测试 | 通过，13 passed |
+| M2.5 后全量质量门禁 | 通过，76 passed；Ruff 39 files formatted；3 个 Fixture |
+| M2.6 发布候选全量质量门禁 | 通过，76 passed；Ruff 39 files formatted；3 个 Fixture |
+| `uv build` v0.2.0 | 通过，sdist/wheel 构建成功 |
+| 独立 wheel venv 安装/import/CLI/迁移 | 通过，版本 0.2.0，迁移 0003 |
+| `actionlint` Docker | 通过，无诊断 |
+| 发布候选秘密/个人路径/大文件扫描 | 通过，0 matches、tracked >5MB 为 0 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
-- M2 及 RAG、实验、论文、Web 和部署能力仍未实现。
+- M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和发布候选审查；合并 `main`、远端 CI 和 `v0.2.0` Tag 仍待完成。
+- RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-从 M2.1 开始：先为缺失信息路由、人工暂停/恢复和 DecisionRecord 写失败测试，再实现审批与版本历史。
+下一步进入 M2.6：独立审查、合并 `main`、运行发布候选门禁并创建 `v0.2.0`；在此之前不宣称 M2 发布。

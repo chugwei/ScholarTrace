@@ -1,0 +1,416 @@
+"""Auditable human approval workflow for a research-question draft."""
+
+from collections.abc import Iterator, Mapping
+from contextlib import contextmanager
+from hashlib import sha256
+from pathlib import Path
+from typing import Any, cast
+
+from langgraph.checkpoint.base import BaseCheckpointSaver
+from langgraph.checkpoint.sqlite import SqliteSaver
+from langgraph.graph import END, START, StateGraph
+from langgraph.types import Command, interrupt
+
+from scholartrace.graphs.research_question_review import (
+    _payload_from_state,
+    find_missing_question_fields,
+)
+from scholartrace.identifiers import validate_identifier
+from scholartrace.persistence.migrations import upgrade_database
+from scholartrace.persistence.models import utc_now_naive
+from scholartrace.persistence.repository import ProjectRepository, research_question_id_for
+from scholartrace.schemas import DecisionRecord, ResearchQuestion
+from scholartrace.states import ResearchProjectState
+
+_QUESTION_FIELDS = {
+    "problem",
+    "target_population_or_domain",
+    "inputs",
+    "expected_outputs",
+    "constraints",
+    "success_criteria",
+    "assumptions",
+    "unresolved_questions",
+}
+
+
+class CheckpointHistoryError(RuntimeError):
+    """Raised when checkpoint history cannot be queried or restored safely."""
+
+
+class CheckpointNotFoundError(CheckpointHistoryError):
+    """Raised when a requested thread or checkpoint ID is absent."""
+
+
+class ResearchQuestionDecisionGraph:
+    """Compiled graph facade with an explicit, thread-bound resume method."""
+
+    def __init__(self, graph: Any, repository: ProjectRepository) -> None:
+        self.graph = graph
+        self.repository = repository
+
+    def invoke(self, state: ResearchProjectState) -> dict[str, Any]:
+        return cast(dict[str, Any], self.graph.invoke(state, _config(state["thread_id"])))
+
+    def resume(self, thread_id: str, command: Command) -> dict[str, Any]:
+        return cast(dict[str, Any], self.graph.invoke(command, _config(thread_id)))
+
+    def get_state(self, thread_id: str) -> Any:
+        return self.graph.get_state(_config(thread_id))
+
+    def history(self, thread_id: str, limit: int | None = None) -> list[Any]:
+        """Return persisted StateSnapshots, newest first, for one thread."""
+
+        thread_id = validate_identifier(thread_id)
+        snapshots = list(self.graph.get_state_history(_config(thread_id), limit=limit))
+        if not snapshots:
+            raise CheckpointHistoryError(f"checkpoint history for thread {thread_id!r} is empty")
+        return snapshots
+
+    def get_state_history(self, thread_id: str, limit: int | None = None) -> list[Any]:
+        """Alias matching LangGraph's native history method."""
+
+        return self.history(thread_id, limit=limit)
+
+    def rollback(
+        self,
+        thread_id: str,
+        checkpoint_id: str,
+        actor_id: str,
+        reason: str,
+    ) -> dict[str, Any]:
+        """Restore a historical state into a new checkpoint and audit the action."""
+
+        thread_id = validate_identifier(thread_id)
+        checkpoint_id = validate_identifier(checkpoint_id)
+        actor_id = validate_identifier(actor_id)
+        if not reason.strip():
+            raise ValueError("reason is required for rollback")
+        snapshots = self.history(thread_id)
+        target = next(
+            (
+                snapshot
+                for snapshot in snapshots
+                if snapshot.config["configurable"].get("checkpoint_id") == checkpoint_id
+            ),
+            None,
+        )
+        if target is None:
+            raise CheckpointNotFoundError(
+                f"checkpoint {checkpoint_id!r} was not found for thread {thread_id!r}"
+            )
+        current = self.graph.get_state(_config(thread_id))
+        current_checkpoint_id = current.config["configurable"].get("checkpoint_id", "none")
+        updated_config = self.graph.update_state(
+            _config(thread_id),
+            target.values,
+            as_node=_rollback_source_node(target),
+        )
+        restored = self.graph.get_state(updated_config)
+        project_id = restored.values.get("project_id") or target.values.get("project_id")
+        if not project_id:
+            raise CheckpointHistoryError("checkpoint does not contain a project_id")
+        audit_id = _rollback_decision_id(thread_id, current_checkpoint_id, checkpoint_id)
+        self.repository.record_decision(
+            decision_id=audit_id,
+            project_id=project_id,
+            thread_id=thread_id,
+            target_type="checkpoint",
+            target_id=checkpoint_id,
+            action="rolled_back",
+            actor_id=actor_id,
+            reason=reason,
+            payload={
+                "from_checkpoint_id": current_checkpoint_id,
+                "to_checkpoint_id": checkpoint_id,
+                "restored_active_stage": restored.values.get("active_stage"),
+            },
+        )
+        return cast(dict[str, Any], restored.values)
+
+    def list_audit_records(self, project_id: str) -> list[DecisionRecord]:
+        """Query domain and checkpoint decisions for a project."""
+
+        return self.repository.list_audit_records(project_id)
+
+
+def build_research_question_decision_graph(
+    repository: ProjectRepository,
+    checkpointer: BaseCheckpointSaver[Any],
+) -> ResearchQuestionDecisionGraph:
+    """Build clarification → human decision → persist/loop workflow."""
+
+    def intake(state: ResearchProjectState) -> dict[str, Any]:
+        repository.create_project(
+            project_id=state["project_id"],
+            thread_id=state["thread_id"],
+            current_goal=state["current_goal"],
+        )
+        payload = _payload_from_state(state)
+        missing = find_missing_question_fields(payload)
+        return {
+            "active_stage": "awaiting_clarification" if missing else "awaiting_approval",
+            "pending_questions": missing,
+            "research_question_payload": payload,
+        }
+
+    def route_after_intake(state: ResearchProjectState) -> str:
+        return "clarify" if state["pending_questions"] else "request_decision"
+
+    def clarify(state: ResearchProjectState) -> dict[str, Any]:
+        answer = interrupt(
+            {
+                "kind": "research_question_clarification",
+                "missing_fields": state["pending_questions"],
+                "payload": state["research_question_payload"],
+            }
+        )
+        if not isinstance(answer, Mapping):
+            raise ValueError("clarification resume value must be a mapping")
+        payload = dict(state["research_question_payload"] or {})
+        payload.update(answer)
+        return {
+            "active_stage": "intake",
+            "pending_questions": find_missing_question_fields(payload),
+            "research_question_payload": payload,
+        }
+
+    def request_decision(state: ResearchProjectState) -> dict[str, Any]:
+        decision = interrupt(
+            {
+                "kind": "research_question_decision",
+                "target_type": "research_question",
+                "target_id": _target_id(state),
+                "payload": state["research_question_payload"],
+                "actions": ["approved", "rejected", "modified", "cancelled", "paused"],
+            }
+        )
+        if not isinstance(decision, Mapping):
+            raise ValueError("decision resume value must be a mapping")
+        return {"active_stage": "recording_decision", "pending_approval": dict(decision)}
+
+    def apply_decision(state: ResearchProjectState) -> dict[str, Any]:
+        raw_decision = state.get("pending_approval")
+        if not isinstance(raw_decision, Mapping):
+            raise ValueError("a pending human decision is required")
+        record = _validated_record(state, raw_decision)
+        updated_payload: dict[str, Any] | None = None
+        if record.action == "modified":
+            updated_payload = _modified_payload(state, record)
+            # Validate before the workflow records and loops. A malformed
+            # modification must never be presented as a reviewable question.
+            ResearchQuestion.model_validate(updated_payload)
+        repository.record_decision(
+            decision_id=record.decision_id,
+            project_id=record.project_id,
+            thread_id=record.thread_id,
+            target_type=record.target_type,
+            target_id=record.target_id,
+            action=record.action,
+            actor_id=record.actor_id,
+            reason=record.reason,
+            payload=record.payload,
+            created_at=record.created_at,
+        )
+
+        if record.action == "modified":
+            repository.update_project_stage(state["project_id"], "awaiting_approval")
+            return {
+                "active_stage": "awaiting_approval",
+                "pending_approval": None,
+                "last_decision_action": "modified",
+                "last_decision_actor": record.actor_id,
+                "last_decision_id": record.decision_id,
+                "research_question_payload": updated_payload,
+            }
+
+        if record.action == "approved":
+            return {
+                "active_stage": "approved",
+                "pending_approval": None,
+                "last_decision_action": "approved",
+                "last_decision_actor": record.actor_id,
+                "last_decision_id": record.decision_id,
+            }
+
+        repository.update_project_stage(state["project_id"], record.action)
+        return {
+            "active_stage": record.action,
+            "pending_approval": None,
+            "last_decision_action": record.action,
+            "last_decision_actor": record.actor_id,
+            "last_decision_id": record.decision_id,
+        }
+
+    def route_after_decision(state: ResearchProjectState) -> str:
+        action = state["last_decision_action"]
+        if action == "approved":
+            return "save"
+        if action == "modified":
+            return "request_decision"
+        return "finish"
+
+    def save(state: ResearchProjectState) -> dict[str, Any]:
+        question = ResearchQuestion.model_validate(state["research_question_payload"])
+        parent_id = state.get("research_question_id")
+        if parent_id is None:
+            saved = repository.save_research_question(
+                state["project_id"],
+                question,
+                active_stage="completed",
+            )
+        else:
+            saved = repository.create_research_question_version(
+                state["project_id"],
+                parent_id,
+                question,
+                active_stage="completed",
+            )
+        frozen = repository.freeze_research_question(
+            state["project_id"],
+            saved.research_question_id,
+            state.get("last_decision_actor") or "system",
+        )
+        return {
+            "active_stage": "completed",
+            "draft_research_question": None,
+            "research_question_id": frozen.research_question_id,
+        }
+
+    def finish(_state: ResearchProjectState) -> dict[str, Any]:
+        return {}
+
+    builder = StateGraph(ResearchProjectState)
+    builder.add_node("intake", intake)
+    builder.add_node("clarify", clarify)
+    builder.add_node("request_decision", request_decision)
+    builder.add_node("apply_decision", apply_decision)
+    builder.add_node("save", save)
+    builder.add_node("finish", finish)
+    builder.add_edge(START, "intake")
+    builder.add_conditional_edges(
+        "intake",
+        route_after_intake,
+        {"clarify": "clarify", "request_decision": "request_decision"},
+    )
+    builder.add_edge("clarify", "intake")
+    builder.add_edge("request_decision", "apply_decision")
+    builder.add_conditional_edges(
+        "apply_decision",
+        route_after_decision,
+        {"save": "save", "request_decision": "request_decision", "finish": "finish"},
+    )
+    builder.add_edge("save", END)
+    builder.add_edge("finish", END)
+    return ResearchQuestionDecisionGraph(builder.compile(checkpointer=checkpointer), repository)
+
+
+@contextmanager
+def open_research_question_decision_graph(
+    database_path: Path,
+    checkpoint_path: Path,
+) -> Iterator[ResearchQuestionDecisionGraph]:
+    """Open the decision workflow with disk-backed business/checkpoint stores."""
+
+    resolved_checkpoint_path = checkpoint_path.expanduser().resolve()
+    resolved_checkpoint_path.parent.mkdir(parents=True, exist_ok=True)
+    upgrade_database(database_path)
+    repository = ProjectRepository(database_path)
+    try:
+        with SqliteSaver.from_conn_string(str(resolved_checkpoint_path)) as checkpointer:
+            yield build_research_question_decision_graph(repository, checkpointer)
+    finally:
+        repository.close()
+
+
+def _validated_record(
+    state: ResearchProjectState,
+    raw_decision: Mapping[str, Any],
+) -> DecisionRecord:
+    payload = raw_decision.get("payload")
+    if payload is None:
+        payload = {}
+    if not isinstance(payload, Mapping):
+        raise ValueError("decision payload must be a mapping")
+    fields = raw_decision.get("fields")
+    if fields is not None:
+        if not isinstance(fields, Mapping):
+            raise ValueError("modified fields must be a mapping")
+        payload = {**dict(payload), "fields": dict(fields)}
+    return DecisionRecord.model_validate(
+        {
+            "decision_id": raw_decision.get("decision_id"),
+            "project_id": state["project_id"],
+            "thread_id": state["thread_id"],
+            "target_type": "research_question",
+            "target_id": _target_id(state),
+            "action": raw_decision.get("action"),
+            "actor_id": raw_decision.get("actor_id"),
+            "reason": raw_decision.get("reason"),
+            "payload": payload,
+            "created_at": raw_decision.get("created_at") or utc_now_naive(),
+        }
+    )
+
+
+def _modified_payload(
+    state: ResearchProjectState,
+    record: DecisionRecord,
+) -> dict[str, Any]:
+    fields = record.payload.get("fields", {})
+    if not isinstance(fields, Mapping):
+        raise ValueError("modified fields must be a mapping")
+    unknown = set(fields) - _QUESTION_FIELDS
+    if unknown:
+        names = ", ".join(sorted(str(item) for item in unknown))
+        raise ValueError(f"modified fields contain unknown names: {names}")
+    payload = dict(state["research_question_payload"] or {})
+    payload.update(fields)
+    return payload
+
+
+def _target_id(state: ResearchProjectState) -> str:
+    payload = state.get("research_question_payload")
+    if isinstance(payload, Mapping):
+        try:
+            return research_question_id_for(
+                state["project_id"],
+                ResearchQuestion.model_validate(payload),
+            )
+        except ValueError:
+            pass
+    existing = state.get("research_question_id")
+    if existing:
+        return existing
+    digest = sha256(f"{state['project_id']}\0{state['thread_id']}".encode()).hexdigest()[:32]
+    return f"rq_pending_{digest}"
+
+
+def _config(thread_id: str) -> dict[str, dict[str, str]]:
+    return {"configurable": {"thread_id": thread_id}}
+
+
+def _rollback_source_node(snapshot: Any) -> str:
+    """Map a snapshot's materialized state to the node that produced it."""
+
+    active_stage = snapshot.values.get("active_stage")
+    if active_stage in {None, "intake"} and snapshot.metadata.get("step") == -1:
+        return "__start__"
+    if active_stage in {"awaiting_clarification", "awaiting_approval"}:
+        return "intake"
+    if active_stage == "recording_decision":
+        return "request_decision"
+    if active_stage == "approved":
+        return "apply_decision"
+    if active_stage == "completed":
+        return "save"
+    if active_stage in {"rejected", "cancelled", "paused"}:
+        return "apply_decision"
+    raise CheckpointHistoryError(
+        f"cannot determine rollback source node for active_stage={active_stage!r}"
+    )
+
+
+def _rollback_decision_id(thread_id: str, from_checkpoint: str, to_checkpoint: str) -> str:
+    digest = sha256(f"{thread_id}\0{from_checkpoint}\0{to_checkpoint}".encode()).hexdigest()[:32]
+    return f"rollback_{digest}"

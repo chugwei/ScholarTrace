@@ -9,6 +9,7 @@ from alembic.runtime.migration import MigrationContext
 from scholartrace.persistence.database import create_sqlite_engine
 
 INITIAL_REVISION = "0001"
+LATEST_REVISION = "0003"
 
 
 def _configuration(database_path: Path) -> Config:

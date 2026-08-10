@@ -16,6 +16,12 @@ def merge_unique_strings(left: Iterable[str], right: Iterable[str]) -> list[str]
     return list(dict.fromkeys([*left, *right]))
 
 
+def replace_strings(_left: Iterable[str], right: Iterable[str]) -> list[str]:
+    """Replace a current string list with an ordered, duplicate-free update."""
+
+    return list(dict.fromkeys(right))
+
+
 class ResearchProjectState(TypedDict):
     """Small, replay-safe workflow state containing references, not large artifacts."""
 
@@ -25,11 +31,15 @@ class ResearchProjectState(TypedDict):
     thread_id: str
     active_stage: str
     current_goal: str | None
-    pending_questions: Annotated[list[str], merge_unique_strings]
+    pending_questions: Annotated[list[str], replace_strings]
     pending_approval: dict[str, Any] | None
+    last_decision_action: str | None
+    last_decision_actor: str | None
+    last_decision_id: str | None
 
     research_question_id: str | None
     draft_research_question: ResearchQuestion | None
+    research_question_payload: dict[str, Any] | None
     approved_document_ids: Annotated[list[str], merge_unique_strings]
     evidence_ids: Annotated[list[str], merge_unique_strings]
     claim_ids: Annotated[list[str], merge_unique_strings]
@@ -63,8 +73,12 @@ def new_research_project_state(
         current_goal=current_goal,
         pending_questions=[],
         pending_approval=None,
+        last_decision_action=None,
+        last_decision_actor=None,
+        last_decision_id=None,
         research_question_id=None,
         draft_research_question=None,
+        research_question_payload=None,
         approved_document_ids=[],
         evidence_ids=[],
         claim_ids=[],

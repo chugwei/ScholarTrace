@@ -179,6 +179,14 @@ def _question_payload(record: ResearchQuestionRecord) -> dict[str, Any]:
         "research_question_id": record.research_question_id,
         "version": record.version,
         "content_sha256": record.content_sha256,
+        "status": record.status,
+        "frozen_at": (
+            record.frozen_at.isoformat(timespec="microseconds") + "Z"
+            if record.frozen_at is not None
+            else None
+        ),
+        "frozen_by": record.frozen_by,
+        "parent_research_question_id": record.parent_research_question_id,
         "question": record.question.model_dump(mode="json"),
         "created_at": record.created_at.isoformat(timespec="microseconds") + "Z",
     }

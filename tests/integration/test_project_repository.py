@@ -6,6 +6,7 @@ from sqlalchemy import inspect
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.migrations import (
     INITIAL_REVISION,
+    LATEST_REVISION,
     current_revision,
     downgrade_database,
     upgrade_database,
@@ -14,7 +15,9 @@ from scholartrace.persistence.repository import (
     ProjectIdentityConflictError,
     ProjectNotFoundError,
     ProjectRepository,
+    ResearchQuestionFrozenError,
     ResearchQuestionNotFoundError,
+    ResearchQuestionVersionConflictError,
 )
 from scholartrace.schemas import ResearchQuestion
 
@@ -44,8 +47,35 @@ def test_initial_migration_can_upgrade_and_downgrade(tmp_path: Path) -> None:
     upgrade_database(database_path)
 
     engine = create_sqlite_engine(database_path)
-    assert current_revision(database_path) == INITIAL_REVISION
+    assert current_revision(database_path) == LATEST_REVISION
+    assert {"projects", "research_questions", "decision_records"} <= set(
+        inspect(engine).get_table_names()
+    )
+    question_columns = {
+        column["name"] for column in inspect(engine).get_columns("research_questions")
+    }
+    assert {"status", "frozen_at", "frozen_by", "parent_research_question_id"} <= question_columns
+    engine.dispose()
+
+    downgrade_database(database_path, "0002")
+
+    engine = create_sqlite_engine(database_path)
+    assert current_revision(database_path) == "0002"
+    question_columns = {
+        column["name"] for column in inspect(engine).get_columns("research_questions")
+    }
+    assert (
+        not {"status", "frozen_at", "frozen_by", "parent_research_question_id"} & question_columns
+    )
+    assert "decision_records" in inspect(engine).get_table_names()
     assert {"projects", "research_questions"} <= set(inspect(engine).get_table_names())
+    engine.dispose()
+
+    downgrade_database(database_path, INITIAL_REVISION)
+
+    engine = create_sqlite_engine(database_path)
+    assert current_revision(database_path) == INITIAL_REVISION
+    assert "decision_records" not in inspect(engine).get_table_names()
     engine.dispose()
 
     downgrade_database(database_path)
@@ -57,7 +87,7 @@ def test_initial_migration_can_upgrade_and_downgrade(tmp_path: Path) -> None:
     engine.dispose()
 
     upgrade_database(database_path)
-    assert current_revision(database_path) == INITIAL_REVISION
+    assert current_revision(database_path) == LATEST_REVISION
 
 
 def test_create_project_is_idempotent_and_persists_after_reopen(tmp_path: Path) -> None:
@@ -151,6 +181,50 @@ def test_research_question_save_is_idempotent_and_versioned(tmp_path: Path) -> N
     reopened = ProjectRepository(tmp_path / "scholartrace.db")
     assert reopened.get_research_question("lychee-pest-001", first.research_question_id) == first
     reopened.close()
+
+
+def test_frozen_question_requires_explicit_descendant_version(tmp_path: Path) -> None:
+    repository = migrated_repository(tmp_path / "scholartrace.db")
+    repository.create_project("lychee-pest-001", "lychee-pest-001")
+
+    first = repository.save_research_question("lychee-pest-001", question())
+    frozen = repository.freeze_research_question(
+        "lychee-pest-001",
+        first.research_question_id,
+        "researcher-001",
+    )
+    assert frozen.status == "frozen"
+    assert frozen.frozen_by == "researcher-001"
+    assert frozen.frozen_at is not None
+    assert (
+        repository.freeze_research_question(
+            "lychee-pest-001",
+            first.research_question_id,
+            "researcher-001",
+        )
+        == frozen
+    )
+
+    revised_question = question("遮挡与尺度变化下的荔枝病虫害小目标检测")
+    with pytest.raises(ResearchQuestionFrozenError, match="frozen"):
+        repository.save_research_question("lychee-pest-001", revised_question)
+
+    second = repository.create_research_question_version(
+        "lychee-pest-001",
+        first.research_question_id,
+        revised_question,
+        active_stage="awaiting_approval",
+    )
+    assert second.version == 2
+    assert second.status == "draft"
+    assert second.parent_research_question_id == first.research_question_id
+    with pytest.raises(ResearchQuestionVersionConflictError, match="current"):
+        repository.create_research_question_version(
+            "lychee-pest-001",
+            first.research_question_id,
+            question("第三个未经当前版本批准的研究问题"),
+        )
+    repository.close()
 
 
 def test_research_questions_are_project_scoped(tmp_path: Path) -> None:
