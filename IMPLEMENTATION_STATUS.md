@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M5 已发布，M6 进行中
+- 项目状态：M6 发布候选准备中
 - 当前里程碑：M6 — 算法与创新候选
-- 当前版本：`v0.5.0`
-- 当前分支：`main`
+- 当前版本：`v0.6.0`
+- 当前分支：`feat/m6-algorithm-innovation`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -74,7 +74,7 @@
 - [x] M6.1 AlgorithmSpec/Prior Art Map 契约与迁移
 - [x] M6.2 InnovationCandidate、差异表和机制假设
 - [x] M6.3 证伪实验、基线/消融建议和创新状态门禁
-- [ ] M6.4 独立审查、合并 `main` 与 `v0.6.0` 发布（当前）
+- [ ] M6.4 独立审查、合并 `main` 与 `v0.6.0` 发布（发布候选）
 
 ## 当前验证
 
@@ -171,6 +171,7 @@
 | M6.2 全量质量门禁 | 通过，`scripts/check.py`；117 passed；3 个合成 Fixture |
 | M6.3 门禁目标测试 | 通过，8 passed；证伪提案、审批顺序、`not_novel` 阻断、撤回和拒绝 |
 | M6.3 全量质量门禁 | 通过，`scripts/check.py`；119 passed；3 个合成 Fixture |
+| M6.4 发布候选 | 通过，v0.6.0 wheel/sdist、隔离 venv、CLI、迁移 0010、actionlint、Apache-2.0、内部文件排除和秘密扫描；详见 `docs/verification/m6-release-candidate.md` |
 
 ## 当前限制
 

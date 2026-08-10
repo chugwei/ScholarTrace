@@ -12,7 +12,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M3 独立文献库 | v0.3.0 | completed | main | [v0.3.0](https://github.com/chugwei/ScholarTrace/tree/v0.3.0) | merge `c12b362`、main 门禁、Tag 已核验 |
 | M4 可信证据 RAG | v0.4.0 | completed | main | [v0.4.0](https://github.com/chugwei/ScholarTrace/tree/v0.4.0) | merge `a193291`、main 门禁、Tag 已核验 |
 | M5 管线与数据设计 | v0.5.0 | completed | main | [v0.5.0](https://github.com/chugwei/ScholarTrace/tree/v0.5.0) | merge `9aef2d8`、main 门禁、Tag 已核验 |
-| M6 算法与创新候选 | v0.6.0 | in_progress | feat/m6-algorithm-innovation | — | 入口已打开 |
+| M6 算法与创新候选 | v0.6.0 | release-candidate | feat/m6-algorithm-innovation | — | M6.1–M6.3 通过，发布候选审查中 |
 | M7 实验注册与导入 | v0.7.0 | pending | feat/m7-experiment-registry | — | — |
 | M8 Runner 与排错 | v0.8.0 | pending | feat/m8-runner-debugging | — | — |
 | M9 图表系统 | v0.9.0 | pending | feat/m9-figures | — | — |
@@ -94,4 +94,4 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M6.1 | AlgorithmSpec/Prior Art Map 契约与迁移 | 0009、证据绑定、版本和审批顺序测试 | completed |
 | M6.2 | InnovationCandidate 与方法差异 | 候选结构、差异表和确定性排序测试 | completed |
 | M6.3 | 证伪、基线/消融与状态门禁 | 审批阻断、实验入口和真实性测试 | completed |
-| M6.4 | M6 发布 | 独立审查、main CI、`v0.6.0` | in_progress |
+| M6.4 | M6 发布 | 独立审查、main CI、`v0.6.0` | release-candidate |
