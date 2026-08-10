@@ -123,3 +123,11 @@ START → intake ──(缺字段)──> clarify ──> intake
 M4 在 M3 全局目录之上维护项目级 `ProjectDocument` 状态：新关联为 `candidate`，人工审核后才可变为 `approved` 或 `rejected`。审核记录保存 actor、时间、理由和 0–1 相关度；全局 Document 不被复制或改写，失败/不可搜索文献不能批准。
 
 `rank_project_candidates()` 使用标题、作者、摘要和 DOI 的确定性 token overlap 评分，只用于排序候选，不声称语义相关或创新证据。项目正式文献查询通过 `list_approved_documents()`，因此 candidate 和 rejected 不会意外进入后续证据链；M4.2 才在 approved 文献上建立 Chunk 检索。
+
+## M4.2 Chunk 与混合索引
+
+`DocumentLibrary.index_document_text()` 从 M3 运行时保存的文本文件读取内容，用固定字符窗口和重叠区间生成 `DocumentChunk`。每个 Chunk 保存 `document_id`、稳定 `chunk_id`、序号、原文字符偏移和内容 SHA-256；`text[start_offset:end_offset]` 必须与 Chunk 文本完全一致。数据库迁移 0006 以文档和序号建立唯一约束，替换 Chunk 集合时使用一个事务。
+
+`HybridChunkIndex.rebuild_project()` 只从 `list_approved_chunks()` 获取项目内容。索引快照同时保存 BM25 词频/文档频率、可替换 Vector provider 的向量和 Chunk 完整来源字段。默认 `HashingEmbeddingProvider` 仅用于离线、确定性验证，不是语义质量证明；部署时可以注入具有相同契约的真实向量 provider。
+
+重建先在内存中完成并写入 `.tmp` 文件，成功后才原子替换项目的 active JSON 快照。Vector provider 异常、维度错误或序列化失败都不会触碰旧快照，因此旧索引仍可查询。搜索结果返回 Chunk、BM25 分数、Vector 分数和 `index_generation`，为 M4.3 的 EvidenceCard 片段定位保留完整链路。

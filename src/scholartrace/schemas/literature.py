@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 NonBlankText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -66,3 +66,40 @@ class ProjectDocument(BaseModel):
     decided_by: NonBlankText | None = None
     decided_at: datetime | None = None
     created_at: datetime
+
+
+class DocumentChunk(BaseModel):
+    """A traceable, searchable span of one catalog document."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    chunk_id: NonBlankText
+    document_id: NonBlankText
+    ordinal: int = Field(ge=0)
+    text: str = Field(min_length=1)
+    start_offset: int = Field(ge=0)
+    end_offset: int = Field(gt=0)
+    content_sha256: Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
+    created_at: datetime
+
+    @model_validator(mode="after")
+    def validate_span(self) -> "DocumentChunk":
+        if self.end_offset <= self.start_offset:
+            raise ValueError("end_offset must be greater than start_offset")
+        if not self.text.strip():
+            raise ValueError("chunk text cannot be blank")
+        if len(self.text) != self.end_offset - self.start_offset:
+            raise ValueError("chunk offsets must span the exact chunk text length")
+        return self
+
+
+class ChunkSearchResult(BaseModel):
+    """Hybrid retrieval result with the source span required for citation tracing."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    chunk: DocumentChunk
+    lexical_score: float = Field(ge=0)
+    vector_score: float = Field(ge=0)
+    score: float = Field(ge=0)
+    index_generation: NonBlankText

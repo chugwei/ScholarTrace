@@ -10,7 +10,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M1 持久化项目图 | v0.1.0 | completed | feat/m1-project-state | [v0.1.0](https://github.com/chugwei/ScholarTrace/tree/v0.1.0) | main CI、独立源码/wheel、E2E 通过 |
 | M2 人工审批与历史 | v0.2.0 | completed | main | [v0.2.0](https://github.com/chugwei/ScholarTrace/tree/v0.2.0) | merge `6689572`、main 门禁、Tag 已核验 |
 | M3 独立文献库 | v0.3.0 | completed | main | [v0.3.0](https://github.com/chugwei/ScholarTrace/tree/v0.3.0) | merge `c12b362`、main 门禁、Tag 已核验 |
-| M4 可信证据 RAG | v0.4.0 | in_progress | feat/m4-evidence-rag | — | M4.1 项目文献审核已通过 |
+| M4 可信证据 RAG | v0.4.0 | in_progress | feat/m4-evidence-rag | — | M4.1–M4.2 已通过，M4.3 进行中 |
 | M5 管线与数据设计 | v0.5.0 | pending | feat/m5-pipeline-data-design | — | — |
 | M6 算法与创新候选 | v0.6.0 | pending | feat/m6-algorithm-innovation | — | — |
 | M7 实验注册与导入 | v0.7.0 | pending | feat/m7-experiment-registry | — | — |
@@ -74,6 +74,6 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | ID | 批次 | 主要证据 | 状态 |
 |---|---|---|---|
 | M4.1 | candidate/approved/rejected 与相关度 | 0005 迁移、相关度排序、人工审批和失败文献门禁 | completed |
-| M4.2 | Chunk/全文索引与混合检索 | 追溯字段、BM25/Vector 兼容检索和旧索引保留 | pending |
-| M4.3 | EvidenceCard 与检索回归 | DOI/URL/片段校验、固定 10–20 条回归集 | pending |
+| M4.2 | Chunk/全文索引与混合检索 | 0006 迁移、偏移回切、BM25/Vector 兼容检索和旧索引保留 | completed |
+| M4.3 | EvidenceCard 与检索回归 | DOI/URL/片段校验、固定 10–20 条回归集 | in_progress |
 | M4.4 | M4 发布 | 独立审查、main CI、`v0.4.0` | pending |

@@ -60,3 +60,24 @@ M4.1 没有新增 Graph State、Edge 或 Checkpointer：项目文献审核目前
 最危险的错误是把“目录命中”或“候选排序第一”直接当成可信证据。集成测试验证候选只在项目范围内排序、批准列表只返回显式 `approved`、失败文献不能批准、空白理由被拒绝，以及 0005 迁移的升级/回滚。测试数据是合成/脱敏农业视觉条目，不代表真实论文或现场结果。
 
 M3 提供全局目录、PDF 质量标记和外部元数据降级；M4.1 增加项目级人工筛选；M4.2 将在 approved 文献上建立 Chunk/全文索引，M4.3 再加入 EvidenceCard 和固定检索回归。
+
+## M4.2 Chunk、BM25 与 Vector
+
+全文不能直接塞入 Graph State，也不能只保存“命中标题”。`DocumentChunk` 用字符偏移、序号和内容哈希把检索结果绑定回运行时文本；农业视觉黄金样例中的每个荔枝病虫害片段都可以用 `text[start_offset:end_offset]` 重建。固定窗口加重叠区间是当前的最小确定性方案，后续可以替换分词器而不改变来源字段契约。
+
+BM25 使用每个 Chunk 的词频、文档频率和平均长度计算 lexical score；Vector provider 将同一文本映射为固定维度向量并计算 cosine score。当前 `HashingEmbeddingProvider` 不访问网络、不需要 API Key，适合 CI 重放，但它只证明接口、排序和降级行为，不证明语义召回质量。正式基线留给 M4.3 的固定 10–20 条回归集和人工标注。
+
+索引重建分成“构造候选快照 → 写临时文件 → 原子替换”三个步骤。Vector 服务异常时构造阶段直接失败，active 文件不变；查询者仍能读取上一代 `index_generation`。这比先删除旧索引再重建更适合科研工作台：失败不会让已有项目暂时失去可追溯检索。
+
+```python
+index = HybridChunkIndex(runtime_index_root)
+snapshot = index.rebuild_project("lychee-m4", repository)
+hits = index.search("lychee-m4", "lychee disease", top_k=5)
+source_text = load_runtime_text_for(hits[0].chunk.document_id)
+assert (
+    source_text[hits[0].chunk.start_offset : hits[0].chunk.end_offset]
+    == hits[0].chunk.text
+)
+```
+
+M4.2 的索引仍不是 Rerank，也没有 EvidenceCard 或引用解析；下一批次会把 DOI/URL/原文片段校验作为进入可信证据集的第二道门。

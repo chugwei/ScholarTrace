@@ -9,11 +9,25 @@ from scholartrace.literature.providers import (
     OpenAlexClient,
     metadata_document_from_lookup,
 )
+from scholartrace.literature.retrieval import (
+    EmbeddingProvider,
+    HashingEmbeddingProvider,
+    HybridChunkIndex,
+    HybridIndexError,
+    IndexCompatibilityError,
+    IndexNotFoundError,
+)
 
 __all__ = [
     "CrossrefClient",
     "DocumentIngestError",
     "DocumentLibrary",
+    "EmbeddingProvider",
+    "HashingEmbeddingProvider",
+    "HybridChunkIndex",
+    "HybridIndexError",
+    "IndexCompatibilityError",
+    "IndexNotFoundError",
     "LiteratureMetadataService",
     "MetadataLookupBundle",
     "MetadataLookupResult",

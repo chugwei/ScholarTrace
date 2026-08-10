@@ -3,7 +3,7 @@
 import hashlib
 from pathlib import Path
 
-from sqlalchemy import String, cast, func, or_, select
+from sqlalchemy import String, cast, delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
@@ -11,12 +11,13 @@ from scholartrace.identifiers import validate_identifier
 from scholartrace.literature_relevance import RelevanceScore, score_document_relevance
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.models import (
+    DocumentChunkRow,
     DocumentRow,
     ProjectDocumentRow,
     ProjectRow,
     utc_now_naive,
 )
-from scholartrace.schemas import Document, ProjectDocument
+from scholartrace.schemas import Document, DocumentChunk, ProjectDocument
 
 
 class LiteratureRepositoryError(RuntimeError):
@@ -271,6 +272,72 @@ class LiteratureRepository:
             ).all()
             return [_document_model(row) for row in rows]
 
+    def replace_document_chunks(
+        self, document_id: str, chunks: list[DocumentChunk]
+    ) -> list[DocumentChunk]:
+        """Replace a document's chunks atomically after validating their identity."""
+
+        document_id = validate_identifier(document_id)
+        if any(chunk.document_id != document_id for chunk in chunks):
+            raise ValueError("all chunks must belong to document_id")
+        ordinals = [chunk.ordinal for chunk in chunks]
+        if len(ordinals) != len(set(ordinals)):
+            raise ValueError("chunk ordinals must be unique per document")
+        with Session(self._engine) as session, session.begin():
+            if session.get(DocumentRow, document_id) is None:
+                raise DocumentNotFoundError(f"document {document_id!r} was not found")
+            session.execute(
+                delete(DocumentChunkRow).where(DocumentChunkRow.document_id == document_id)
+            )
+            session.add_all(
+                DocumentChunkRow(
+                    chunk_id=chunk.chunk_id,
+                    document_id=chunk.document_id,
+                    ordinal=chunk.ordinal,
+                    text=chunk.text,
+                    start_offset=chunk.start_offset,
+                    end_offset=chunk.end_offset,
+                    content_sha256=chunk.content_sha256,
+                    created_at=chunk.created_at.replace(tzinfo=None),
+                )
+                for chunk in chunks
+            )
+            session.flush()
+            return [_chunk_model(row) for row in sorted(chunks, key=lambda item: item.ordinal)]
+
+    def list_document_chunks(self, document_id: str) -> list[DocumentChunk]:
+        document_id = validate_identifier(document_id)
+        with Session(self._engine) as session:
+            if session.get(DocumentRow, document_id) is None:
+                raise DocumentNotFoundError(f"document {document_id!r} was not found")
+            rows = session.scalars(
+                select(DocumentChunkRow)
+                .where(DocumentChunkRow.document_id == document_id)
+                .order_by(DocumentChunkRow.ordinal)
+            ).all()
+            return [_chunk_model(row) for row in rows]
+
+    def list_approved_chunks(self, project_id: str) -> list[DocumentChunk]:
+        """Return chunks only from documents approved for this project."""
+
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            if session.get(ProjectRow, project_id) is None:
+                raise LiteratureRepositoryError(f"project {project_id!r} was not found")
+            rows = session.scalars(
+                select(DocumentChunkRow)
+                .join(
+                    ProjectDocumentRow,
+                    ProjectDocumentRow.document_id == DocumentChunkRow.document_id,
+                )
+                .where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "approved",
+                )
+                .order_by(DocumentChunkRow.document_id, DocumentChunkRow.ordinal)
+            ).all()
+            return [_chunk_model(row) for row in rows]
+
     def list_project_documents(self, project_id: str) -> list[ProjectDocument]:
         project_id = validate_identifier(project_id)
         with Session(self._engine) as session:
@@ -341,6 +408,21 @@ def _project_document_model(row: ProjectDocumentRow) -> ProjectDocument:
             "relevance_reason": row.relevance_reason,
             "decided_by": row.decided_by,
             "decided_at": row.decided_at,
+            "created_at": row.created_at,
+        }
+    )
+
+
+def _chunk_model(row: DocumentChunkRow) -> DocumentChunk:
+    return DocumentChunk.model_validate(
+        {
+            "chunk_id": row.chunk_id,
+            "document_id": row.document_id,
+            "ordinal": row.ordinal,
+            "text": row.text,
+            "start_offset": row.start_offset,
+            "end_offset": row.end_offset,
+            "content_sha256": row.content_sha256,
             "created_at": row.created_at,
         }
     )

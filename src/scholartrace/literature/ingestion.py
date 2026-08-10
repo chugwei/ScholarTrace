@@ -12,13 +12,14 @@ from typing import Any
 import pypdf
 from pypdf import PdfReader
 
+from scholartrace.literature.chunking import chunk_document_text
 from scholartrace.persistence.literature_repository import (
     LiteratureRepository,
     document_id_for_content,
 )
 from scholartrace.persistence.migrations import upgrade_database
 from scholartrace.persistence.models import utc_now_naive
-from scholartrace.schemas import Document, DocumentMetadata
+from scholartrace.schemas import Document, DocumentChunk, DocumentMetadata
 
 _DOI_PATTERN = re.compile(r"10\.\d{4,9}/[-._;()/:A-Z0-9]+", re.IGNORECASE)
 _YEAR_PATTERN = re.compile(r"(?:19|20)\d{2}")
@@ -39,6 +40,33 @@ class DocumentLibrary:
 
     def close(self) -> None:
         self.repository.close()
+
+    def index_document_text(
+        self,
+        document_id: str,
+        *,
+        max_chars: int = 800,
+        overlap_chars: int | None = None,
+    ) -> list[DocumentChunk]:
+        """Read a cataloged text artifact and persist traceable chunks."""
+
+        document = self.repository.get_document(document_id)
+        if not document.text_relpath:
+            raise DocumentIngestError("document has no stored searchable text")
+        text_path = (self.storage_root / document.text_relpath).resolve()
+        if not text_path.is_relative_to(self.storage_root):
+            raise DocumentIngestError("document text path escapes the storage root")
+        try:
+            text = text_path.read_text(encoding="utf-8")
+        except (OSError, UnicodeError) as error:
+            raise DocumentIngestError("could not read stored document text") from error
+        chunks = chunk_document_text(
+            document.document_id,
+            text,
+            max_chars=max_chars,
+            overlap_chars=overlap_chars,
+        )
+        return self.repository.replace_document_chunks(document.document_id, chunks)
 
     def ingest_pdf(
         self,
