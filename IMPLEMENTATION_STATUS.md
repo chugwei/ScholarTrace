@@ -41,8 +41,8 @@
 ## M2 小任务
 
 - [x] M2.1 缺失信息路由与 Conditional Edge
-- [ ] M2.2 `interrupt()` / `Command(resume=...)` 的暂停恢复契约（当前）
-- [ ] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
+- [x] M2.2 `interrupt()` / `Command(resume=...)` 的暂停恢复契约
+- [ ] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord（当前）
 - [ ] M2.4 研究问题冻结与新版本创建
 - [ ] M2.5 Checkpoint History、回滚和审计查询
 - [ ] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布（当前）
@@ -77,6 +77,8 @@
 | `v0.1.0` annotated Tag | 远端对象 `a7ef171`，peeled commit `986eee3` |
 | M2.1 Conditional Edge 集成测试 | 通过，8 passed |
 | M2.1 后全量 pytest | 通过，58 passed |
+| M2.2 interrupt/resume 集成测试 | 通过，4 passed |
+| M2.2 后全量 pytest | 通过，62 passed |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
 | `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.1.0 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
@@ -91,9 +93,9 @@
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
-- M2.1 已实现缺失信息路由；`interrupt()`、人工审批、版本冻结、历史回滚仍未实现。
+- M2.1–M2.2 已实现缺失信息路由和真实 interrupt/resume；DecisionRecord、审批结果、版本冻结、历史回滚仍未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-从 M2.2 开始：先验证 `interrupt()` 真暂停和 `Command(resume=...)` 同 thread 恢复，再实现 DecisionRecord。
+从 M2.3 开始：先为五类人工决定建立 DecisionRecord Schema 和失败测试，再接入审批节点。

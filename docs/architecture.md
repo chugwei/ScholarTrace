@@ -65,3 +65,9 @@ START → intake → build_research_question → save → END
 M2.1 在研究问题输入进入校验前计算缺失字段，不用模型补全。`find_missing_question_fields()` 按 ResearchQuestion 契约顺序检查必填文本、核心列表和结构化列表；Conditional Edge 将结果路由到 `clarify` 或原有 `build_research_question → save` 路径。`clarify` 只写入 `awaiting_clarification` 和下一动作，不写入 ResearchQuestion 实体。
 
 这一步仍不是人工暂停：`clarify` 在本批次到达 `END`，没有 `interrupt()`、DecisionRecord 或恢复输入。M2.2 才会把同一分支改成持久化等待，并验证人工输入恢复后能清理旧的 `pending_questions`。
+
+## M2.2 真正暂停与恢复
+
+M2.2 的 `clarify` 节点调用 `interrupt()` 返回结构化 `kind`、缺失字段和当前 payload。第一次运行只提交 checkpoint，不写正式研究问题；客户端必须用同一 `thread_id` 和 `Command(resume=answer)` 恢复。恢复会从 `clarify` 节点开头重放，合并人工补充后回到 `intake`，重新计算缺口，再决定保存或再次暂停。
+
+`pending_questions` 从 M2.2 起使用替换型 Reducer：它代表当前缺口集合，而不是历史并集。历史审计不依赖这个字段，后续 M2.3 的 DecisionRecord 将保存每次人工决定及输入。

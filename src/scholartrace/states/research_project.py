@@ -16,6 +16,12 @@ def merge_unique_strings(left: Iterable[str], right: Iterable[str]) -> list[str]
     return list(dict.fromkeys([*left, *right]))
 
 
+def replace_strings(_left: Iterable[str], right: Iterable[str]) -> list[str]:
+    """Replace a current string list with an ordered, duplicate-free update."""
+
+    return list(dict.fromkeys(right))
+
+
 class ResearchProjectState(TypedDict):
     """Small, replay-safe workflow state containing references, not large artifacts."""
 
@@ -25,7 +31,7 @@ class ResearchProjectState(TypedDict):
     thread_id: str
     active_stage: str
     current_goal: str | None
-    pending_questions: Annotated[list[str], merge_unique_strings]
+    pending_questions: Annotated[list[str], replace_strings]
     pending_approval: dict[str, Any] | None
 
     research_question_id: str | None
