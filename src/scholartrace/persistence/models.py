@@ -392,3 +392,54 @@ class ExperimentPlanRow(Base):
     approved_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
     approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class RunManifestRow(Base):
+    __tablename__ = "run_manifests"
+
+    run_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    plan_id: Mapped[str] = mapped_column(
+        String(40), ForeignKey("experiment_plans.plan_id"), nullable=False, index=True
+    )
+    matrix_entry_id: Mapped[str] = mapped_column(String(128), nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class MetricResultRow(Base):
+    __tablename__ = "metric_results"
+    __table_args__ = (
+        UniqueConstraint(
+            "run_id",
+            "name",
+            "split",
+            "source",
+            name="uq_metric_run_name_split_source",
+        ),
+    )
+
+    metric_result_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    run_id: Mapped[str] = mapped_column(
+        String(40), ForeignKey("run_manifests.run_id"), nullable=False, index=True
+    )
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    split: Mapped[str] = mapped_column(String(128), nullable=False)
+    value: Mapped[float] = mapped_column(nullable=False)
+    source: Mapped[str] = mapped_column(String(32), nullable=False)
+    verification_status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    is_final: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

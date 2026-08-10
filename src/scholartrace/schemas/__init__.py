@@ -22,7 +22,12 @@ from scholartrace.schemas.design import (
     PipelineStage,
     PipelineVersionComparison,
 )
-from scholartrace.schemas.experiment import ExperimentMatrixEntry, ExperimentPlan
+from scholartrace.schemas.experiment import (
+    ExperimentMatrixEntry,
+    ExperimentPlan,
+    MetricResult,
+    RunManifest,
+)
 from scholartrace.schemas.literature import (
     ChunkSearchResult,
     Document,
@@ -55,6 +60,7 @@ __all__ = [
     "InnovationFinding",
     "InnovationValidationReport",
     "MethodDifference",
+    "MetricResult",
     "PipelineSpec",
     "PipelineStage",
     "PipelineVersionComparison",
@@ -62,5 +68,6 @@ __all__ = [
     "PriorArtMap",
     "ProjectDocument",
     "ResearchQuestion",
+    "RunManifest",
     "SourceSpan",
 ]

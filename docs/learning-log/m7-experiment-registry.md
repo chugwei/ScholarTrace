@@ -35,3 +35,9 @@ frozen ExperimentPlan → M7.2 RunManifest import → M7.3 MetricResult
 常见错误是没有批准算法就冻结计划、修改冻结计划的内容、重复使用版本号或矩阵中使用重复种子。Schema 和 Repository 测试分别覆盖结构不变量、审批顺序、父版本、幂等和迁移回滚。当前示例是合成/脱敏农业视觉计划，不是实际训练承诺或指标。
 
 M6 提供候选和证伪计划；M7.1 只冻结实验意图，M7.2 将导入现有日志/配置/权重/指标并标记缺失证据，M7.3 再独立重算指标和更新 Claim。M8 才考虑受控执行。
+
+## M7.2 Run Manifest 与指标边界
+
+`RunManifest` 记录 plan/matrix 身份、代码 SHA、数据版本、配置、环境锁、种子、Checkpoint 和相对 Artifact 路径。导入器先验证它引用的是 frozen 计划，再计算缺失字段；缺失时保存 `incomplete` 和 `missing_requirements`，不丢弃失败信息。相对路径检查阻止把私有绝对路径或 `..` 路径带入 Artifact 根目录。
+
+日志和报告中的数值进入 `MetricResult` 时保留 `source=training_log` 或 `imported_report`、`verification_status=unverifiable`、`is_final=false`。这条边界避免“训练日志最高值”自动变成论文最终指标。M7.3 的独立重算必须另有评估脚本 SHA、数据版本和可重复输入，才能产生 verified/final 结果。

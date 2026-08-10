@@ -113,7 +113,7 @@ def plan(
 def test_m7_plan_migration_rolls_back(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
     upgrade_database(database_path)
-    assert current_revision(database_path) == LATEST_REVISION == "0011"
+    assert current_revision(database_path) == LATEST_REVISION
     downgrade_database(database_path, "0010")
     assert current_revision(database_path) == "0010"
     upgrade_database(database_path)
