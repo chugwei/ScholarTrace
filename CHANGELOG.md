@@ -6,6 +6,18 @@
 
 后续变更将在下一版本记录。
 
+## [0.7.0] - 2026-08-11
+
+### Added
+
+- M7.1 冻结门控的 `ExperimentPlan` 与实验矩阵，绑定数据版本、代码 SHA、环境锁、种子、基线和消融。
+- M7.2 Run Manifest 导入、相对 Artifact 路径安全、缺失 provenance 的 `incomplete` 状态，以及报告指标的 `unverifiable` 边界。
+- M7.3 独立 accuracy/MAE/RMSE 重算、verified/final 指标聚合和 Claim `insufficient` 降级。
+
+### Boundary
+
+- M7 不执行训练，不把日志临时值当作最终指标；受控 Runner、排错和真实场景验证留在后续里程碑。
+
 ## [0.6.0] - 2026-08-11
 
 ### Added

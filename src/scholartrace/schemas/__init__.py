@@ -22,6 +22,14 @@ from scholartrace.schemas.design import (
     PipelineStage,
     PipelineVersionComparison,
 )
+from scholartrace.schemas.experiment import (
+    ClaimUpdate,
+    ExperimentMatrixEntry,
+    ExperimentPlan,
+    MetricAggregate,
+    MetricResult,
+    RunManifest,
+)
 from scholartrace.schemas.literature import (
     ChunkSearchResult,
     Document,
@@ -39,6 +47,7 @@ __all__ = [
     "CandidateExperimentPlan",
     "CaptureField",
     "ChunkSearchResult",
+    "ClaimUpdate",
     "DataCollectionProtocol",
     "DecisionRecord",
     "DesignFinding",
@@ -47,11 +56,15 @@ __all__ = [
     "DocumentChunk",
     "DocumentMetadata",
     "EvidenceCard",
+    "ExperimentMatrixEntry",
+    "ExperimentPlan",
     "InnovationCandidate",
     "InnovationCandidateRanking",
     "InnovationFinding",
     "InnovationValidationReport",
     "MethodDifference",
+    "MetricAggregate",
+    "MetricResult",
     "PipelineSpec",
     "PipelineStage",
     "PipelineVersionComparison",
@@ -59,5 +72,6 @@ __all__ = [
     "PriorArtMap",
     "ProjectDocument",
     "ResearchQuestion",
+    "RunManifest",
     "SourceSpan",
 ]

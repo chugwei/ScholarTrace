@@ -217,7 +217,7 @@ def test_m6_migration_rolls_back_algorithm_tables(tmp_path: Path) -> None:
 def test_m6_candidate_migration_rolls_back_candidate_table(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
     upgrade_database(database_path)
-    assert current_revision(database_path) == "0010"
+    assert current_revision(database_path) == LATEST_REVISION
     downgrade_database(database_path, "0009")
     assert current_revision(database_path) == "0009"
     upgrade_database(database_path)

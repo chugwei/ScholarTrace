@@ -4,7 +4,7 @@
 
 研迹 ScholarTrace 是一个从研究问题、文献证据、数据与实验，到论文和真实部署的可追溯科研工作台。
 
-当前版本为 `v0.6.0`。它包含研究问题与项目生命周期、SQLite Checkpoint、人工审批和版本审计，独立文献目录、SHA-256 去重、合法 PDF 入库、Crossref/OpenAlex 元数据查询、项目级可信证据链，版本化 PipelineSpec/DataCollectionProtocol，以及证据绑定的 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、证伪计划和 `approved_for_experiment` 门禁。M4 的 hashing Vector、M5 的合成方案和 M6 的合成候选只证明离线契约，不代表真实文献召回、真实采集、真实实验或现场结果。`approved_for_experiment` 只表示允许安排验证，不是已证明创新；实验执行、论文生成、Web 工作台和部署仍未实现。
+当前版本为 `v0.7.0`。它包含研究问题与项目生命周期、SQLite Checkpoint、人工审批和版本审计，独立文献目录、SHA-256 去重、合法 PDF 入库、Crossref/OpenAlex 元数据查询、项目级可信证据链，版本化 PipelineSpec/DataCollectionProtocol，证据绑定的算法候选，以及冻结 ExperimentPlan、Run Manifest provenance、报告指标隔离、独立 MAE/RMSE/accuracy 重算和 Claim 证据门禁。M4 的 hashing Vector、M5/M6 的合成方案和 M7 的合成 Run/Metric 只证明离线契约，不代表真实文献召回、真实采集、真实实验或现场结果。M7 不执行训练，M8 才开始受控执行与排错。
 
 ## 环境要求
 
