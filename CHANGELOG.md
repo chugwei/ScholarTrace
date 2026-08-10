@@ -4,6 +4,10 @@
 
 ## [Unreleased]
 
+后续变更将在下一版本记录。
+
+## [0.8.0] - 2026-08-11
+
 ### Added
 
 - M8.1 绑定 frozen `ExperimentPlan` 的受控执行契约、资源上限和 0014 `controlled_runs` 迁移。

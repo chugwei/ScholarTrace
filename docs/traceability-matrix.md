@@ -58,4 +58,5 @@
 | M8.2 启动、取消、超时与流式日志 | `src/scholartrace/runner/executor.py`, `src/scholartrace/persistence/runner_repository.py`, `src/scholartrace/persistence/migrations/versions/0015_add_controlled_run_events.py` | `tests/integration/test_m8_runner_policy.py`, `docs/verification/m8-runner-lifecycle.md` | v0.8.0 | implemented-tested |
 | M8.3 DebugCase、诊断与安全修复回归 | `src/scholartrace/schemas/debug.py`, `src/scholartrace/debugging/analysis.py`, `src/scholartrace/debugging/repair.py`, `src/scholartrace/persistence/debug_case_repository.py`, `src/scholartrace/persistence/migrations/versions/0016_add_debug_cases.py` | `tests/integration/test_m8_runner_policy.py`, `docs/verification/m8-debugging.md` | v0.8.0 | implemented-tested |
 | M8.4.1 MLflow/DVC 初步集成 | `src/scholartrace/schemas/tracking.py`, `src/scholartrace/integrations/tracking.py` | `tests/integration/test_m8_integrations.py`, `docs/verification/m8-integrations.md` | v0.8.0 | implemented-tested |
-| M8.4.2 M8 发布候选与 v0.8.0 发布 | — | — | v0.8.0 | planned |
+| M8.4.2 M8 发布候选 | `pyproject.toml`, `uv.lock`, `README.md`, `CHANGELOG.md` | `docs/verification/m8-release-candidate.md`, 独立 wheel/venv/迁移/秘密扫描 | v0.8.0 | release-candidate |
+| M8.4.3 v0.8.0 发布 | `main`, `v0.8.0` | — | v0.8.0 | planned |

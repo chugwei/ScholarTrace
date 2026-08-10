@@ -1,8 +1,8 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M7 已发布，M8.4 进行中
+- 项目状态：M7 已发布，M8.4.2 发布候选审查中
 - 当前里程碑：M8 — 受控实验执行与排错
-- 当前版本：`v0.7.0`
+- 当前版本：`v0.8.0-rc`
 - 当前分支：`feat/m8-runner-debugging`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
@@ -89,7 +89,8 @@
 - [x] M8.2 启动、取消、超时、流式日志和失败产物隔离
 - [x] M8.3 DebugCase、诊断假设排序、安全修复分支和回归门禁
 - [x] M8.4.1 JSON 离线追踪、MLflow 可选适配和 DVC manifest 校验
-- [ ] M8.4.2 独立审查、发布候选、合并 `main` 与 `v0.8.0` 发布
+- [x] M8.4.2 独立审查与发布候选
+- [ ] M8.4.3 合并 `main`、推送 `v0.8.0` Tag 并关闭 M8
 
 ## 当前验证
 
@@ -204,6 +205,7 @@
 | M8.3 全量质量门禁 | 通过，`scripts/check.py`；140 passed；3 个合成 Fixture |
 | M8.4.1 tracking/DVC 目标测试 | 通过，3 passed；JSON 追踪、MLflow 可用性降级、DVC hash/path 校验 |
 | M8.4.1 全量质量门禁 | 通过，`scripts/check.py`；143 passed；3 个合成 Fixture |
+| M8.4.2 发布候选独立验收 | 待完成；目标为 v0.8.0 wheel/sdist、隔离 venv、迁移 0016、许可证、秘密/大文件扫描和 actionlint |
 
 ## 当前限制
 
@@ -214,4 +216,4 @@
 
 ## 下一步
 
-下一步执行 M8.4.2 发布候选独立审查、版本元数据校验和 `v0.8.0` 发布流程；不把失败日志或临时指标升级为科研 Claim。
+下一步完成 M8.4.2 发布候选独立审查后，合并到 `main`、推送 `v0.8.0` Tag，并重新运行 main smoke；不把失败日志或临时指标升级为科研 Claim。
