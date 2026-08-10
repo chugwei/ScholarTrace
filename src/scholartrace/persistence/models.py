@@ -134,4 +134,71 @@ class ProjectDocumentRow(Base):
         index=True,
     )
     status: Mapped[str] = mapped_column(String(16), nullable=False, default="candidate")
+    relevance_score: Mapped[float | None] = mapped_column(nullable=True)
+    relevance_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    decided_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    decided_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class DocumentChunkRow(Base):
+    __tablename__ = "document_chunks"
+    __table_args__ = (
+        UniqueConstraint("document_id", "ordinal", name="uq_document_chunk_document_ordinal"),
+    )
+
+    chunk_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    document_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("documents.document_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    ordinal: Mapped[int] = mapped_column(Integer, nullable=False)
+    text: Mapped[str] = mapped_column(Text, nullable=False)
+    start_offset: Mapped[int] = mapped_column(Integer, nullable=False)
+    end_offset: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class EvidenceCardRow(Base):
+    __tablename__ = "evidence_cards"
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id",
+            "chunk_id",
+            "source_start_offset",
+            "source_end_offset",
+            name="uq_evidence_card_project_span",
+        ),
+    )
+
+    evidence_card_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    document_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("documents.document_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    chunk_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("document_chunks.chunk_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    statement: Mapped[str] = mapped_column(Text, nullable=False)
+    quote: Mapped[str] = mapped_column(Text, nullable=False)
+    source_start_offset: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_end_offset: Mapped[int] = mapped_column(Integer, nullable=False)
+    locator_kind: Mapped[str] = mapped_column(String(16), nullable=False)
+    locator_value: Mapped[str] = mapped_column(Text, nullable=False)
+    verification_status: Mapped[str] = mapped_column(String(16), nullable=False)
+    verified_by: Mapped[str] = mapped_column(String(128), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

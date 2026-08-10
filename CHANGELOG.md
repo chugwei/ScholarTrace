@@ -6,6 +6,14 @@
 
 后续变更将在下一版本记录。
 
+## [0.4.0] - 2026-08-11
+
+### Added
+
+- M4.1 项目文献 `candidate` / `approved` / `rejected` 状态、确定性相关度和人工审核元数据。
+- M4.2 可追溯 `DocumentChunk`、BM25 + Vector 混合检索和索引失败时的旧快照保留。
+- M4.3 经过来源片段与引用 locator 校验的 EvidenceCard，以及 10 条离线检索回归用例。
+
 ## [0.3.0] - 2026-08-11
 
 ### Added

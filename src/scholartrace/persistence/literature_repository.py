@@ -3,19 +3,21 @@
 import hashlib
 from pathlib import Path
 
-from sqlalchemy import String, cast, func, or_, select
+from sqlalchemy import String, cast, delete, func, or_, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from scholartrace.identifiers import validate_identifier
+from scholartrace.literature_relevance import RelevanceScore, score_document_relevance
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.models import (
+    DocumentChunkRow,
     DocumentRow,
     ProjectDocumentRow,
     ProjectRow,
     utc_now_naive,
 )
-from scholartrace.schemas import Document, ProjectDocument
+from scholartrace.schemas import Document, DocumentChunk, ProjectDocument
 
 
 class LiteratureRepositoryError(RuntimeError):
@@ -181,6 +183,187 @@ class LiteratureRepository:
             session.flush()
             return _project_document_model(row)
 
+    def review_project_document(
+        self,
+        project_id: str,
+        document_id: str,
+        *,
+        status: str,
+        actor_id: str,
+        reason: str,
+        relevance_score: float | None = None,
+    ) -> ProjectDocument:
+        """Record a project-scoped approval decision without changing the global document."""
+
+        project_id = validate_identifier(project_id)
+        document_id = validate_identifier(document_id)
+        actor_id = validate_identifier(actor_id)
+        if status not in {"approved", "rejected"}:
+            raise ValueError("review status must be approved or rejected")
+        if not reason.strip():
+            raise ValueError("review reason is required")
+        if relevance_score is not None and not 0 <= relevance_score <= 1:
+            raise ValueError("relevance_score must be between 0 and 1")
+        with Session(self._engine) as session, session.begin():
+            row = session.scalar(
+                select(ProjectDocumentRow).where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.document_id == document_id,
+                )
+            )
+            if row is None:
+                raise ProjectDocumentConflictError(
+                    "document must be attached as candidate before review"
+                )
+            document = session.get(DocumentRow, document_id)
+            if document is None:
+                raise DocumentNotFoundError(f"document {document_id!r} was not found")
+            if status == "approved" and (
+                document.ingest_status == "failed" or not document.searchable
+            ):
+                raise LiteratureRepositoryError(
+                    "failed or non-searchable documents cannot be approved"
+                )
+            row.status = status
+            row.relevance_score = relevance_score
+            row.relevance_reason = reason.strip()
+            row.decided_by = actor_id
+            row.decided_at = utc_now_naive()
+            session.flush()
+            return _project_document_model(row)
+
+    def rank_project_candidates(self, project_id: str, query: str) -> list[RelevanceScore]:
+        """Rank only candidate links using deterministic metadata overlap."""
+
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            rows = session.scalars(
+                select(ProjectDocumentRow)
+                .where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "candidate",
+                )
+                .order_by(ProjectDocumentRow.document_id)
+            ).all()
+            scores: list[RelevanceScore] = []
+            for link in rows:
+                document = session.get(DocumentRow, link.document_id)
+                if document is None:
+                    continue
+                scores.append(score_document_relevance(query, _document_model(document)))
+            return sorted(scores, key=lambda item: (-item.score, item.document.document_id))
+
+    def list_approved_documents(self, project_id: str) -> list[Document]:
+        """Return only project documents explicitly approved by a human."""
+
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            rows = session.scalars(
+                select(DocumentRow)
+                .join(
+                    ProjectDocumentRow,
+                    ProjectDocumentRow.document_id == DocumentRow.document_id,
+                )
+                .where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "approved",
+                )
+                .order_by(DocumentRow.document_id)
+            ).all()
+            return [_document_model(row) for row in rows]
+
+    def replace_document_chunks(
+        self, document_id: str, chunks: list[DocumentChunk]
+    ) -> list[DocumentChunk]:
+        """Replace a document's chunks atomically after validating their identity."""
+
+        document_id = validate_identifier(document_id)
+        if any(chunk.document_id != document_id for chunk in chunks):
+            raise ValueError("all chunks must belong to document_id")
+        ordinals = [chunk.ordinal for chunk in chunks]
+        if len(ordinals) != len(set(ordinals)):
+            raise ValueError("chunk ordinals must be unique per document")
+        with Session(self._engine) as session, session.begin():
+            if session.get(DocumentRow, document_id) is None:
+                raise DocumentNotFoundError(f"document {document_id!r} was not found")
+            session.execute(
+                delete(DocumentChunkRow).where(DocumentChunkRow.document_id == document_id)
+            )
+            session.add_all(
+                DocumentChunkRow(
+                    chunk_id=chunk.chunk_id,
+                    document_id=chunk.document_id,
+                    ordinal=chunk.ordinal,
+                    text=chunk.text,
+                    start_offset=chunk.start_offset,
+                    end_offset=chunk.end_offset,
+                    content_sha256=chunk.content_sha256,
+                    created_at=chunk.created_at.replace(tzinfo=None),
+                )
+                for chunk in chunks
+            )
+            session.flush()
+            return [_chunk_model(row) for row in sorted(chunks, key=lambda item: item.ordinal)]
+
+    def list_document_chunks(self, document_id: str) -> list[DocumentChunk]:
+        document_id = validate_identifier(document_id)
+        with Session(self._engine) as session:
+            if session.get(DocumentRow, document_id) is None:
+                raise DocumentNotFoundError(f"document {document_id!r} was not found")
+            rows = session.scalars(
+                select(DocumentChunkRow)
+                .where(DocumentChunkRow.document_id == document_id)
+                .order_by(DocumentChunkRow.ordinal)
+            ).all()
+            return [_chunk_model(row) for row in rows]
+
+    def list_approved_chunks(self, project_id: str) -> list[DocumentChunk]:
+        """Return chunks only from documents approved for this project."""
+
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            if session.get(ProjectRow, project_id) is None:
+                raise LiteratureRepositoryError(f"project {project_id!r} was not found")
+            rows = session.scalars(
+                select(DocumentChunkRow)
+                .join(
+                    ProjectDocumentRow,
+                    ProjectDocumentRow.document_id == DocumentChunkRow.document_id,
+                )
+                .where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "approved",
+                )
+                .order_by(DocumentChunkRow.document_id, DocumentChunkRow.ordinal)
+            ).all()
+            return [_chunk_model(row) for row in rows]
+
+    def get_approved_chunk(self, project_id: str, chunk_id: str) -> tuple[DocumentChunk, Document]:
+        """Load a Chunk and its Document only through an approved project link."""
+
+        project_id = validate_identifier(project_id)
+        chunk_id = validate_identifier(chunk_id)
+        with Session(self._engine) as session:
+            result = session.execute(
+                select(DocumentChunkRow, DocumentRow)
+                .join(DocumentRow, DocumentRow.document_id == DocumentChunkRow.document_id)
+                .join(
+                    ProjectDocumentRow,
+                    ProjectDocumentRow.document_id == DocumentChunkRow.document_id,
+                )
+                .where(
+                    DocumentChunkRow.chunk_id == chunk_id,
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "approved",
+                )
+            ).one_or_none()
+            if result is None:
+                raise ProjectDocumentConflictError(
+                    "chunk must belong to an approved project document"
+                )
+            chunk_row, document_row = result
+            return _chunk_model(chunk_row), _document_model(document_row)
+
     def list_project_documents(self, project_id: str) -> list[ProjectDocument]:
         project_id = validate_identifier(project_id)
         with Session(self._engine) as session:
@@ -247,6 +430,25 @@ def _project_document_model(row: ProjectDocumentRow) -> ProjectDocument:
             "project_id": row.project_id,
             "document_id": row.document_id,
             "status": row.status,
+            "relevance_score": row.relevance_score,
+            "relevance_reason": row.relevance_reason,
+            "decided_by": row.decided_by,
+            "decided_at": row.decided_at,
+            "created_at": row.created_at,
+        }
+    )
+
+
+def _chunk_model(row: DocumentChunkRow) -> DocumentChunk:
+    return DocumentChunk.model_validate(
+        {
+            "chunk_id": row.chunk_id,
+            "document_id": row.document_id,
+            "ordinal": row.ordinal,
+            "text": row.text,
+            "start_offset": row.start_offset,
+            "end_offset": row.end_offset,
+            "content_sha256": row.content_sha256,
             "created_at": row.created_at,
         }
     )

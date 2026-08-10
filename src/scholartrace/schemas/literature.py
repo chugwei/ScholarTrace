@@ -3,7 +3,7 @@
 from datetime import datetime
 from typing import Annotated, Literal
 
-from pydantic import BaseModel, ConfigDict, Field, StringConstraints
+from pydantic import BaseModel, ConfigDict, Field, StringConstraints, model_validator
 
 NonBlankText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
@@ -16,7 +16,7 @@ DocumentQualityStatus = Literal[
     "metadata_incomplete",
     "unknown",
 ]
-ProjectDocumentStatus = Literal["candidate"]
+ProjectDocumentStatus = Literal["candidate", "approved", "rejected"]
 
 
 class DocumentMetadata(BaseModel):
@@ -61,4 +61,84 @@ class ProjectDocument(BaseModel):
     project_id: NonBlankText
     document_id: NonBlankText
     status: ProjectDocumentStatus = "candidate"
+    relevance_score: float | None = Field(default=None, ge=0, le=1)
+    relevance_reason: str | None = None
+    decided_by: NonBlankText | None = None
+    decided_at: datetime | None = None
+    created_at: datetime
+
+
+class DocumentChunk(BaseModel):
+    """A traceable, searchable span of one catalog document."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    chunk_id: NonBlankText
+    document_id: NonBlankText
+    ordinal: int = Field(ge=0)
+    text: str = Field(min_length=1)
+    start_offset: int = Field(ge=0)
+    end_offset: int = Field(gt=0)
+    content_sha256: Annotated[str, StringConstraints(pattern=r"^[0-9a-f]{64}$")]
+    created_at: datetime
+
+    @model_validator(mode="after")
+    def validate_span(self) -> "DocumentChunk":
+        if self.end_offset <= self.start_offset:
+            raise ValueError("end_offset must be greater than start_offset")
+        if not self.text.strip():
+            raise ValueError("chunk text cannot be blank")
+        if len(self.text) != self.end_offset - self.start_offset:
+            raise ValueError("chunk offsets must span the exact chunk text length")
+        return self
+
+
+class ChunkSearchResult(BaseModel):
+    """Hybrid retrieval result with the source span required for citation tracing."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    chunk: DocumentChunk
+    lexical_score: float = Field(ge=0)
+    vector_score: float = Field(ge=0)
+    score: float = Field(ge=0)
+    index_generation: NonBlankText
+
+
+SourceLocatorKind = Literal["doi", "url", "local"]
+
+
+class SourceSpan(BaseModel):
+    """A quoted span that can be located inside one persisted DocumentChunk."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    document_id: NonBlankText
+    chunk_id: NonBlankText
+    quote: str = Field(min_length=1)
+    start_offset: int = Field(ge=0)
+    end_offset: int = Field(gt=0)
+
+    @model_validator(mode="after")
+    def validate_span(self) -> "SourceSpan":
+        if self.end_offset <= self.start_offset:
+            raise ValueError("end_offset must be greater than start_offset")
+        if not self.quote.strip():
+            raise ValueError("quote cannot be blank")
+        return self
+
+
+class EvidenceCard(BaseModel):
+    """A verified project-scoped evidence statement with a source locator."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    evidence_card_id: NonBlankText
+    project_id: NonBlankText
+    statement: NonBlankText
+    source_span: SourceSpan
+    locator_kind: SourceLocatorKind
+    locator_value: NonBlankText
+    verification_status: Literal["verified"] = "verified"
+    verified_by: NonBlankText
     created_at: datetime
