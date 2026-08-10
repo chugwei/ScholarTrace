@@ -28,4 +28,4 @@ Fixture validation: 3 synthetic fixtures passed
 
 ## 限制
 
-本批次只验证研究问题审批图的 checkpoint 回滚，尚未为 CLI 或 Web API 暴露回滚入口；M2.6 发布审查、合并 main 和 `v0.2.0` Tag 尚未完成。验证使用合成、脱敏 Fixture，不等同于真实场景证据。
+本批次只验证研究问题审批图的 checkpoint 回滚，尚未为 CLI 或 Web API 暴露回滚入口；本记录对应 M2.5 当时的检查点，M2.6 发布候选审查见 `m2-release-candidate.md`。验证使用合成、脱敏 Fixture，不等同于真实场景证据。

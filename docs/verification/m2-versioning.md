@@ -26,4 +26,4 @@ pytest: 75 passed
 Fixture validation: 3 synthetic fixtures passed
 ```
 
-验证数据使用合成、脱敏农业视觉 Fixture，不等同于真实场景结果；M2.5 Checkpoint 历史、回滚查询和 M2.6 发布门禁仍未完成。
+验证数据使用合成、脱敏农业视觉 Fixture，不等同于真实场景结果；本记录对应 M2.4 当时的检查点，M2.5 和 M2.6 的后续证据见 `m2-history-rollback.md` 与 `m2-release-candidate.md`。

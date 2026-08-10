@@ -8,7 +8,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 |---|---|---|---|---|---|
 | M0 仓库骨架 | v0.0.1 | completed | main | [v0.0.1](https://github.com/chugwei/ScholarTrace/tree/v0.0.1) | 本地、独立环境、CI 通过 |
 | M1 持久化项目图 | v0.1.0 | completed | feat/m1-project-state | [v0.1.0](https://github.com/chugwei/ScholarTrace/tree/v0.1.0) | main CI、独立源码/wheel、E2E 通过 |
-| M2 人工审批与历史 | v0.2.0 | in_progress | feat/m2-human-approval | — | 任务拆分完成 |
+| M2 人工审批与历史 | v0.2.0 | release_candidate | feat/m2-human-approval | — | M2.1–M2.5 与独立门禁通过，待合并 Tag |
 | M3 独立文献库 | v0.3.0 | pending | feat/m3-literature-library | — | — |
 | M4 可信证据 RAG | v0.4.0 | pending | feat/m4-evidence-rag | — | — |
 | M5 管线与数据设计 | v0.5.0 | pending | feat/m5-pipeline-data-design | — | — |
@@ -58,4 +58,4 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M2.3 | 审批 DecisionRecord | 批准/拒绝/修改/取消/暂停路径测试 | completed |
 | M2.4 | 研究问题版本 | 冻结、新版本和内容哈希测试 | completed |
 | M2.5 | 历史与回滚 | Checkpoint History、回滚、审计测试 | completed |
-| M2.6 | M2 发布 | 独立审查、main CI、`v0.2.0` | pending |
+| M2.6 | M2 发布 | 独立审查、main CI、`v0.2.0` | release_candidate |

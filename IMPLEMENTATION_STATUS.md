@@ -1,8 +1,8 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 已发布，M2.5 实现完成，继续 M2
+- 项目状态：M2 发布候选已完成，待合并与 Tag
 - 当前里程碑：M2 — 人工澄清、审批与版本历史
-- 当前版本：`v0.1.0`
+- 当前版本：`v0.2.0`
 - 当前分支：`feat/m2-human-approval`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-10（Asia/Shanghai）
@@ -45,7 +45,7 @@
 - [x] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
 - [x] M2.4 研究问题冻结与新版本创建
 - [x] M2.5 Checkpoint History、回滚和审计查询
-- [ ] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布
+- [x] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布候选
 
 ## 当前验证
 
@@ -100,11 +100,16 @@
 | M2.4 迁移 `0003 → 0002 → 0001 → base → head` | 通过，生命周期列正确移除并恢复 |
 | M2.5 History/rollback 目标测试 | 通过，13 passed |
 | M2.5 后全量质量门禁 | 通过，76 passed；Ruff 39 files formatted；3 个 Fixture |
+| M2.6 发布候选全量质量门禁 | 通过，76 passed；Ruff 39 files formatted；3 个 Fixture |
+| `uv build` v0.2.0 | 通过，sdist/wheel 构建成功 |
+| 独立 wheel venv 安装/import/CLI/迁移 | 通过，版本 0.2.0，迁移 0003 |
+| `actionlint` Docker | 通过，无诊断 |
+| 发布候选秘密/个人路径/大文件扫描 | 通过，0 matches、tracked >5MB 为 0 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
-- M2.1–M2.5 已实现缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结和受控 checkpoint 回滚；M2.6 发布审查仍未完成。
+- M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和发布候选审查；合并 `main`、远端 CI 和 `v0.2.0` Tag 仍待完成。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
