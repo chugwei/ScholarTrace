@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from sqlalchemy import JSON, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
+from sqlalchemy import JSON, Boolean, DateTime, ForeignKey, Integer, String, Text, UniqueConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 
 
@@ -83,4 +83,55 @@ class DecisionRecordRow(Base):
     actor_id: Mapped[str] = mapped_column(String(128), nullable=False)
     reason: Mapped[str | None] = mapped_column(Text, nullable=True)
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class DocumentRow(Base):
+    __tablename__ = "documents"
+    __table_args__ = (UniqueConstraint("content_sha256", name="uq_document_content_sha256"),)
+
+    document_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False, unique=True)
+    mime_type: Mapped[str] = mapped_column(String(128), nullable=False)
+    byte_size: Mapped[int] = mapped_column(Integer, nullable=False)
+    source_type: Mapped[str] = mapped_column(String(32), nullable=False)
+    ingest_status: Mapped[str] = mapped_column(String(24), nullable=False)
+    quality_status: Mapped[str] = mapped_column(String(32), nullable=False)
+    searchable: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    title: Mapped[str | None] = mapped_column(Text, nullable=True)
+    authors: Mapped[list[str]] = mapped_column(JSON, nullable=False)
+    abstract: Mapped[str | None] = mapped_column(Text, nullable=True)
+    year: Mapped[int | None] = mapped_column(Integer, nullable=True)
+    doi: Mapped[str | None] = mapped_column(String(256), nullable=True, index=True)
+    url: Mapped[str | None] = mapped_column(String(2048), nullable=True)
+    storage_relpath: Mapped[str | None] = mapped_column(Text, nullable=True)
+    text_relpath: Mapped[str | None] = mapped_column(Text, nullable=True)
+    parser_version: Mapped[str | None] = mapped_column(String(64), nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class ProjectDocumentRow(Base):
+    __tablename__ = "project_documents"
+    __table_args__ = (
+        UniqueConstraint(
+            "project_id",
+            "document_id",
+            name="uq_project_document_project_document",
+        ),
+    )
+
+    project_document_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    document_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("documents.document_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="candidate")
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

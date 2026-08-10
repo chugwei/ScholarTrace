@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M2 已发布，进入 M3
-- 当前里程碑：M2 — 人工澄清、审批与版本历史
+- 项目状态：M2 已发布，M3.1 已完成，继续 M3
+- 当前里程碑：M3 — 独立文献库
 - 当前版本：`v0.2.0`
-- 当前分支：`main`
+- 当前分支：`feat/m3-literature-library`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-10（Asia/Shanghai）
 
@@ -46,6 +46,13 @@
 - [x] M2.4 研究问题冻结与新版本创建
 - [x] M2.5 Checkpoint History、回滚和审计查询
 - [x] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布
+
+## M3 小任务
+
+- [x] M3.1 Document/ProjectDocument Schema、0004 迁移、SHA-256 去重和目录搜索
+- [ ] M3.2 合法 PDF 入库、原文只读保存、元数据解析和质量标记
+- [ ] M3.3 Crossref/OpenAlex 查询、失败降级和来源标记
+- [ ] M3.4 独立审查、合并 `main` 与 `v0.3.0` 发布
 
 ## 当前验证
 
@@ -107,13 +114,16 @@
 | 发布候选秘密/个人路径/大文件扫描 | 通过，0 matches、tracked >5MB 为 0 |
 | M2 main 合并 | 通过，merge commit `6689572`，main smoke test 与全量门禁通过 |
 | `v0.2.0` annotated Tag | 通过，tag object `f4990a7d`，peeled commit `6689572`，远端已核验 |
+| M3.1 文献目录目标测试 | 通过，3 passed |
+| M3.1 Ruff format/lint | 通过，46 files formatted、无诊断 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
+- M3.1 已完成独立文献目录、项目 candidate 关联、SHA-256 去重和失败条目隔离；PDF、外部元数据和 M4 可信证据仍未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M3：独立文献库；不把 M2 的离线 Fixture 结果宣传为真实文献或真实场景证据。
+下一步进入 M3.2：合法 PDF 入库、解析和质量标记；不把合成条目宣传为真实文献证据。

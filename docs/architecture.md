@@ -99,3 +99,9 @@ START → intake ──(缺字段)──> clarify ──> intake
 审批图 facade 暴露 `history()` / `get_state_history()`，返回同一 `thread_id` 的 LangGraph `StateSnapshot`，按新到旧排列；查询不跨线程，也不修改历史记录。`rollback(thread_id, checkpoint_id, actor_id, reason)` 先确认目标 checkpoint 属于该 thread，再使用 `update_state()` 将目标 State 写入一个新的 checkpoint。旧 checkpoint 永不被覆盖，新的 State 会保留目标的下一节点语义。
 
 回滚完成后写入一个 `DecisionRecord(target_type="checkpoint", action="rolled_back")`，payload 同时记录来源 checkpoint、目标 checkpoint 和恢复后的阶段。`list_audit_records()` 与 `list_decisions()` 支持按 target/action 查询，因此“谁在何时把哪个 thread 从哪里恢复到哪里”可以独立于 Graph State 查询。回滚只恢复工作流 State，不删除已经批准的领域版本；若要修改研究问题，仍必须走 M2.4 的新版本审批链。
+
+## M3.1 独立文献目录
+
+`documents` 是全局目录，`project_documents` 只是项目候选关联；M3 不把目录条目自动变成项目证据。文献 ID 由内容 SHA-256 派生，重复上传返回同一记录，项目关联使用独立稳定 ID 并保持 `candidate` 状态。
+
+目录查询只读取 `searchable=true` 且 `ingest_status != failed` 的元数据字段（标题、作者、摘要、DOI、URL）。原始 PDF、解析文本和大型运行数据不进入数据库或 Git；M3.2 将把合法上传文件写到 `.gitignore` 覆盖的运行时存储，并显式记录解析质量。
