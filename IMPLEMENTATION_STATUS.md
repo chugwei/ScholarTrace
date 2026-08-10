@@ -59,8 +59,13 @@
 | `uv run scholartrace --help` | 通过，Windows UTF-8 中文显示正常 |
 | M1.5 独立进程恢复 E2E | 通过，4 passed；参数化恢复 3/3 |
 | M1.5 后全量 pytest | 通过，50 passed |
+| `git archive 52bf99f` 独立源码验收 | 通过，50 passed，sdist/wheel 0.1.0 |
+| 独立 wheel 安装、迁移、CLI 恢复 | 通过，版本 0.1.0，Apache-2.0 |
+| M1 发布候选秘密/大文件/内部路径扫描 | 通过，均为 0 |
+| `actionlint` Docker | 通过，无诊断 |
+| GitHub Actions quality Run #14 | 通过，commit `52bf99f` |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
-| `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.0.1 |
+| `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.1.0 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
 | `actionlint` Docker 静态检查 | 通过，无诊断输出 |
 | GitHub Actions quality Run #4 | 通过，commit `42238c1`，10s |

@@ -21,3 +21,4 @@
 | M1 最小 Graph/Checkpointer | `src/scholartrace/graphs/research_project.py` | `tests/integration/test_research_graph.py`, `docs/verification/m1-graph.md` | v0.1.0 | implemented-tested |
 | M1 CLI create/continue/show | `src/scholartrace/cli.py`, `pyproject.toml` | `tests/integration/test_cli.py`, `docs/verification/m1-cli.md` | v0.1.0 | implemented-tested |
 | M1 独立进程重启恢复 | `src/scholartrace/__main__.py`, `examples/agriculture-vision-project/research-question.json` | `tests/e2e/test_cli_process_recovery.py`, `docs/verification/m1-process-recovery.md` | v0.1.0 | implemented-tested |
+| M1 发布候选与独立环境 | `pyproject.toml`, `uv.lock`, `docs/verification/m1-release-candidate.md` | Git archive、wheel、Run #14、actionlint、秘密扫描 | v0.1.0 | implemented-tested |
