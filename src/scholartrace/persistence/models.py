@@ -202,3 +202,55 @@ class EvidenceCardRow(Base):
     verification_status: Mapped[str] = mapped_column(String(16), nullable=False)
     verified_by: Mapped[str] = mapped_column(String(128), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class PipelineSpecRow(Base):
+    __tablename__ = "pipeline_specs"
+    __table_args__ = (
+        UniqueConstraint("project_id", "version", name="uq_pipeline_project_version"),
+        UniqueConstraint("project_id", "content_sha256", name="uq_pipeline_project_content"),
+    )
+
+    pipeline_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    parent_pipeline_id: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    decision_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class DataCollectionProtocolRow(Base):
+    __tablename__ = "data_collection_protocols"
+    __table_args__ = (
+        UniqueConstraint("project_id", "version", name="uq_protocol_project_version"),
+        UniqueConstraint("project_id", "content_sha256", name="uq_protocol_project_content"),
+    )
+
+    protocol_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False)
+    parent_protocol_id: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    decision_reason: Mapped[str | None] = mapped_column(Text, nullable=True)
+    approved_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    approved_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

@@ -137,3 +137,11 @@ M4 在 M3 全局目录之上维护项目级 `ProjectDocument` 状态：新关联
 `EvidenceCardService.create_card()` 首先通过 `get_approved_chunk()` 检查项目关系，随后要求用户提供的 quote 精确出现在 Chunk 中，并将 Chunk 内相对位置转换为原文绝对偏移。它从 Document 的 DOI、HTTP(S) URL 或安全的相对本地路径中选择 locator；没有可解析来源时不写卡片。配置运行时文本根目录后，还会再次读取原文并校验绝对偏移，防止存储文件被替换。
 
 持久化的 EvidenceCard 固定为 `verified`，包含 statement、SourceSpan、locator、审核者和创建时间。它是有来源的证据记录，不是模型自动生成的科研结论；statement 仍需要研究者判断。`tests/fixtures/retrieval/m4-regression.json` 提供 10 条合成农业视觉查询，验证当前离线索引的 top-1 基线，真实文献召回仍需后续数据和人工标注。
+
+## M5.1 版本化研究设计契约
+
+`PipelineSpec` 把数据采集、训练、评估和交付阶段保存为有序 `PipelineStage` 列表；`DataCollectionProtocol` 描述目标群体、抽样、采集字段、标注策略、数据划分和泄漏控制。两者都使用 Pydantic `extra="forbid"`，在边界拒绝未知字段和重复 stage/field 名称，并由 Repository 计算 canonical content SHA-256。
+
+`DesignRepository` 将每个版本写入独立 SQLite 表。新设计从 `draft` 开始；批准写入 actor、理由和时间，并把旧的 approved 版本标记为 `superseded`。批准版本不能被隐式覆盖，修改必须使用递增版本号和当前批准父 ID；相同内容重放返回原记录。0008 迁移支持完整回退，JSON payload 保留 Schema 之外的可审计原始结构。
+
+本批次还没有研究设计 Subgraph、流程图、数据泄漏执行检查或 Markdown/YAML 导出。Repository 是领域持久化边界，不冒充 LangGraph Node；M5.2 才把这些契约接入可重放的 Subgraph 和人工发布流程。
