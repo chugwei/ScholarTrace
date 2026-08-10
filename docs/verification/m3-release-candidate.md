@@ -38,6 +38,13 @@ version 0.3.0; scholartrace --help passed; migration 0004 passed
 
 `docker run --rm -v <workspace>:/repo -w /repo rhysd/actionlint:latest` 已通过且无诊断；tracked secret/personal-path scan 为 0 matches，tracked 文件大于 5MB 为 0。GitHub Actions API 若因 rate limit 无法读取，保持未验证，不猜测 CI 结论。Tag 只在功能分支推送、合并 `main`、main smoke test 和远端 Ref 核验后创建。
 
+## 发布结果
+
+- 功能分支已非 squash 合并到 `main`，merge commit：`c12b362270a731f4750204e7ec088460a104ca04`；
+- `main` 已推送并核验为 `c12b362`；
+- annotated Tag `v0.3.0` 已推送；Tag object：`8ac3d022e33446f35b8d0b5504d5055093bd336e`，peeled commit：`c12b362`；
+- M3 已发布；M4 项目级可信证据筛选与 RAG 尚未实现。
+
 ## 能力边界
 
 PDF 和 API 测试使用合成内容、MockTransport 和离线临时目录；它们证明的是文件处理、来源标记和失败契约，不是具体真实论文事实、版权授权或真实农业场景验证。M4–M12 仍需按路线实现。

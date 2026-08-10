@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M3 发布候选已完成，待合并与 Tag
+- 项目状态：M3 已发布，进入 M4
 - 当前里程碑：M3 — 独立文献库
 - 当前版本：`v0.3.0`
-- 当前分支：`feat/m3-literature-library`
+- 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-10（Asia/Shanghai）
 
@@ -52,7 +52,7 @@
 - [x] M3.1 Document/ProjectDocument Schema、0004 迁移、SHA-256 去重和目录搜索
 - [x] M3.2 合法 PDF 入库、原文只读保存、元数据解析和质量标记
 - [x] M3.3 Crossref/OpenAlex 查询、失败降级和来源标记
-- [x] M3.4 独立审查、合并 `main` 与 `v0.3.0` 发布候选
+- [x] M3.4 独立审查、合并 `main` 与 `v0.3.0` 发布
 
 ## 当前验证
 
@@ -122,14 +122,16 @@
 | M3.3 后全量质量门禁 | 通过，86 passed；Ruff 48 files formatted；3 个 Fixture |
 | `uv build` v0.3.0 | 通过，sdist/wheel 构建成功 |
 | 独立 wheel venv 安装/import/CLI/迁移 | 通过，版本 0.3.0，迁移 0004 |
+| M3 main 合并 | 通过，merge commit `c12b362`，main smoke test 与全量门禁通过 |
+| `v0.3.0` annotated Tag | 通过，tag object `8ac3d022`，peeled commit `c12b362`，远端已核验 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
-- M3.1–M3.3 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化和显式失败降级；M4 可信证据和 approved/rejected 仍未实现。
+- M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 可信证据和 approved/rejected 仍未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步完成 M3.4：独立审查、全量门禁、合并 `main` 并发布 `v0.3.0`；不把 MockTransport 结果宣传为真实文献查询证据。
+下一步进入 M4：项目文献筛选与可信证据；不把 MockTransport 或合成 PDF 结果宣传为真实文献事实。
