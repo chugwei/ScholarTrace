@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M6 已发布，M7 进行中
+- 项目状态：M7 发布候选准备中
 - 当前里程碑：M7 — 实验计划与结果导入
-- 当前版本：`v0.6.0`
-- 当前分支：`main`
+- 当前版本：`v0.7.0`
+- 当前分支：`feat/m7-experiment-registry`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -81,7 +81,7 @@
 - [x] M7.1 ExperimentPlan、实验矩阵和冻结门禁
 - [x] M7.2 Run Manifest、现有产物导入和不可验证状态
 - [x] M7.3 指标独立重算、统计汇总和 Claim 更新
-- [ ] M7.4 独立审查、合并 `main` 与 `v0.7.0` 发布（当前）
+- [ ] M7.4 独立审查、合并 `main` 与 `v0.7.0` 发布（发布候选）
 
 ## 当前验证
 
@@ -186,6 +186,7 @@
 | M7.2 全量质量门禁 | 通过，`scripts/check.py`；125 passed；3 个合成 Fixture |
 | M7.3 指标/Claim 目标测试 | 通过，5 passed；独立重算、verified 聚合、数据版本和 Claim 降级 |
 | M7.3 全量质量门禁 | 通过，`scripts/check.py`；127 passed；3 个合成 Fixture |
+| M7.4 发布候选 | 通过，v0.7.0 wheel/sdist、隔离 venv、CLI、迁移 0013、actionlint、Apache-2.0、内部文件排除和秘密扫描；详见 `docs/verification/m7-release-candidate.md` |
 
 ## 当前限制
 
