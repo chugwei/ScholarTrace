@@ -16,6 +16,7 @@
 - M10.2 增加离线 BibTeX 解析、引用缺失报告和来源绑定的确定性章节草稿模板。
 - M10.3 增加显式 Claim/MetricResult 标记、章节一致性、证据缺口和 Conclusion 新 Claim 门禁。
 - M10.4 完成独立发布候选审查，并发布 `v0.10.0`。
+- M11.1 增加 FastAPI Project/Run/Artifact API，复用 Repository 的迁移、隔离和受控 Run 门禁。
 
 ### Boundary
 

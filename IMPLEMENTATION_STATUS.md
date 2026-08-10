@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M10 已发布，M11 待开始
+- 项目状态：M11.2 进行中
 - 当前里程碑：M11 — FastAPI、SSE 与 Web 工作台
 - 当前版本：`v0.10.0`
-- 当前分支：`main`
+- 当前分支：`feat/m11-web-workbench`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -108,7 +108,7 @@
 
 ## M11 小任务
 
-- [ ] M11.1 FastAPI Project/Run/Artifact API 与持久化读写
+- [x] M11.1 FastAPI Project/Run/Artifact API 与持久化读写
 - [ ] M11.2 SSE Run 时间线与连接降级
 - [ ] M11.3 Web 工作台页面、审批组件和黄金样例垂直流程
 - [ ] M11.4 独立审查、合并 `main` 与 `v0.11.0` 发布
@@ -244,6 +244,8 @@
 | M10.3 全量质量门禁 | 通过，`scripts/check.py`；162 passed；3 个合成 Fixture |
 | M10.4 发布候选 | 通过；v0.10.0 wheel/sdist、独立 venv、0018 迁移、许可证、秘密/大文件扫描、Git archive、Docker actionlint 和 Python smoke |
 | M10.4 main 合并与 v0.10.0 发布 | 通过；merge `33cf794`；main 162 passed；annotated Tag `v0.10.0` object `154fcbd` 已推送，peeled `33cf794` |
+| M11.1 API 目标测试 | 通过，3 passed；Project/Run/Artifact 路由、Repository 复用和项目隔离 |
+| M11.1 全量质量门禁 | 通过，`scripts/check.py`；165 passed；3 个合成 Fixture |
 
 ## 当前限制
 
@@ -254,4 +256,4 @@
 
 ## 下一步
 
-下一步创建 `feat/m11-web-workbench`，先实现 API 与持久化读写；不把合成演示描述为真实场景交付。
+下一步实现 M11.2 SSE Run 时间线、重放和断线降级；不把合成演示描述为真实场景交付。

@@ -15,6 +15,7 @@ authors = [
 ]
 dependencies = [
   "alembic>=1.19,<2",
+  "fastapi>=0.115,<0.116",
   "langchain-core>=1.2,<2",
   "langgraph>=1.2,<2",
   "langgraph-checkpoint-sqlite>=3.1,<4",

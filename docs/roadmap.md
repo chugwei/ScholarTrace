@@ -17,7 +17,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M8 Runner 与排错 | v0.8.0 | completed | main | [v0.8.0](https://github.com/chugwei/ScholarTrace/tree/v0.8.0) | merge `99f72e1`、main 门禁、Tag 已核验 |
 | M9 图表系统 | v0.9.0 | completed | main | [v0.9.0](https://github.com/chugwei/ScholarTrace/tree/v0.9.0) | merge `4e60f48`、149 tests、视觉验收和 Tag 已核验 |
 | M10 论文与引用 | v0.10.0 | completed | main | [v0.10.0](https://github.com/chugwei/ScholarTrace/tree/v0.10.0) | merge `33cf794`、162 tests、候选门禁和 Tag 已核验 |
-| M11 Web 工作台 | v0.11.0 | pending | feat/m11-web-workbench | — | — |
+| M11 Web 工作台 | v0.11.0 | in progress | feat/m11-web-workbench | — | M11.1 API 已验证，SSE/页面待实现 |
 | M12 交付与部署 | v1.0.0 | pending | feat/m12-deployment | — | — |
 
 ## M0 验收进度
@@ -131,3 +131,12 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M10.2 | 章节生成、BibTeX 和引用解析 | `docs/verification/m10-citations.md`；5 个目标测试、158 个全量测试、缺失引用失败降级 | completed |
 | M10.3 | 章节一致性、证据缺口与数字回溯门禁 | `docs/verification/m10-consistency.md`；4 个目标测试、162 个全量测试、显式 Claim/MetricResult 标记 | completed |
 | M10.4 | 独立审查、合并 `main` 与 `v0.10.0` 发布 | `docs/verification/m10-release.md`；merge `33cf794`、162 个全量测试、独立 wheel/venv、迁移 0018 和 Tag | completed |
+
+## M11 验收批次
+
+| ID | 批次 | 主要证据 | 状态 |
+|---|---|---|---|
+| M11.1 | FastAPI Project/Run/Artifact API 与持久化读写 | `docs/verification/m11-api.md`；3 个目标测试、165 个全量测试、Repository 隔离 | completed |
+| M11.2 | SSE Run 时间线与连接降级 | — | pending |
+| M11.3 | Web 工作台页面、审批组件和黄金样例垂直流程 | — | pending |
+| M11.4 | 独立审查、合并 `main` 与 `v0.11.0` 发布 | — | pending |
