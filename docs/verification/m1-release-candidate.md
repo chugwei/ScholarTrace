@@ -1,7 +1,8 @@
 # M1 v0.1.0 发布候选审查
 
 - 审查提交：`52bf99f3f2e6974e8ea175f43e571f819e4fde0b`
-- 分支：`feat/m1-project-state`
+- 发布合并提交：`986eee31fbf16d534e4e84b8f7cb3338e353d6d9`
+- 分支：`main`
 - 日期：2026-08-10（Asia/Shanghai）
 - 目标版本：`v0.1.0`
 
@@ -40,10 +41,11 @@ uv build                                      passed; sdist + wheel 0.1.0
 - 最大跟踪文件为 `uv.lock`，约 240 KB；
 - `actionlint` Docker 对 `.github/workflows/quality.yml` 无诊断；
 - GitHub Actions quality Run #14：成功，提交 `52bf99f`；
+- GitHub Actions quality Run #16：成功，合并提交 `986eee3`；
 - M1.1–M1.5 对应远端 quality Runs #8、#10、#11、#12、#13、#14：均成功。
 
 依赖漏洞服务审计曾执行 `pip-audit --path`，但 PyPI 请求在 15 秒读取超时；该项记为“未验证”，没有被包装成通过。它不改变本地锁定安装、代码秘密扫描或测试结果的事实。
 
 ## 发布决策
 
-M1 功能、测试、迁移、独立环境、CLI、E2E、秘密扫描和 CI 门禁已满足；下一步是在功能分支与 `main` 做最终 diff 审查，快进合并到 `main`，重新运行 main smoke test，再创建并推送 annotated Tag `v0.1.0`。Tag 创建前不宣称 M1 已发布。
+M1 功能、测试、迁移、独立环境、CLI、E2E、秘密扫描和 CI 门禁已满足。功能分支已通过非 squash 合并进入 `main`，合并提交 `986eee3` 的 main smoke test 和 Run #16 均通过；annotated Tag `v0.1.0` 已推送，远端 tag 对象为 `a7ef171`，peeled commit 为 `986eee3`。M1 已发布，后续进入 M2。

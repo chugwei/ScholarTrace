@@ -4,7 +4,7 @@
 
 研迹 ScholarTrace 是一个从研究问题、文献证据、数据与实验，到论文和真实部署的可追溯科研工作台。
 
-`v0.1.0` 发布候选已实现研究问题、项目 State、Reducer、SQLite Project Repository、Alembic 初始迁移、带 SQLite Checkpointer 的固定顺序 LangGraph，以及创建、继续和查看项目的 CLI；独立进程恢复验收已通过，正式 Tag 尚未创建。文献检索、实验执行、论文生成和部署尚未实现，不能视为可用能力。
+最新发布版本为 `v0.1.0`。它包含研究问题、项目 State、Reducer、SQLite Project Repository、Alembic 初始迁移、带 SQLite Checkpointer 的固定顺序 LangGraph，以及创建、继续和查看项目的 CLI；M2 的人工暂停、审批和版本历史正在开发。文献检索、实验执行、论文生成和部署尚未实现，不能视为可用能力。
 
 ## 环境要求
 

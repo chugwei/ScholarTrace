@@ -1,11 +1,11 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M1 发布候选审查
-- 当前里程碑：M1 — 最小持久化科研项目图
-- 当前版本：`v0.1.0-rc`
-- 当前分支：`feat/m1-project-state`
+- 项目状态：M1 已发布，进入 M2
+- 当前里程碑：M2 — 人工澄清、审批与版本历史
+- 当前版本：`v0.1.0`
+- 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
-- 更新时间：2026-08-09（Asia/Shanghai）
+- 更新时间：2026-08-10（Asia/Shanghai）
 
 ## 已完成
 
@@ -36,7 +36,16 @@
 - [x] M1.3 `START → intake → build_research_question → save → END` 与 SQLite Checkpointer
 - [x] M1.4 CLI 创建、继续和查看项目
 - [x] M1.5 重启恢复、项目隔离、幂等与农业视觉黄金场景验收
-- [ ] M1.6 独立审查、合并 `main` 与 `v0.1.0` 发布（当前）
+- [x] M1.6 独立审查、合并 `main` 与 `v0.1.0` 发布
+
+## M2 小任务
+
+- [ ] M2.1 缺失信息路由与 Conditional Edge
+- [ ] M2.2 `interrupt()` / `Command(resume=...)` 的暂停恢复契约
+- [ ] M2.3 批准、拒绝、修改、取消和暂停 DecisionRecord
+- [ ] M2.4 研究问题冻结与新版本创建
+- [ ] M2.5 Checkpoint History、回滚和审计查询
+- [ ] M2.6 独立审查、合并 `main` 与 `v0.2.0` 发布（当前）
 
 ## 当前验证
 
@@ -64,6 +73,8 @@
 | M1 发布候选秘密/大文件/内部路径扫描 | 通过，均为 0 |
 | `actionlint` Docker | 通过，无诊断 |
 | GitHub Actions quality Run #14 | 通过，commit `52bf99f` |
+| GitHub Actions quality Run #16 | 通过，merge commit `986eee3` |
+| `v0.1.0` annotated Tag | 远端对象 `a7ef171`，peeled commit `986eee3` |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
 | `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.1.0 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
@@ -77,9 +88,9 @@
 
 ## 当前限制
 
-- M1 功能与独立进程恢复门禁已完成；尚未完成独立 diff 审查、发布候选全新环境验收、合并 main 和 `v0.1.0` Tag。
-- RAG、实验、论文、Web 和部署能力仍未实现。
+- M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
+- M2 及 RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-执行 M1.6 范围、测试、迁移、安全、文档、退化路径和秘密扫描审查，在全新环境验收后合并 main 并发布 `v0.1.0`。
+从 M2.1 开始：先为缺失信息路由、人工暂停/恢复和 DecisionRecord 写失败测试，再实现审批与版本历史。
