@@ -34,3 +34,18 @@ hits = repository.search_catalog("lychee")
 ## 与前后里程碑的关系
 
 M2 提供项目和人工审批边界，M3 将文献目录作为独立实体加入；M4 才会在项目候选上实现 approved/rejected、Chunk、混合检索和 EvidenceCard。M3 不提前宣称 RAG 或可信证据已实现。
+
+## M3.3 工具调用与降级学习
+
+Crossref/OpenAlex 客户端是确定性工具边界，不是 Graph Node，也不把网络响应直接当作科研结论。`MetadataProvider` 把两个 API 归一化为同一个 `MetadataLookupResult`；`LiteratureMetadataService` 是编排层，按顺序调用 Tool 并保留失败原因。
+
+当 Crossref 返回 503 时，服务可以继续尝试 OpenAlex；当两个服务都不可用时，结果明确为 `unavailable` 且 `metadata=None`。当 API 返回空结果时是 `not_found`，同样不能生成假的 DOI 或作者。只有 `ok` 结果能显式生成 `metadata_only` Document，而且它没有全文路径，不会被误说成论文全文。
+
+```python
+service = LiteratureMetadataService([CrossrefClient(), OpenAlexClient()])
+bundle = service.lookup("lychee disease detection")
+if bundle.status == "ok":
+    document = metadata_document_from_lookup(bundle.attempts[-1])
+```
+
+CI 使用 `httpx.MockTransport` 验证请求和失败路径，不依赖真实 API Key、网络或付费服务；真实来源仍需在使用时保存响应时间和人工核验记录。M4 才会把项目候选纳入 approved/rejected 和 EvidenceCard。

@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M2 已发布，M3.2 已完成，继续 M3
+- 项目状态：M2 已发布，M3.3 已完成，进入 M3 发布审查
 - 当前里程碑：M3 — 独立文献库
 - 当前版本：`v0.2.0`
 - 当前分支：`feat/m3-literature-library`
@@ -51,7 +51,7 @@
 
 - [x] M3.1 Document/ProjectDocument Schema、0004 迁移、SHA-256 去重和目录搜索
 - [x] M3.2 合法 PDF 入库、原文只读保存、元数据解析和质量标记
-- [ ] M3.3 Crossref/OpenAlex 查询、失败降级和来源标记
+- [x] M3.3 Crossref/OpenAlex 查询、失败降级和来源标记
 - [ ] M3.4 独立审查、合并 `main` 与 `v0.3.0` 发布
 
 ## 当前验证
@@ -118,6 +118,8 @@
 | M3.1 Ruff format/lint | 通过，46 files formatted、无诊断 |
 | M3.2 PDF 入库目标测试 | 通过，3 passed |
 | M3.2 后全量质量门禁 | 通过，82 passed；Ruff 46 files formatted；3 个 Fixture |
+| M3.3 元数据客户端目标测试 | 通过，4 passed；MockTransport 离线 |
+| M3.3 后全量质量门禁 | 通过，86 passed；Ruff 48 files formatted；3 个 Fixture |
 
 ## 当前限制
 
@@ -125,8 +127,9 @@
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1 已完成独立文献目录、项目 candidate 关联、SHA-256 去重和失败条目隔离；PDF、外部元数据和 M4 可信证据仍未实现。
 - M3.2 已完成合法 PDF 的本地解析、只读运行时保存、重复文件去重和失败质量标记；外部元数据查询和 M4 可信证据仍未实现。
+- M3.3 已完成 Crossref/OpenAlex 字段归一化、fallback 和显式失败降级；真实 API 可用性、M4 证据检索和 approved/rejected 仍未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M3.3：Crossref/OpenAlex 可替换客户端、来源标记和网络失败降级；不把合成条目宣传为真实文献证据。
+下一步进入 M3.4：独立审查、全量门禁、合并 `main` 并发布 `v0.3.0`；不把 MockTransport 结果宣传为真实文献查询证据。

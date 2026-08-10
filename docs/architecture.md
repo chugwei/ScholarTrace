@@ -111,3 +111,9 @@ START → intake ──(缺字段)──> clarify ──> intake
 `DocumentLibrary.ingest_pdf()` 先计算内容 SHA-256，再尝试用 pypdf 解析；同一内容在解析前就返回已存在条目。成功解析的 PDF 和提取文本写到调用方提供的运行时根目录，并在写入完成后设置只读权限，数据库只保存相对路径。解析失败会保存 `failed/parse_failed/searchable=false` 诊断记录，但不复制原文，也不会出现在目录搜索中。
 
 合法上传、元数据来源和解析质量是三个独立事实：pypdf 的 `/Title`、`/Author` 和创建年份只作为可追溯元数据，缺失时标记 `metadata_incomplete`；空文本标记 `empty_text`，不能被描述成全文解析成功。M3 不自动下载受版权限制的全文，外部元数据客户端留给 M3.3。
+
+## M3.3 外部元数据与降级
+
+`CrossrefClient` 和 `OpenAlexClient` 实现同一个 `MetadataProvider` 契约，只返回结构化 `MetadataLookupResult`。HTTP 非 200、超时、连接异常、JSON 无结果都返回 `unavailable` 或 `not_found`，不会填充默认作者、年份或 DOI。`LiteratureMetadataService` 按调用方给定顺序尝试提供商，并保留所有 attempts，成功结果才可显式转换为 `metadata_only` Document。
+
+元数据 Document 的 `source_type` 是 `crossref` / `openalex`，`storage_relpath` 为空，表示它不是授权全文。MockTransport 让 CI 验证真实的请求路径、字段归一化和网络失败分支；真实 API 访问不属于离线测试通过的证据。

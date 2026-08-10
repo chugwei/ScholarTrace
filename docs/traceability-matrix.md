@@ -31,3 +31,4 @@
 | M2 v0.2.0 发布候选 | `pyproject.toml`, `README.md`, `CHANGELOG.md` | `docs/verification/m2-release-candidate.md`, `scripts/check.py` | v0.2.0 | release-candidate |
 | M3.1 独立文献目录 | `src/scholartrace/schemas/literature.py`, `src/scholartrace/persistence/literature_repository.py`, `src/scholartrace/persistence/migrations/versions/0004_add_literature_catalog.py` | `tests/integration/test_literature_repository.py`, `docs/verification/m3-catalog.md` | v0.3.0 | implemented-tested |
 | M3.2 PDF 入库与质量标记 | `src/scholartrace/literature/ingestion.py`, `pyproject.toml` | `tests/integration/test_literature_ingestion.py`, `docs/verification/m3-pdf-ingestion.md` | v0.3.0 | implemented-tested |
+| M3.3 Crossref/OpenAlex 元数据 | `src/scholartrace/literature/providers.py` | `tests/integration/test_literature_providers.py`, `docs/verification/m3-metadata-providers.md` | v0.3.0 | implemented-tested |
