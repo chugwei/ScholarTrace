@@ -4,6 +4,7 @@ from collections.abc import Collection
 
 from scholartrace.schemas import (
     AlgorithmSpec,
+    CandidateExperimentPlan,
     InnovationCandidate,
     InnovationValidationReport,
     PriorArtMap,
@@ -164,6 +165,81 @@ def validate_innovation_candidate(
                 message="novelty remains unverified until prior-art review and experiments",
             )
         )
+    return InnovationValidationReport(
+        passed=not any(item.severity == "error" for item in findings),
+        findings=findings,
+    )
+
+
+def build_falsification_plan(candidate: InnovationCandidate) -> CandidateExperimentPlan:
+    """Turn candidate fields into a reviewable proposal without running anything."""
+
+    return CandidateExperimentPlan(
+        candidate_id=candidate.candidate_id,
+        hypothesis=(
+            f"The proposed change should affect the stated mechanism: "
+            f"{candidate.expected_mechanism}"
+        ),
+        falsification_experiment=candidate.falsification_experiment,
+        required_baselines=candidate.required_baselines,
+        required_ablations=candidate.required_ablations,
+        evaluation_requirements=[
+            "use the frozen dataset split and evaluation protocol",
+            "report the candidate, every required baseline and every ablation",
+            "record the code, data, configuration, seed and environment identifiers",
+        ],
+    )
+
+
+def validate_candidate_for_experiment(
+    candidate: InnovationCandidate,
+    prior_art_map: PriorArtMap,
+    *,
+    algorithm_status: str,
+    prior_art_status: str,
+    available_evidence_ids: Collection[str] | None = None,
+) -> InnovationValidationReport:
+    """Gate entry to validation; this never upgrades a candidate to proven novelty."""
+
+    report = validate_innovation_candidate(
+        candidate,
+        prior_art_map,
+        available_evidence_ids=available_evidence_ids,
+    )
+    findings = list(report.findings)
+    if algorithm_status != "approved":
+        findings.append(
+            InnovationFinding(
+                code="candidate.algorithm_not_approved",
+                severity="error",
+                message="an algorithm specification must be approved before validation",
+            )
+        )
+    if prior_art_status != "approved":
+        findings.append(
+            InnovationFinding(
+                code="candidate.prior_art_not_approved",
+                severity="error",
+                message="a prior-art map must be approved before validation",
+            )
+        )
+    if candidate.novelty_status == "not_novel":
+        findings.append(
+            InnovationFinding(
+                code="candidate.not_novel",
+                severity="error",
+                message="a candidate marked not_novel cannot enter validation",
+            )
+        )
+    if candidate.novelty_status == "conflicting":
+        findings.append(
+            InnovationFinding(
+                code="candidate.conflicting_prior_art",
+                severity="warning",
+                message="conflicting prior-art evidence must remain visible to the reviewer",
+            )
+        )
+    build_falsification_plan(candidate)
     return InnovationValidationReport(
         passed=not any(item.severity == "error" for item in findings),
         findings=findings,

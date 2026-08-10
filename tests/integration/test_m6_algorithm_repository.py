@@ -4,6 +4,7 @@ from pathlib import Path
 import pytest
 from sqlalchemy.orm import Session
 
+from scholartrace.algorithm import build_falsification_plan
 from scholartrace.persistence.algorithm_repository import (
     AlgorithmDecisionConflictError,
     AlgorithmRepository,
@@ -308,6 +309,69 @@ def test_candidate_requires_map_references_and_has_deterministic_rank(tmp_path: 
     assert ranked[0].candidate_id == "candidate-v2"
     assert ranked[0].score > ranked[1].score
     assert "does not establish novelty" in ranked[0].rationale[-1]
+    repository.close()
+
+
+def test_candidate_experiment_gate_requires_approved_sources_and_preserves_boundary(
+    tmp_path: Path,
+) -> None:
+    database_path = tmp_path / "domain.db"
+    upgrade_database(database_path)
+    create_project(database_path)
+    add_evidence_card(database_path)
+    repository = AlgorithmRepository(database_path)
+    repository.save_algorithm(algorithm())
+    repository.save_prior_art_map(prior_art_map())
+    repository.save_candidate(candidate())
+
+    with pytest.raises(AlgorithmRepositoryError, match="algorithm specification must be approved"):
+        repository.approve_candidate_for_experiment(
+            "lychee-m6", "candidate-v1", "researcher-001", "enter validation"
+        )
+    repository.approve_algorithm("lychee-m6", "algo-v1", "researcher-001", "approved")
+    with pytest.raises(AlgorithmRepositoryError, match="prior-art map must be approved"):
+        repository.approve_candidate_for_experiment(
+            "lychee-m6", "candidate-v1", "researcher-001", "enter validation"
+        )
+    repository.approve_prior_art_map("lychee-m6", "map-v1", "researcher-001", "checked")
+
+    plan = build_falsification_plan(candidate())
+    assert plan.status == "proposed"
+    assert "frozen dataset split" in plan.evaluation_requirements[0]
+    approved = repository.approve_candidate_for_experiment(
+        "lychee-m6", "candidate-v1", "researcher-001", "allow validation only"
+    )
+    assert approved.status == "approved_for_experiment"
+    assert approved.novelty_status == "unverified"
+    withdrawn = repository.withdraw_candidate(
+        "lychee-m6", "candidate-v1", "researcher-001", "new prior-art conflict"
+    )
+    assert withdrawn.status == "withdrawn"
+
+
+def test_not_novel_candidate_is_blocked_and_draft_can_be_rejected(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    upgrade_database(database_path)
+    create_project(database_path)
+    add_evidence_card(database_path)
+    repository = AlgorithmRepository(database_path)
+    repository.save_algorithm(algorithm())
+    repository.approve_algorithm("lychee-m6", "algo-v1", "researcher-001", "approved")
+    repository.save_prior_art_map(prior_art_map())
+    repository.approve_prior_art_map("lychee-m6", "map-v1", "researcher-001", "checked")
+    repository.save_candidate(
+        candidate(candidate_id="candidate-not-novel").model_copy(
+            update={"novelty_status": "not_novel"}
+        )
+    )
+    with pytest.raises(AlgorithmRepositoryError, match="not_novel"):
+        repository.approve_candidate_for_experiment(
+            "lychee-m6", "candidate-not-novel", "researcher-001", "enter validation"
+        )
+    rejected = repository.reject_candidate(
+        "lychee-m6", "candidate-not-novel", "researcher-001", "prior work already covers it"
+    )
+    assert rejected.status == "rejected"
     repository.close()
 
 

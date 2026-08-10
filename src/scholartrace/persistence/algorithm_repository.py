@@ -13,6 +13,7 @@ from sqlalchemy.orm import Session
 from scholartrace.algorithm.ranking import rank_innovation_candidates
 from scholartrace.algorithm.validation import (
     validate_algorithm_spec,
+    validate_candidate_for_experiment,
     validate_innovation_candidate,
     validate_prior_art_map,
 )
@@ -434,6 +435,88 @@ class AlgorithmRepository:
         """Return deterministic completeness ranks, never a novelty verdict."""
 
         return rank_innovation_candidates(self.list_candidates(project_id, algorithm_id))
+
+    def approve_candidate_for_experiment(
+        self, project_id: str, candidate_id: str, actor_id: str, reason: str
+    ) -> InnovationCandidate:
+        """Allow a candidate into a future validation plan, never call it proven."""
+
+        project_id = validate_identifier(project_id)
+        candidate_id = validate_identifier(candidate_id)
+        actor_id = validate_identifier(actor_id)
+        if not reason.strip():
+            raise ValueError("approval reason is required")
+        with Session(self._engine) as session, session.begin():
+            row = self._candidate_for_update(session, project_id, candidate_id)
+            algorithm = session.get(AlgorithmSpecRow, row.algorithm_id)
+            prior_art_map = session.get(PriorArtMapRow, row.prior_art_map_id)
+            if algorithm is None or prior_art_map is None:
+                raise InnovationCandidateConflictError(
+                    "candidate references missing algorithm or prior-art map"
+                )
+            candidate = _candidate_model(row)
+            report = validate_candidate_for_experiment(
+                candidate,
+                _prior_art_map_model(prior_art_map),
+                algorithm_status=algorithm.status,
+                prior_art_status=prior_art_map.status,
+                available_evidence_ids=self._evidence_ids(session, project_id),
+            )
+            if not report.passed:
+                raise InnovationCandidateConflictError(
+                    "; ".join(finding.message for finding in report.findings)
+                )
+            if row.status == "approved_for_experiment":
+                if row.approved_by != actor_id:
+                    raise InnovationCandidateConflictError(
+                        "approved candidate belongs to another actor"
+                    )
+                return candidate
+            if row.status not in {"draft", "under_review"}:
+                raise InnovationCandidateConflictError(
+                    "only draft or under-review candidates can enter validation"
+                )
+            row.status = "approved_for_experiment"
+            row.approved_by = actor_id
+            row.approved_at = utc_now_naive()
+            row.decision_reason = reason.strip()
+            return _candidate_model(row)
+
+    def reject_candidate(
+        self, project_id: str, candidate_id: str, actor_id: str, reason: str
+    ) -> InnovationCandidate:
+        project_id = validate_identifier(project_id)
+        candidate_id = validate_identifier(candidate_id)
+        actor_id = validate_identifier(actor_id)
+        if not reason.strip():
+            raise ValueError("rejection reason is required")
+        with Session(self._engine) as session, session.begin():
+            row = self._candidate_for_update(session, project_id, candidate_id)
+            if row.status not in {"draft", "under_review"}:
+                raise InnovationCandidateConflictError(
+                    "only draft or under-review candidates can be rejected"
+                )
+            row.status = "rejected"
+            row.decision_reason = f"{actor_id}: {reason.strip()}"
+            return _candidate_model(row)
+
+    def withdraw_candidate(
+        self, project_id: str, candidate_id: str, actor_id: str, reason: str
+    ) -> InnovationCandidate:
+        project_id = validate_identifier(project_id)
+        candidate_id = validate_identifier(candidate_id)
+        actor_id = validate_identifier(actor_id)
+        if not reason.strip():
+            raise ValueError("withdrawal reason is required")
+        with Session(self._engine) as session, session.begin():
+            row = self._candidate_for_update(session, project_id, candidate_id)
+            if row.status != "approved_for_experiment":
+                raise InnovationCandidateConflictError(
+                    "only candidates approved for validation can be withdrawn"
+                )
+            row.status = "withdrawn"
+            row.decision_reason = f"{actor_id}: {reason.strip()}"
+            return _candidate_model(row)
 
     @staticmethod
     def _require_project(session: Session, project_id: str) -> None:

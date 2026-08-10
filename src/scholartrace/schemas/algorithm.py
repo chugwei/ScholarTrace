@@ -194,3 +194,17 @@ class InnovationCandidateRanking(BaseModel):
     candidate_id: NonBlankText
     score: float = Field(ge=0, le=1)
     rationale: list[NonBlankText] = Field(min_length=1)
+
+
+class CandidateExperimentPlan(BaseModel):
+    """A proposed falsification plan, not an executed experiment result."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    candidate_id: NonBlankText
+    hypothesis: NonBlankText
+    falsification_experiment: NonBlankText
+    required_baselines: TextList = Field(min_length=1)
+    required_ablations: TextList = Field(min_length=1)
+    evaluation_requirements: TextList = Field(min_length=1)
+    status: Literal["proposed"] = "proposed"

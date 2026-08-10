@@ -60,3 +60,9 @@ M5 提供批准的管线和采集协议；M6.1 只建立算法和先验工作契
 候选的完整度排序是可重复的审查队列：证据引用、差异、机制、证伪实验、基线和消融分别贡献固定权重；同分按 ID 稳定排序。这个分数不表示原创性，也不替代人工决定。候选在后续审批前保持 `draft` 和 `novelty_status=unverified`。
 
 最小数据流为：`approved PriorArtMap → InnovationCandidate draft → completeness ranking → M6.3 experiment gate`。M6.3 才会允许一个候选进入实验计划，且状态名称会明确是“允许验证”，不是“已证明创新”。
+
+## M6.3 证伪与状态门禁
+
+`build_falsification_plan()` 只把候选的机制、证伪描述、基线和消融整理成提案，并附带固定的数据划分、对照报告和运行溯源要求。它不启动命令，也不产生 MetricResult。`approve_candidate_for_experiment()` 在一个事务中检查算法规格和先验地图已批准、证据仍属于项目且候选没有标记 `not_novel`，然后把状态改为 `approved_for_experiment`。这个名称刻意描述“可以验证”，不描述科学结论。
+
+如果先验工作发生冲突，候选仍保留 `conflicting` 和 warning，供研究者判断；如果确认已有工作覆盖，`not_novel` 会被门禁阻断。已进入验证的候选可以记录撤回原因，历史仍可查询。M7 将消费这个入口来冻结实验计划，但本里程碑不提前创建实验结果。

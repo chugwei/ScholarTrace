@@ -3,6 +3,7 @@
 from scholartrace.schemas.algorithm import (
     AlgorithmComponent,
     AlgorithmSpec,
+    CandidateExperimentPlan,
     InnovationCandidate,
     InnovationCandidateRanking,
     InnovationFinding,
@@ -35,6 +36,7 @@ from scholartrace.schemas.research import ResearchQuestion
 __all__ = [
     "AlgorithmComponent",
     "AlgorithmSpec",
+    "CandidateExperimentPlan",
     "CaptureField",
     "ChunkSearchResult",
     "DataCollectionProtocol",
