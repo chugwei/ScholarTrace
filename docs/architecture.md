@@ -145,3 +145,17 @@ M4 在 M3 全局目录之上维护项目级 `ProjectDocument` 状态：新关联
 `DesignRepository` 将每个版本写入独立 SQLite 表。新设计从 `draft` 开始；批准写入 actor、理由和时间，并把旧的 approved 版本标记为 `superseded`。批准版本不能被隐式覆盖，修改必须使用递增版本号和当前批准父 ID；相同内容重放返回原记录。0008 迁移支持完整回退，JSON payload 保留 Schema 之外的可审计原始结构。
 
 本批次还没有研究设计 Subgraph、流程图、数据泄漏执行检查或 Markdown/YAML 导出。Repository 是领域持久化边界，不冒充 LangGraph Node；M5.2 才把这些契约接入可重放的 Subgraph 和人工发布流程。
+
+## M5.2 研究设计 Subgraph
+
+`open_research_design_graph()` 将 M5.1 契约接入一个 thread-bound LangGraph：
+
+```text
+START → intake → persist_drafts → request_approval(interrupt)
+                                      ↓ Command(resume)
+                              apply_decision → finish → END
+```
+
+`intake` 创建/确认项目，`persist_drafts` 通过 DesignRepository 保存两个 draft，`request_approval` 暂停并返回目标 ID/允许动作，`apply_decision` 将批准或拒绝写入既有 DecisionRecord 的 `design` target，并只在批准分支将两个版本转为 approved。取消/暂停不会把 draft 宣称为正式方案。Graph State 只保存 design ID、draft 引用和当前审批信息，不保存大型数据或图表。
+
+`pipeline_to_mermaid()` 按 PipelineStage 顺序生成稳定的 `stage_0 → stage_1` 流程图，标签同时包含名称和稳定 stage ID，便于文档审查。它是设计可视化，不是执行引擎；M5.3 才会在流程上运行数据质量和泄漏检查。

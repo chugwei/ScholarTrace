@@ -13,7 +13,7 @@ DecisionAction = Literal[
     "paused",
     "rolled_back",
 ]
-DecisionTargetType = Literal["research_question", "checkpoint"]
+DecisionTargetType = Literal["research_question", "checkpoint", "design"]
 NonBlankText = Annotated[str, StringConstraints(strip_whitespace=True, min_length=1)]
 
 

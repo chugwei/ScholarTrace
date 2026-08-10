@@ -39,3 +39,4 @@
 | M4 v0.4.0 发布候选 | `pyproject.toml`, `README.md`, `CHANGELOG.md`, `uv.lock` | `docs/verification/m4-release-candidate.md`, `scripts/check.py`, 独立 wheel/CLI/迁移 | v0.4.0 | release-candidate |
 | M4 v0.4.0 发布 | `main`, `v0.4.0` | merge `a193291`, Tag object `11593b0`, main smoke/门禁 | v0.4.0 | implemented-tested |
 | M5.1 PipelineSpec/DataCollectionProtocol | `src/scholartrace/schemas/design.py`, `src/scholartrace/persistence/design_repository.py`, `src/scholartrace/persistence/migrations/versions/0008_add_research_designs.py` | `tests/integration/test_m5_design_repository.py`, `docs/verification/m5-design-repository.md` | v0.5.0 | implemented-tested |
+| M5.2 研究设计 Subgraph 与流程图 | `src/scholartrace/graphs/research_design.py`, `src/scholartrace/design/flow.py`, `src/scholartrace/states/research_project.py`, `src/scholartrace/schemas/decisions.py` | `tests/integration/test_m5_design_graph.py`, `docs/verification/m5-design-graph.md` | v0.5.0 | implemented-tested |

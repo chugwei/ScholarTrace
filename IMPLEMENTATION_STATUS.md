@@ -64,8 +64,8 @@
 ## M5 小任务
 
 - [x] M5.1 PipelineSpec/DataCollectionProtocol 契约与迁移
-- [ ] M5.2 研究设计 Subgraph 与流程图（当前）
-- [ ] M5.3 数据质量/泄漏检查与方案比较
+- [x] M5.2 研究设计 Subgraph 与流程图
+- [ ] M5.3 数据质量/泄漏检查与方案比较（当前）
 - [ ] M5.4 Markdown/YAML 导出、独立审查、合并 `main` 与 `v0.5.0` 发布
 
 ## 当前验证
@@ -149,14 +149,16 @@
 | M4 main 合并与发布 | 通过，merge `a193291`；main smoke/全量 98 passed；Tag object `11593b0`，peeled `a193291` |
 | M5.1 设计 Repository 目标测试 | 通过，4 passed；0008 迁移、版本幂等、批准/拒绝、父版本和项目隔离 |
 | M5.1 全量质量门禁 | 通过，`scripts/check.py`；102 passed；3 个合成 Fixture |
+| M5.2 Subgraph/流程图目标测试 | 通过，3 passed；interrupt/resume、批准/拒绝审计、未批准降级和 Mermaid 输出 |
+| M5.2 全量质量门禁 | 通过，`scripts/check.py`；105 passed；3 个合成 Fixture |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
-- M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5.1 已实现版本化研究设计契约，但 Subgraph、质量/泄漏检查和导出仍未实现。
+- M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5.1–M5.2 已实现版本化设计契约、人工 Subgraph 和流程图，但质量/泄漏检查、方案比较和导出仍未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M5.2：把批准门禁接入研究设计 Subgraph，并输出可审计流程图；不把合成方案或离线测试结果宣传为真实采集方案或现场证据。
+下一步进入 M5.3：实现数据质量/泄漏检查、方案比较和失败路径；不把合成方案或离线测试结果宣传为真实采集方案或现场证据。
