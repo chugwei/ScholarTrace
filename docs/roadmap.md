@@ -15,7 +15,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M6 算法与创新候选 | v0.6.0 | completed | main | [v0.6.0](https://github.com/chugwei/ScholarTrace/tree/v0.6.0) | merge `0161739`、main 门禁、Tag 已核验 |
 | M7 实验注册与导入 | v0.7.0 | completed | main | [v0.7.0](https://github.com/chugwei/ScholarTrace/tree/v0.7.0) | merge `1cd9280`、main 门禁、Tag 已核验 |
 | M8 Runner 与排错 | v0.8.0 | completed | main | [v0.8.0](https://github.com/chugwei/ScholarTrace/tree/v0.8.0) | merge `99f72e1`、main 门禁、Tag 已核验 |
-| M9 图表系统 | v0.9.0 | pending | feat/m9-figures | — | — |
+| M9 图表系统 | v0.9.0 | in progress | feat/m9-figures | — | M9.1 FigureSpec 已验证，绘图与视觉验收待实现 |
 | M10 论文与引用 | v0.10.0 | pending | feat/m10-manuscript | — | — |
 | M11 Web 工作台 | v0.11.0 | pending | feat/m11-web-workbench | — | — |
 | M12 交付与部署 | v1.0.0 | pending | feat/m12-deployment | — | — |
@@ -113,3 +113,12 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M8.2 | 启动、取消、超时、流式日志和失败产物隔离 | 10 个目标测试、137 个全量测试、合成脚本 E2E | completed |
 | M8.3 | DebugCase、诊断假设排序、安全修复分支和回归 | 13 个目标测试、140 个全量测试、隔离修复 E2E | completed |
 | M8.4 | MLflow/DVC 初步集成、独立审查和 `v0.8.0` 发布 | 143 个全量测试、独立 wheel/venv、迁移 0016、archive、actionlint、Tag | completed |
+
+## M9 验收批次
+
+| ID | 批次 | 主要证据 | 状态 |
+|---|---|---|---|
+| M9.1 | FigureSpec、输入数据契约、Artifact 元数据和 0017 迁移 | 3 个目标测试、verified MetricResult/data_version 门禁 | completed |
+| M9.2 | 确定性绘图脚本与 PNG/SVG/PDF 输出 | — | pending |
+| M9.3 | Caption、图表建议、数据/脚本溯源和数值一致性 | — | pending |
+| M9.4 | 视觉验收、独立审查和 `v0.9.0` 发布 | — | pending |

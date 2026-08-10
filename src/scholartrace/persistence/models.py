@@ -542,3 +542,25 @@ class DebugCaseRow(Base):
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
     updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class FigureSpecRow(Base):
+    """Versioned figure design and provenance references."""
+
+    __tablename__ = "figure_specs"
+    __table_args__ = (
+        UniqueConstraint("project_id", "content_sha256", name="uq_figure_project_content"),
+    )
+
+    figure_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

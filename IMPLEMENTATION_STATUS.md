@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M8 已发布，M9 待开始
+- 项目状态：M8 已发布，M9.1 进行中
 - 当前里程碑：M9 — 结果图表系统
 - 当前版本：`v0.8.0`
 - 当前分支：`main`
@@ -91,6 +91,13 @@
 - [x] M8.4.1 JSON 离线追踪、MLflow 可选适配和 DVC manifest 校验
 - [x] M8.4.2 独立审查与发布候选
 - [x] M8.4.3 合并 `main`、推送 `v0.8.0` Tag 并关闭 M8
+
+## M9 小任务
+
+- [x] M9.1 FigureSpec、输入数据契约、Artifact 元数据和 0017 迁移
+- [ ] M9.2 确定性绘图脚本与 PNG/SVG/PDF 输出
+- [ ] M9.3 Caption、图表建议、数据/脚本溯源和数值一致性检查
+- [ ] M9.4 视觉验收、独立审查、合并 `main` 与 `v0.9.0` 发布
 
 ## 当前验证
 
@@ -207,14 +214,16 @@
 | M8.4.1 全量质量门禁 | 通过，`scripts/check.py`；143 passed；3 个合成 Fixture |
 | M8.4.2 发布候选独立验收 | 通过；v0.8.0 wheel/sdist、隔离 venv、迁移 0016、许可证、秘密/大文件扫描、Git archive 和 actionlint |
 | M8.4.3 main 合并与 v0.8.0 发布 | 通过，merge `99f72e1`；main 143 passed；annotated Tag `v0.8.0` 已推送，peeled `99f72e1` |
+| M9.1 FigureSpec/Repository 目标测试 | 通过，3 passed；0017 迁移回滚、内容哈希、verified MetricResult/data_version 门禁和审批 |
+| M9.1 全量质量门禁 | 通过，`scripts/check.py`；146 passed；3 个合成 Fixture |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级；Docker 真实运行、MLflow 在线服务、论文、Web 和部署能力仍未实现。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9.1 仅完成 FigureSpec 与 verified MetricResult/data_version 门禁，尚未生成图表；Docker 真实运行、MLflow 在线服务、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步创建 `feat/m9-figures`，实现 FigureSpec、可重复绘图脚本、数据/脚本溯源和视觉验收；不把失败日志或临时指标升级为科研 Claim。
+下一步实现 M9.2 确定性绘图脚本与 PNG/SVG/PDF 输出；不把失败日志或临时指标升级为科研 Claim。
