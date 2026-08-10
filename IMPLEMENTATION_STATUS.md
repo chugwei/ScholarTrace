@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M4 已发布，M5 进行中
+- 项目状态：M5 发布候选准备中
 - 当前里程碑：M5 — 管线与数据采集设计
-- 当前版本：`v0.4.0`
-- 当前分支：`main`
+- 当前版本：`v0.5.0`
+- 当前分支：`feat/m5-pipeline-data-design`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -156,6 +156,7 @@
 | M5.3 全量质量门禁 | 通过，`scripts/check.py`；109 passed；3 个合成 Fixture |
 | M5.4 导出目标测试 | 通过，2 passed；draft 阻断、approved Markdown/YAML 确定性输出和版本/SHA-256 保留 |
 | M5.4 全量质量门禁 | 通过，`scripts/check.py`；111 passed；3 个合成 Fixture |
+| M5 发布候选独立验收 | 通过，v0.5.0 wheel/sdist、独立 venv、PyYAML、CLI、迁移 0008、actionlint 和许可证检查通过 |
 
 ## 当前限制
 

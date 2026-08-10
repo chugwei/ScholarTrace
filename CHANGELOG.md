@@ -6,6 +6,8 @@
 
 后续变更将在下一版本记录。
 
+## [0.5.0] - 2026-08-11
+
 ### Added
 
 - M5.1 版本化 `PipelineSpec` / `DataCollectionProtocol` 契约、内容哈希和人工批准门禁。
