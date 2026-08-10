@@ -56,5 +56,5 @@
 | M7 v0.7.0 发布 | `main`, `v0.7.0` | merge `1cd9280`, Tag object `95af661`, main smoke/门禁 | v0.7.0 | implemented-tested |
 | M8.1 受控执行契约、资源限制与命令白名单 | `src/scholartrace/schemas/runner.py`, `src/scholartrace/runner/policy.py`, `src/scholartrace/persistence/runner_repository.py`, `src/scholartrace/persistence/migrations/versions/0014_add_controlled_runs.py` | `tests/integration/test_m8_runner_policy.py`, `docs/verification/m8-runner-policy.md` | v0.8.0 | implemented-tested |
 | M8.2 启动、取消、超时与流式日志 | `src/scholartrace/runner/executor.py`, `src/scholartrace/persistence/runner_repository.py`, `src/scholartrace/persistence/migrations/versions/0015_add_controlled_run_events.py` | `tests/integration/test_m8_runner_policy.py`, `docs/verification/m8-runner-lifecycle.md` | v0.8.0 | implemented-tested |
-| M8.3 DebugCase、诊断与安全修复回归 | — | — | v0.8.0 | planned |
+| M8.3 DebugCase、诊断与安全修复回归 | `src/scholartrace/schemas/debug.py`, `src/scholartrace/debugging/analysis.py`, `src/scholartrace/debugging/repair.py`, `src/scholartrace/persistence/debug_case_repository.py`, `src/scholartrace/persistence/migrations/versions/0016_add_debug_cases.py` | `tests/integration/test_m8_runner_policy.py`, `docs/verification/m8-debugging.md` | v0.8.0 | implemented-tested |
 | M8.4 MLflow/DVC 初步集成与 M8 发布 | — | — | v0.8.0 | planned |

@@ -517,3 +517,28 @@ class ControlledRunEventRow(Base):
     stream: Mapped[str] = mapped_column(String(16), nullable=False)
     message: Mapped[str] = mapped_column(Text, nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class DebugCaseRow(Base):
+    """Persisted failure evidence and gated repair lifecycle."""
+
+    __tablename__ = "debug_cases"
+    __table_args__ = (
+        UniqueConstraint("project_id", "execution_id", name="uq_debug_case_project_execution"),
+    )
+
+    case_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    execution_id: Mapped[str] = mapped_column(
+        String(40), ForeignKey("controlled_runs.execution_id"), nullable=False, index=True
+    )
+    status: Mapped[str] = mapped_column(String(24), nullable=False, index=True)
+    category: Mapped[str] = mapped_column(String(24), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+    updated_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)

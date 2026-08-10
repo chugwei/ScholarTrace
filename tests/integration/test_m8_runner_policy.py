@@ -5,7 +5,15 @@ from time import sleep
 import pytest
 from sqlalchemy.orm import Session
 
+from scholartrace.debugging.analysis import (
+    capture_failure,
+    classify_failure,
+    diagnose_case,
+    rank_hypotheses,
+)
+from scholartrace.debugging.repair import SafeRepairWorkspace
 from scholartrace.persistence.database import create_sqlite_engine
+from scholartrace.persistence.debug_case_repository import DebugCaseRepository
 from scholartrace.persistence.experiment_repository import ExperimentRepository
 from scholartrace.persistence.migrations import (
     LATEST_REVISION,
@@ -28,6 +36,7 @@ from scholartrace.schemas import (
     ExperimentPlan,
     ResourceLimits,
 )
+from scholartrace.schemas.debug import RegressionResult, RepairFileChange, RepairProposal
 
 CREATED_AT = datetime(2026, 8, 11, tzinfo=UTC)
 
@@ -120,6 +129,16 @@ def test_runner_migration_rolls_back(tmp_path: Path) -> None:
 
 def test_runner_event_migration_rolls_back_to_m8_1(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
+    upgrade_database(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
+
+
+def test_debug_case_migration_rolls_back_to_m8_2(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    upgrade_database(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
+    downgrade_database(database_path, "0015")
+    assert current_revision(database_path) == "0015"
     upgrade_database(database_path)
     assert current_revision(database_path) == LATEST_REVISION
     downgrade_database(database_path, "0014")
@@ -326,6 +345,109 @@ def test_executor_cancel_and_log_limit_are_terminal_and_safe(tmp_path: Path) -> 
     cancelled = executor.cancel("lychee-m8", "exec-cancel")
     assert cancelled.status == "cancelled"
     executor.shutdown()
+    repository.close()
+
+
+def test_failure_classification_is_evidence_bound_and_deterministic() -> None:
+    assert classify_failure("ModuleNotFoundError: No module named torch") == "environment"
+    hypotheses = rank_hypotheses("File not found: dataset/labels.json")
+    assert hypotheses[0].category == "data"
+    assert hypotheses[0].priority == 1
+    assert hypotheses[0].evidence
+    assert rank_hypotheses("unclassified failure")[0].category == "unknown"
+
+
+def test_debug_case_capture_diagnosis_and_regression_gate(tmp_path: Path) -> None:
+    database_path = tmp_path / "debug.db"
+    spec = _executor_spec(execution_id="exec-debug")
+    repository, executor = _prepare_executor(
+        database_path,
+        tmp_path,
+        spec,
+        "raise SystemExit(2)\n",
+    )
+    executor.start("lychee-m8", "exec-debug")
+    failed = executor.wait("lychee-m8", "exec-debug")
+    assert failed.status == "failed"
+
+    cases = DebugCaseRepository(database_path)
+    captured = capture_failure(
+        repository,
+        cases,
+        project_id="lychee-m8",
+        execution_id="exec-debug",
+        case_id="case-debug-001",
+        expected_behavior="the regression script exits successfully",
+    )
+    assert captured.status == "captured"
+    diagnosed = diagnose_case(
+        repository,
+        cases,
+        project_id="lychee-m8",
+        case_id="case-debug-001",
+        staging_root=tmp_path / "staging",
+    )
+    assert diagnosed.status == "diagnosed"
+    assert diagnosed.hypotheses[0].category == "unknown"
+    assert any(finding.finding_id == "finding-staging-exists" for finding in diagnosed.findings)
+
+    proposal = RepairProposal(
+        fix_id="fix-debug-001",
+        case_id="case-debug-001",
+        summary="make the regression script exit normally",
+        rationale="the captured failure is an explicit non-zero exit",
+        changes=[
+            RepairFileChange(
+                relative_path="runner_script.py",
+                replacement_text="print('fixed', flush=True)\n",
+            )
+        ],
+        regression_command=["python", "runner_script.py"],
+        rollback_plan="discard the isolated repair workspace",
+        created_by="researcher-001",
+        created_at=CREATED_AT,
+    )
+    proposed = cases.propose_fix("lychee-m8", "case-debug-001", proposal)
+    assert proposed.status == "fix_proposed"
+    approved = cases.approve_fix(
+        "lychee-m8",
+        "case-debug-001",
+        actor_id="researcher-001",
+        reason="minimal change is limited to the isolated repair workspace",
+    )
+    assert approved.status == "approved"
+    repair = SafeRepairWorkspace(
+        source_root=tmp_path / "staging",
+        repair_root=tmp_path / "repairs",
+    )
+    workspace = repair.create(approved)
+    repair.apply(approved, workspace)
+    regression = repair.run_regression(approved, workspace)
+    assert regression.status == "passed"
+    assert "fixed" in regression.output_excerpt
+    assert "raise SystemExit(2)" in (
+        tmp_path / "staging" / "exec-debug" / "workspace" / "runner_script.py"
+    ).read_text(encoding="utf-8")
+    failed_regression = cases.record_regression(
+        "lychee-m8",
+        "case-debug-001",
+        RegressionResult(
+            status="failed",
+            command=["python", "runner_script.py"],
+            exit_code=2,
+            output_excerpt="still failing",
+            checked_at=CREATED_AT,
+        ),
+    )
+    assert failed_regression.status == "regression_failed"
+    passed_regression = cases.record_regression("lychee-m8", "case-debug-001", regression)
+    assert passed_regression.status == "regression_passed"
+    resolved = cases.resolve_case(
+        "lychee-m8", "case-debug-001", "regression passed in the isolated workspace"
+    )
+    assert resolved.status == "resolved"
+    executor.shutdown()
+    cases.close()
     repository.close()
 
     log_db = tmp_path / "log.db"

@@ -42,4 +42,10 @@ M8.1 与 M7 的关系是把可导入的 Run 身份扩展为可排队的受控执
 
 日志读取线程把 stdout 分块放入队列，主循环同时检查取消事件和 deadline，因此无输出的长进程也能被超时终止。每个事件带有单调 sequence 并追加到 `controlled_run_events`；事件回调只用于观察，回调错误不会改变 Run 结果。M8.2 的测试用合成 Python 脚本验证成功发布、非零退出、超时、取消、日志上限和事件顺序，不把这些脚本结果描述成农业模型指标。
 
-M8.2 没有在本机宣称 Docker 资源隔离通过；Docker 只在 M8.1 验证了 argv 构造。下一批 M8.3 将把失败 Run 转成 DebugCase，要求诊断假设有证据、修复在隔离分支/沙箱中执行并通过回归后才可记录解决。
+M8.2 没有在本机宣称 Docker 资源隔离通过；Docker 只在 M8.1 验证了 argv 构造。M8.3 将失败 Run 转成 DebugCase，要求诊断假设有证据、修复在隔离分支/沙箱中执行并通过回归后才可记录解决。
+
+## M8.3：DebugCase 与安全修复
+
+失败 Run 先通过 `capture_failure()` 固化 observed error、Run 状态、日志/ staging 路径和非敏感环境事实；`classify_failure()` 与 `rank_hypotheses()` 只根据可观察关键词生成有 evidence reference 的候选假设。无足够证据时类别为 `unknown`，不会把“最可能”写成根因。
+
+`DebugCaseRepository` 将诊断、修复提案、人工批准、回归失败/通过和 resolved 做成单向门禁。`SafeRepairWorkspace` 只在批准后复制失败 Run 的 workspace，拒绝 symlink、绝对路径、`..` 逃逸和哈希不匹配，并用 argv 在隔离目录执行 regression command。原始 staging 和主工作树不会被修改；只有回归通过后 DebugCase 才能进入 resolved。

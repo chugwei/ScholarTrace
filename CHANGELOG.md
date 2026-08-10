@@ -9,10 +9,11 @@
 - M8.1 绑定 frozen `ExperimentPlan` 的受控执行契约、资源上限和 0014 `controlled_runs` 迁移。
 - argv 命令白名单、shell 注入拒绝、相对路径隔离和 Docker 无网络/只读工作区命令构造。
 - M8.2 异步本地 Runner、取消/超时/日志上限、追加式 Run 事件和成功后的原子 staging Artifact 发布。
+- M8.3 DebugCase 证据链、确定性诊断假设、人工修复审批、隔离修复工作区和回归门禁。
 
 ### Boundary
 
-- M8.2 只验证合成脚本和本地受控进程；Docker 实际运行、DebugCase、MLflow/DVC 和真实农业视觉实验仍在后续批次。
+- M8.3 只验证合成脚本和隔离工作区；Docker 实际运行、MLflow/DVC 和真实农业视觉实验仍在后续批次。
 
 ## [0.7.0] - 2026-08-11
 
