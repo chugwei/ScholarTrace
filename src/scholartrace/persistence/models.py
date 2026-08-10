@@ -564,3 +564,78 @@ class FigureSpecRow(Base):
     status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
     created_by: Mapped[str] = mapped_column(String(128), nullable=False)
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class ManuscriptRow(Base):
+    """Versioned manuscript container without generated section text."""
+
+    __tablename__ = "manuscripts"
+    __table_args__ = (
+        UniqueConstraint("project_id", "version", name="uq_manuscript_project_version"),
+        UniqueConstraint("project_id", "content_sha256", name="uq_manuscript_project_content"),
+    )
+
+    manuscript_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    version: Mapped[int] = mapped_column(Integer, nullable=False)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    parent_manuscript_id: Mapped[str | None] = mapped_column(String(40), nullable=True, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class SectionContractRow(Base):
+    """Required sources and claims for one manuscript section."""
+
+    __tablename__ = "section_contracts"
+    __table_args__ = (
+        UniqueConstraint(
+            "manuscript_id",
+            "section",
+            name="uq_section_contract_manuscript_section",
+        ),
+    )
+
+    section_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    manuscript_id: Mapped[str] = mapped_column(
+        String(40),
+        ForeignKey("manuscripts.manuscript_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    section: Mapped[str] = mapped_column(String(32), nullable=False)
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
+
+
+class ClaimLedgerRow(Base):
+    """Evidence-bound claim ledger entry."""
+
+    __tablename__ = "claim_ledger"
+    __table_args__ = (
+        UniqueConstraint("project_id", "content_sha256", name="uq_claim_project_content"),
+    )
+
+    claim_id: Mapped[str] = mapped_column(String(40), primary_key=True)
+    project_id: Mapped[str] = mapped_column(
+        String(128),
+        ForeignKey("projects.project_id", ondelete="CASCADE"),
+        nullable=False,
+        index=True,
+    )
+    content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
+    payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    claim_type: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, index=True)
+    created_by: Mapped[str] = mapped_column(String(128), nullable=False)
+    created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
