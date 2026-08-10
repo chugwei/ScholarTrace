@@ -22,3 +22,4 @@
 | M1 CLI create/continue/show | `src/scholartrace/cli.py`, `pyproject.toml` | `tests/integration/test_cli.py`, `docs/verification/m1-cli.md` | v0.1.0 | implemented-tested |
 | M1 独立进程重启恢复 | `src/scholartrace/__main__.py`, `examples/agriculture-vision-project/research-question.json` | `tests/e2e/test_cli_process_recovery.py`, `docs/verification/m1-process-recovery.md` | v0.1.0 | implemented-tested |
 | M1 发布候选与独立环境 | `pyproject.toml`, `uv.lock`, `docs/verification/m1-release-candidate.md` | Git archive、wheel、Run #14、actionlint、秘密扫描 | v0.1.0 | implemented-tested |
+| M2.1 缺失信息路由 | `src/scholartrace/graphs/research_question_review.py` | `tests/integration/test_m2_routing.py`, `docs/verification/m2-routing.md` | v0.2.0 | implemented-tested |

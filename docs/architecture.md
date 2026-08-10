@@ -59,3 +59,9 @@ START → intake → build_research_question → save → END
 `save` 在同一 Repository 事务中保存研究问题并把 Project 的 `active_stage` 更新为 `completed`，因此 `project show` 的业务视图和 Graph 最终 State 不会分别停留在 `intake` 与 `completed`。
 
 业务数据库与 checkpoint 数据库是两个文件：前者保存项目和研究问题版本，后者由 `SqliteSaver` 保存节点执行快照。关闭两个连接后重新打开，领域实体和最终 State 都能恢复；两个 thread 的 checkpoint 查询互不串联。本批次只实现固定 Edge，不包含人工暂停或条件路由。
+
+## M2.1 缺失信息路由
+
+M2.1 在研究问题输入进入校验前计算缺失字段，不用模型补全。`find_missing_question_fields()` 按 ResearchQuestion 契约顺序检查必填文本、核心列表和结构化列表；Conditional Edge 将结果路由到 `clarify` 或原有 `build_research_question → save` 路径。`clarify` 只写入 `awaiting_clarification` 和下一动作，不写入 ResearchQuestion 实体。
+
+这一步仍不是人工暂停：`clarify` 在本批次到达 `END`，没有 `interrupt()`、DecisionRecord 或恢复输入。M2.2 才会把同一分支改成持久化等待，并验证人工输入恢复后能清理旧的 `pending_questions`。

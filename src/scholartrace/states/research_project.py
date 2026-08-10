@@ -30,6 +30,7 @@ class ResearchProjectState(TypedDict):
 
     research_question_id: str | None
     draft_research_question: ResearchQuestion | None
+    research_question_payload: dict[str, Any] | None
     approved_document_ids: Annotated[list[str], merge_unique_strings]
     evidence_ids: Annotated[list[str], merge_unique_strings]
     claim_ids: Annotated[list[str], merge_unique_strings]
@@ -65,6 +66,7 @@ def new_research_project_state(
         pending_approval=None,
         research_question_id=None,
         draft_research_question=None,
+        research_question_payload=None,
         approved_document_ids=[],
         evidence_ids=[],
         claim_ids=[],

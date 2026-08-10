@@ -17,3 +17,9 @@ M2 尚未实现。本日志先冻结学习目标和验收边界，代码与测�
 ## 与 M1 的关系
 
 M1 已提供可恢复 State、Repository、Checkpoint 和 CLI。M2 将在其上增加人工决策状态与版本历史，不改变 M1 已发布的固定顺序成功路径；每个审批结果都必须能够回到对应 thread、输入、版本和审计记录。
+
+## M2.1 已验证的最小路径
+
+`intake` 先把结构化 payload 与缺失字段写入 State，Conditional Edge 根据 `pending_questions` 选择 `clarify` 或 `build_research_question`。农业视觉黄金输入缺少 `success_criteria` 时，系统会明确列出字段并结束在 `awaiting_clarification`；它不会保存一个不完整的研究问题，也不会把 Fixture 当作证据。完整 payload 仍沿 M1 路径保存。
+
+常见错误是把“字段存在”当成“信息完整”：空白文本、空核心列表和缺失键都被测试覆盖。M2.1 的 `pending_questions` 只描述当前缺口；后续 M2.2 会增加暂停/恢复和清理语义。

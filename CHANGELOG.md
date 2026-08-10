@@ -4,6 +4,11 @@
 
 ## [Unreleased]
 
+### Added
+
+- M2.1 研究问题缺失信息检测与 Conditional Edge 路由。
+- 不完整研究问题停在 `awaiting_clarification`，不会写入正式实体。
+
 ## [0.1.0] - 2026-08-09
 
 ### Added
