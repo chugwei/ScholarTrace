@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M9.4 发布候选审查中
+- 项目状态：M9 已发布，M10 待开始
 - 当前里程碑：M9 — 结果图表系统
 - 当前版本：`v0.9.0`
-- 当前分支：`feat/m9-figures`
+- 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -97,7 +97,7 @@
 - [x] M9.1 FigureSpec、输入数据契约、Artifact 元数据和 0017 迁移
 - [x] M9.2 确定性绘图脚本与 PNG/SVG/PDF 输出
 - [x] M9.3 Caption、图表建议、数据/脚本溯源和数值一致性检查
-- [ ] M9.4 视觉验收、独立审查、合并 `main` 与 `v0.9.0` 发布
+- [x] M9.4 视觉验收、独立审查、合并 `main` 与 `v0.9.0` 发布
 
 ## M10 小任务
 
@@ -229,15 +229,15 @@
 | M9.3 全量质量门禁 | 通过，`scripts/check.py`；149 passed；3 个合成 Fixture |
 | M9.4 实际视觉验收 | 通过；PNG、SVG 和 PDF 已实际打开检查，未发现裁切、重叠、黑块或不可读标签；PDF 另经 Poppler 渲染检查 |
 | M9.4 发布候选 | 通过；wheel/sdist、隔离 venv、0017 迁移、CLI、Apache-2.0、内部文件排除、秘密/大文件扫描和 actionlint |
-| M9.4 main 合并与 v0.9.0 发布 | 待完成；候选通过后合并 `main`、运行 main smoke 并推送 annotated Tag |
+| M9.4 main 合并与 v0.9.0 发布 | 通过；merge `4e60f48`；main 149 passed；annotated Tag `v0.9.0` object `0290f40` 已推送，peeled `4e60f48` |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9.1–M9.4 的代码、数值门禁和实际视觉验收已通过候选检查，main 合并与 Tag 尚未完成；Docker 真实运行、MLflow 在线服务、论文、Web、部署和真实场景验证仍未实现。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9.1–M9.4 已发布 v0.9.0，完成 FigureSpec 门禁、可重建三格式 Bundle、verified-only 建议、来源 Caption、数值/provenance 检查和实际视觉验收；Docker 真实运行、MLflow 在线服务、论文、Web、部署和真实场景验证仍未实现。
 
 ## 下一步
 
-下一步完成 M9.4 独立审查，合并 `main`、推送 annotated `v0.9.0` Tag；不把图表或临时指标升级为科研 Claim。
+下一步创建 `feat/m10-manuscript`，先实现 Manuscript、Section Contract 和 Claim Ledger 契约；不把图表或临时指标升级为科研 Claim。
