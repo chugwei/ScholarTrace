@@ -41,7 +41,12 @@ server 28.3.2; no diagnostics
 
 wheel 中包含 `dist-info/licenses/LICENSE`，且不包含内部协作文件。GitHub Actions API 若返回 rate limit，CI 状态保持“未验证”，不猜测通过。
 
-Tag 只在功能分支推送、合并 `main`、main smoke test 和远端 Ref 核验后创建。当前文档记录的是候选，不是已经发布的 Tag。
+## 发布结果
+
+- 功能分支已非 squash 合并到 `main`，merge commit：`9aef2d8608b33c3f47faa0039a95ac3cedae5757`；
+- `main` 已推送并核验为 `9aef2d8`，main smoke/全量门禁 111 passed；
+- annotated Tag `v0.5.0` 已推送；Tag object：`c35ed74b4663332bb4ee7da2fbbe4b7de97ced1a`，peeled commit：`9aef2d8`；
+- M5 已发布；M6 算法与创新候选已打开，M6–M12 仍未完成。
 
 ## 能力边界
 

@@ -43,3 +43,4 @@
 | M5.3 质量/泄漏检查与方案比较 | `src/scholartrace/design/validation.py`, `src/scholartrace/persistence/design_repository.py`, `src/scholartrace/schemas/design.py` | `tests/integration/test_m5_design_validation.py`, `docs/verification/m5-design-validation.md` | v0.5.0 | implemented-tested |
 | M5.4 Markdown/YAML 导出 | `src/scholartrace/design/export.py`, `pyproject.toml` | `tests/integration/test_m5_design_export.py`, `docs/verification/m5-design-export.md` | v0.5.0 | implemented-tested |
 | M5 v0.5.0 发布候选 | `pyproject.toml`, `README.md`, `CHANGELOG.md`, `uv.lock` | `docs/verification/m5-release-candidate.md`, `scripts/check.py`, 独立 wheel/CLI/迁移 | v0.5.0 | release-candidate |
+| M5 v0.5.0 发布 | `main`, `v0.5.0` | merge `9aef2d8`, Tag object `c35ed74`, main smoke/门禁 | v0.5.0 | implemented-tested |

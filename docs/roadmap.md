@@ -11,8 +11,8 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M2 人工审批与历史 | v0.2.0 | completed | main | [v0.2.0](https://github.com/chugwei/ScholarTrace/tree/v0.2.0) | merge `6689572`、main 门禁、Tag 已核验 |
 | M3 独立文献库 | v0.3.0 | completed | main | [v0.3.0](https://github.com/chugwei/ScholarTrace/tree/v0.3.0) | merge `c12b362`、main 门禁、Tag 已核验 |
 | M4 可信证据 RAG | v0.4.0 | completed | main | [v0.4.0](https://github.com/chugwei/ScholarTrace/tree/v0.4.0) | merge `a193291`、main 门禁、Tag 已核验 |
-| M5 管线与数据设计 | v0.5.0 | in_progress | feat/m5-pipeline-data-design | — | M5.1–M5.4 已通过，发布候选准备中 |
-| M6 算法与创新候选 | v0.6.0 | pending | feat/m6-algorithm-innovation | — | — |
+| M5 管线与数据设计 | v0.5.0 | completed | main | [v0.5.0](https://github.com/chugwei/ScholarTrace/tree/v0.5.0) | merge `9aef2d8`、main 门禁、Tag 已核验 |
+| M6 算法与创新候选 | v0.6.0 | in_progress | feat/m6-algorithm-innovation | — | 入口已打开 |
 | M7 实验注册与导入 | v0.7.0 | pending | feat/m7-experiment-registry | — | — |
 | M8 Runner 与排错 | v0.8.0 | pending | feat/m8-runner-debugging | — | — |
 | M9 图表系统 | v0.9.0 | pending | feat/m9-figures | — | — |
@@ -85,4 +85,4 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M5.1 | PipelineSpec/DataCollectionProtocol 契约与迁移 | Schema、兼容迁移和黄金样例 | completed |
 | M5.2 | 研究设计 Subgraph 与流程图 | 节点、版本和人工批准边界测试 | completed |
 | M5.3 | 数据质量/泄漏检查与方案比较 | 失败路径、版本对比和安全检查 | completed |
-| M5.4 | Markdown/YAML 导出与 M5 发布 | 独立审查、main CI、`v0.5.0` | release-candidate |
+| M5.4 | Markdown/YAML 导出与 M5 发布 | 独立审查、main CI、`v0.5.0` | completed |
