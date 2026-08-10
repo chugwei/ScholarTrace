@@ -60,6 +60,7 @@ from scholartrace.schemas.runner import (
     RunBackend,
     RunEventStream,
 )
+from scholartrace.schemas.tracking import DVCDataVersionCheck, TrackingAttempt
 
 __all__ = [
     "AlgorithmComponent",
@@ -72,6 +73,7 @@ __all__ = [
     "ControlledRunRecord",
     "ControlledRunSpec",
     "ControlledRunStatus",
+    "DVCDataVersionCheck",
     "DataCollectionProtocol",
     "DebugCase",
     "DebugCaseStatus",
@@ -110,4 +112,5 @@ __all__ = [
     "RunEventStream",
     "RunManifest",
     "SourceSpan",
+    "TrackingAttempt",
 ]

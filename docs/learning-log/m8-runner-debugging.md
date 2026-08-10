@@ -49,3 +49,9 @@ M8.2 没有在本机宣称 Docker 资源隔离通过；Docker 只在 M8.1 验证
 失败 Run 先通过 `capture_failure()` 固化 observed error、Run 状态、日志/ staging 路径和非敏感环境事实；`classify_failure()` 与 `rank_hypotheses()` 只根据可观察关键词生成有 evidence reference 的候选假设。无足够证据时类别为 `unknown`，不会把“最可能”写成根因。
 
 `DebugCaseRepository` 将诊断、修复提案、人工批准、回归失败/通过和 resolved 做成单向门禁。`SafeRepairWorkspace` 只在批准后复制失败 Run 的 workspace，拒绝 symlink、绝对路径、`..` 逃逸和哈希不匹配，并用 argv 在隔离目录执行 regression command。原始 staging 和主工作树不会被修改；只有回归通过后 DebugCase 才能进入 resolved。
+
+## M8.4.1：可选实验工具适配
+
+核心包不把 MLflow 或 DVC 作为必需依赖。`JsonTrackingAdapter` 为离线环境保存确定性的 Run provenance；`MLflowTrackingAdapter` 延迟导入，未安装时返回 `unavailable`，调用异常返回 `failed`，只有真实 API 调用完成才返回 `recorded`。`DVCDataVersionAdapter` 不执行外部 CLI，而是读取显式 manifest 并重新计算文件 SHA-256，路径逃逸、缺失文件和 hash 不一致都保留为非 verified 状态。
+
+这样可以在没有 API、服务或 DVC CLI 的 CI 中验证数据边界，同时不把“适配器存在”误写成外部系统已接通。M8.4.2 会对打包、迁移、许可证、秘密扫描和 main 合并做独立审查。

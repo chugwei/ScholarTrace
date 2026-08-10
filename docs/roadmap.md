@@ -14,7 +14,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M5 管线与数据设计 | v0.5.0 | completed | main | [v0.5.0](https://github.com/chugwei/ScholarTrace/tree/v0.5.0) | merge `9aef2d8`、main 门禁、Tag 已核验 |
 | M6 算法与创新候选 | v0.6.0 | completed | main | [v0.6.0](https://github.com/chugwei/ScholarTrace/tree/v0.6.0) | merge `0161739`、main 门禁、Tag 已核验 |
 | M7 实验注册与导入 | v0.7.0 | completed | main | [v0.7.0](https://github.com/chugwei/ScholarTrace/tree/v0.7.0) | merge `1cd9280`、main 门禁、Tag 已核验 |
-| M8 Runner 与排错 | v0.8.0 | in progress | feat/m8-runner-debugging | — | M8.1–M8.3 已验证，MLflow/DVC 与发布审查待实现 |
+| M8 Runner 与排错 | v0.8.0 | in progress | feat/m8-runner-debugging | — | M8.1–M8.4.1 已验证，发布审查待实现 |
 | M9 图表系统 | v0.9.0 | pending | feat/m9-figures | — | — |
 | M10 论文与引用 | v0.10.0 | pending | feat/m10-manuscript | — | — |
 | M11 Web 工作台 | v0.11.0 | pending | feat/m11-web-workbench | — | — |
@@ -112,4 +112,4 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M8.1 | 受控执行契约、命令白名单、资源限制和 0014 迁移 | 6 个目标测试、冻结计划门禁、Docker argv 构造 | completed |
 | M8.2 | 启动、取消、超时、流式日志和失败产物隔离 | 10 个目标测试、137 个全量测试、合成脚本 E2E | completed |
 | M8.3 | DebugCase、诊断假设排序、安全修复分支和回归 | 13 个目标测试、140 个全量测试、隔离修复 E2E | completed |
-| M8.4 | MLflow/DVC 初步集成、独立审查和 `v0.8.0` 发布 | — | in progress |
+| M8.4 | MLflow/DVC 初步集成、独立审查和 `v0.8.0` 发布 | 3 个适配器目标测试；发布候选待审查 | in progress |

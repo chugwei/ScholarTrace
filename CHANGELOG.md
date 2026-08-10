@@ -10,10 +10,11 @@
 - argv 命令白名单、shell 注入拒绝、相对路径隔离和 Docker 无网络/只读工作区命令构造。
 - M8.2 异步本地 Runner、取消/超时/日志上限、追加式 Run 事件和成功后的原子 staging Artifact 发布。
 - M8.3 DebugCase 证据链、确定性诊断假设、人工修复审批、隔离修复工作区和回归门禁。
+- M8.4.1 可替换的 JSON 离线追踪、MLflow 可选适配和 DVC manifest SHA-256 校验。
 
 ### Boundary
 
-- M8.3 只验证合成脚本和隔离工作区；Docker 实际运行、MLflow/DVC 和真实农业视觉实验仍在后续批次。
+- M8.4.1 的 MLflow 结果会明确区分 recorded/unavailable/failed；当前环境未安装 MLflow，未宣称在线 tracking 成功。Docker 和真实农业视觉实验仍未验证。
 
 ## [0.7.0] - 2026-08-11
 
