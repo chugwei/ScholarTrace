@@ -1,6 +1,6 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M7 已发布，M8.1 进行中
+- 项目状态：M7 已发布，M8.2 进行中
 - 当前里程碑：M8 — 受控实验执行与排错
 - 当前版本：`v0.7.0`
 - 当前分支：`feat/m8-runner-debugging`
@@ -86,7 +86,7 @@
 ## M8 小任务
 
 - [x] M8.1 受控执行契约、命令白名单、资源限制和 0014 迁移
-- [ ] M8.2 启动、取消、超时、流式日志和失败产物隔离
+- [x] M8.2 启动、取消、超时、流式日志和失败产物隔离
 - [ ] M8.3 DebugCase、诊断假设排序、安全修复分支和回归门禁
 - [ ] M8.4 MLflow/DVC 可替换适配、独立审查、合并 `main` 与 `v0.8.0` 发布
 
@@ -197,14 +197,16 @@
 | M7 main 合并与发布 | 通过，merge `1cd9280`；main smoke/全量 127 passed；Tag object `95af661`，peeled `1cd9280` |
 | M8.1 受控 Runner 契约目标测试 | 通过，6 passed；0014 迁移升降级、冻结计划门禁、命令白名单、路径隔离和 Docker argv 构造 |
 | M8.1 Ruff format/lint | 通过；95 files formatted/unchanged，All checks passed |
+| M8.2 Runner 生命周期目标测试 | 通过，10 passed；成功发布、失败/取消/超时隔离、日志上限、事件顺序和 0015↔0014 回滚 |
+| M8.2 全量质量门禁 | 通过，`scripts/check.py`；137 passed；3 个合成 Fixture |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8.1 仅提供绑定 frozen plan 的受控执行契约与安全命令构造，尚未启动真实实验、流式日志、排错或 MLflow/DVC 运行集成；论文、Web 和部署能力仍未实现。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8.1/M8.2 已验证 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件和成功后 staging 发布；Docker 尚未实际运行，DebugCase、MLflow/DVC、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步实现 M8.2 的异步启动、取消、超时、流式日志和失败产物隔离；所有外部命令继续使用 argv、白名单和资源限制。
+下一步实现 M8.3 的 DebugCase、诊断假设排序、安全修复分支和回归测试；不把失败日志或临时指标升级为科研 Claim。

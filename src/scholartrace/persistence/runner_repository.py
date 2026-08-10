@@ -4,21 +4,25 @@ from __future__ import annotations
 
 import hashlib
 import json
+from datetime import UTC, datetime
 from pathlib import Path
 
-from sqlalchemy import select
+from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from scholartrace.identifiers import validate_identifier
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.models import (
+    ControlledRunEventRow,
     ControlledRunRow,
     ExperimentPlanRow,
     ProjectRow,
 )
 from scholartrace.runner.policy import CommandPolicy
-from scholartrace.schemas import ControlledRunRecord, ControlledRunSpec
+from scholartrace.schemas import ControlledRunEvent, ControlledRunRecord, ControlledRunSpec
+
+_TERMINAL_STATUSES = {"succeeded", "failed", "cancelled", "timed_out"}
 
 
 class ControlledRunRepositoryError(RuntimeError):
@@ -111,7 +115,7 @@ class ControlledRunRepository:
                 raise ControlledRunRepositoryError(
                     f"execution {execution_id!r} was not found in project {project_id!r}"
                 )
-            return _record_model(row)
+            return _record_model(row, event_count=self._event_count(session, execution_id))
 
     def list_runs(self, project_id: str) -> list[ControlledRunRecord]:
         project_id = validate_identifier(project_id)
@@ -123,7 +127,150 @@ class ControlledRunRepository:
                 .where(ControlledRunRow.project_id == project_id)
                 .order_by(ControlledRunRow.created_at, ControlledRunRow.execution_id)
             ).all()
-            return [_record_model(row) for row in rows]
+            return [
+                _record_model(row, event_count=self._event_count(session, row.execution_id))
+                for row in rows
+            ]
+
+    def mark_running(self, project_id: str, execution_id: str) -> ControlledRunRecord:
+        """Transition a queued run to running, idempotently."""
+
+        with Session(self._engine) as session, session.begin():
+            row = self._row_for_project(session, project_id, execution_id)
+            if row.status == "queued":
+                row.status = "running"
+                row.started_at = _utc_now_naive()
+                self._append_event(session, row.execution_id, "system", "status:running")
+            elif row.status != "running":
+                raise ControlledRunRepositoryError(
+                    f"run {row.execution_id!r} cannot start from status {row.status!r}"
+                )
+            return _record_model(row, event_count=self._event_count(session, row.execution_id))
+
+    def finish_run(
+        self,
+        project_id: str,
+        execution_id: str,
+        *,
+        status: str,
+        exit_code: int | None = None,
+        error: str | None = None,
+        log_relpath: str | None = None,
+        staging_relpath: str | None = None,
+        published_relpath: str | None = None,
+    ) -> ControlledRunRecord:
+        """Persist one terminal outcome without deleting staging evidence."""
+
+        if status not in _TERMINAL_STATUSES:
+            raise ValueError("finish status must be a terminal controlled-run status")
+        with Session(self._engine) as session, session.begin():
+            row = self._row_for_project(session, project_id, execution_id)
+            if row.status in _TERMINAL_STATUSES:
+                if row.status != status:
+                    raise ControlledRunRepositoryError(
+                        f"run {row.execution_id!r} already finished as {row.status!r}"
+                    )
+            elif row.status not in {"queued", "running"}:
+                raise ControlledRunRepositoryError(
+                    f"run {row.execution_id!r} cannot finish from status {row.status!r}"
+                )
+            else:
+                row.status = status
+                row.exit_code = exit_code
+                row.error = error
+                row.log_relpath = log_relpath
+                row.staging_relpath = staging_relpath
+                row.published_relpath = published_relpath
+                row.finished_at = _utc_now_naive()
+                self._append_event(session, row.execution_id, "system", f"status:{status}")
+            return _record_model(row, event_count=self._event_count(session, row.execution_id))
+
+    def append_event(
+        self,
+        project_id: str,
+        execution_id: str,
+        *,
+        stream: str,
+        message: str,
+    ) -> ControlledRunEvent:
+        """Append one bounded event after checking project ownership."""
+
+        with Session(self._engine) as session, session.begin():
+            row = self._row_for_project(session, project_id, execution_id)
+            event = self._append_event(session, row.execution_id, stream, message)
+            return event
+
+    def list_events(self, project_id: str, execution_id: str) -> list[ControlledRunEvent]:
+        with Session(self._engine) as session:
+            row = self._row_for_project(session, project_id, execution_id)
+            events = session.scalars(
+                select(ControlledRunEventRow)
+                .where(ControlledRunEventRow.execution_id == row.execution_id)
+                .order_by(ControlledRunEventRow.sequence)
+            ).all()
+            return [_event_model(event) for event in events]
+
+    def _row_for_project(
+        self, session: Session, project_id: str, execution_id: str
+    ) -> ControlledRunRow:
+        project_id = validate_identifier(project_id)
+        execution_id = validate_identifier(execution_id)
+        row = session.scalar(
+            select(ControlledRunRow).where(
+                ControlledRunRow.project_id == project_id,
+                ControlledRunRow.execution_id == execution_id,
+            )
+        )
+        if row is None:
+            raise ControlledRunRepositoryError(
+                f"execution {execution_id!r} was not found in project {project_id!r}"
+            )
+        return row
+
+    @staticmethod
+    def _event_count(session: Session, execution_id: str) -> int:
+        return int(
+            session.scalar(
+                select(func.count())
+                .select_from(ControlledRunEventRow)
+                .where(ControlledRunEventRow.execution_id == execution_id)
+            )
+            or 0
+        )
+
+    @staticmethod
+    def _append_event(
+        session: Session,
+        execution_id: str,
+        stream: str,
+        message: str,
+    ) -> ControlledRunEvent:
+        event_time = _utc_now()
+        latest_sequence = session.scalar(
+            select(func.max(ControlledRunEventRow.sequence)).where(
+                ControlledRunEventRow.execution_id == execution_id
+            )
+        )
+        sequence = (int(latest_sequence) if latest_sequence is not None else -1) + 1
+        event = ControlledRunEvent(
+            execution_id=execution_id,
+            sequence=sequence,
+            stream=stream,
+            message=message,
+            created_at=event_time,
+        )
+        session.add(
+            ControlledRunEventRow(
+                event_id=f"{execution_id}:{sequence}",
+                execution_id=execution_id,
+                sequence=sequence,
+                stream=stream,
+                message=message,
+                created_at=event_time.replace(tzinfo=None),
+            )
+        )
+        session.flush()
+        return event
 
 
 def _command_sha256(command: list[str]) -> str:
@@ -131,7 +278,15 @@ def _command_sha256(command: list[str]) -> str:
     return hashlib.sha256(payload.encode("utf-8")).hexdigest()
 
 
-def _record_model(row: ControlledRunRow) -> ControlledRunRecord:
+def _utc_now() -> datetime:
+    return datetime.now(UTC)
+
+
+def _utc_now_naive() -> datetime:
+    return _utc_now().replace(tzinfo=None)
+
+
+def _record_model(row: ControlledRunRow, *, event_count: int = 0) -> ControlledRunRecord:
     spec = ControlledRunSpec.model_validate(row.payload)
     return ControlledRunRecord(
         execution_id=row.execution_id,
@@ -144,7 +299,21 @@ def _record_model(row: ControlledRunRow) -> ControlledRunRecord:
         spec=spec,
         exit_code=row.exit_code,
         error=row.error,
+        log_relpath=row.log_relpath,
+        staging_relpath=row.staging_relpath,
+        published_relpath=row.published_relpath,
+        event_count=event_count,
         created_at=row.created_at,
         started_at=row.started_at,
         finished_at=row.finished_at,
+    )
+
+
+def _event_model(row: ControlledRunEventRow) -> ControlledRunEvent:
+    return ControlledRunEvent(
+        execution_id=row.execution_id,
+        sequence=row.sequence,
+        stream=row.stream,
+        message=row.message,
+        created_at=row.created_at,
     )

@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from pathlib import Path
+from time import sleep
 
 import pytest
 from sqlalchemy.orm import Session
@@ -7,6 +8,7 @@ from sqlalchemy.orm import Session
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.experiment_repository import ExperimentRepository
 from scholartrace.persistence.migrations import (
+    LATEST_REVISION,
     current_revision,
     downgrade_database,
     upgrade_database,
@@ -19,6 +21,7 @@ from scholartrace.persistence.runner_repository import (
     ControlledRunRepositoryError,
 )
 from scholartrace.runner import CommandPolicy, DockerCommandBuilder, UnsafeCommandError
+from scholartrace.runner.executor import RunExecutor
 from scholartrace.schemas import (
     ControlledRunSpec,
     ExperimentMatrixEntry,
@@ -112,11 +115,21 @@ def _spec(*, execution_id: str = "exec-001", command: list[str] | None = None) -
 def test_runner_migration_rolls_back(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
     upgrade_database(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
+
+
+def test_runner_event_migration_rolls_back_to_m8_1(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    upgrade_database(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
+    downgrade_database(database_path, "0014")
     assert current_revision(database_path) == "0014"
+    upgrade_database(database_path)
+    assert current_revision(database_path) == LATEST_REVISION
     downgrade_database(database_path, "0013")
     assert current_revision(database_path) == "0013"
     upgrade_database(database_path)
-    assert current_revision(database_path) == "0014"
+    assert current_revision(database_path) == LATEST_REVISION
 
 
 def test_policy_rejects_shell_and_inline_code() -> None:
@@ -173,4 +186,183 @@ def test_controlled_run_rejects_draft_plan(tmp_path: Path) -> None:
     repository = ControlledRunRepository(database_path)
     with pytest.raises(ControlledRunRepositoryError, match="frozen"):
         repository.create_run(_spec())
+    repository.close()
+
+
+def _executor_spec(
+    *,
+    execution_id: str,
+    input_relpaths: list[str] | None = None,
+    timeout_seconds: float = 10,
+    max_log_bytes: int = 1_048_576,
+    max_output_bytes: int = 1_048_576,
+) -> ControlledRunSpec:
+    payload = _spec(execution_id=execution_id).model_dump(mode="json")
+    payload.update(
+        {
+            "command": ["python", "runner_script.py"],
+            "input_relpaths": input_relpaths or ["runner_script.py"],
+            "limits": {
+                "timeout_seconds": timeout_seconds,
+                "memory_mb": 256,
+                "cpu_seconds": 20,
+                "max_log_bytes": max_log_bytes,
+                "max_output_bytes": max_output_bytes,
+            },
+        }
+    )
+    return ControlledRunSpec.model_validate(payload)
+
+
+def _prepare_executor(
+    database_path: Path,
+    tmp_path: Path,
+    spec: ControlledRunSpec,
+    script: str,
+) -> tuple[ControlledRunRepository, RunExecutor]:
+    upgrade_database(database_path)
+    _plan(database_path)
+    input_root = tmp_path / "inputs"
+    input_root.mkdir(parents=True)
+    (input_root / "runner_script.py").write_text(script, encoding="utf-8")
+    repository = ControlledRunRepository(database_path)
+    repository.create_run(spec)
+    executor = RunExecutor(
+        repository,
+        workspace_root=tmp_path / "staging",
+        artifact_root=tmp_path / "artifacts",
+        input_root=input_root,
+    )
+    return repository, executor
+
+
+def test_executor_streams_and_publishes_only_successful_outputs(tmp_path: Path) -> None:
+    database_path = tmp_path / "domain.db"
+    spec = _executor_spec(execution_id="exec-success")
+    script = "\n".join(
+        [
+            "from pathlib import Path",
+            "print('started', flush=True)",
+            "Path('outputs/result.txt').write_text('ok', encoding='utf-8')",
+            "",
+        ]
+    )
+    repository, executor = _prepare_executor(
+        database_path,
+        tmp_path,
+        spec,
+        script,
+    )
+    events: list[str] = []
+    executor.start("lychee-m8", "exec-success", on_event=lambda event: events.append(event.stream))
+    result = executor.wait("lychee-m8", "exec-success")
+    assert result.status == "succeeded"
+    assert result.published_relpath == "lychee-m8/exec-success"
+    assert (tmp_path / "artifacts" / "lychee-m8" / "exec-success" / "result.txt").read_text(
+        encoding="utf-8"
+    ) == "ok"
+    assert "stdout" in events
+    assert [
+        event.sequence for event in repository.list_events("lychee-m8", "exec-success")
+    ] == list(range(result.event_count))
+    executor.shutdown()
+    repository.close()
+
+
+def test_executor_failure_and_timeout_preserve_staging_without_publishing(
+    tmp_path: Path,
+) -> None:
+    failed_db = tmp_path / "failed.db"
+    failed_spec = _executor_spec(execution_id="exec-failed")
+    failed_script = "\n".join(
+        [
+            "from pathlib import Path",
+            "Path('outputs/partial.txt').write_text('partial', encoding='utf-8')",
+            "raise SystemExit(2)",
+            "",
+        ]
+    )
+    repository, executor = _prepare_executor(
+        failed_db,
+        tmp_path / "failed",
+        failed_spec,
+        failed_script,
+    )
+    executor.start("lychee-m8", "exec-failed")
+    failed = executor.wait("lychee-m8", "exec-failed")
+    assert failed.status == "failed"
+    assert not (tmp_path / "failed" / "artifacts" / "lychee-m8" / "exec-failed").exists()
+    assert (tmp_path / "failed" / "staging" / "exec-failed").exists()
+    executor.shutdown()
+    repository.close()
+
+    timeout_db = tmp_path / "timeout.db"
+    timeout_spec = _executor_spec(execution_id="exec-timeout", timeout_seconds=0.2)
+    repository, executor = _prepare_executor(
+        timeout_db,
+        tmp_path / "timeout",
+        timeout_spec,
+        "import time\ntime.sleep(3)\n",
+    )
+    executor.start("lychee-m8", "exec-timeout")
+    timeout = executor.wait("lychee-m8", "exec-timeout")
+    assert timeout.status == "timed_out"
+    assert not (tmp_path / "timeout" / "artifacts" / "lychee-m8" / "exec-timeout").exists()
+    executor.shutdown()
+    repository.close()
+
+
+def test_executor_cancel_and_log_limit_are_terminal_and_safe(tmp_path: Path) -> None:
+    cancel_db = tmp_path / "cancel.db"
+    cancel_spec = _executor_spec(execution_id="exec-cancel", timeout_seconds=10)
+    repository, executor = _prepare_executor(
+        cancel_db,
+        tmp_path / "cancel",
+        cancel_spec,
+        "import time\nprint('waiting', flush=True)\ntime.sleep(3)\n",
+    )
+    executor.start("lychee-m8", "exec-cancel")
+    sleep(0.2)
+    cancelled = executor.cancel("lychee-m8", "exec-cancel")
+    assert cancelled.status == "cancelled"
+    executor.shutdown()
+    repository.close()
+
+    log_db = tmp_path / "log.db"
+    log_spec = _executor_spec(execution_id="exec-log", max_log_bytes=100)
+    repository, executor = _prepare_executor(
+        log_db,
+        tmp_path / "log",
+        log_spec,
+        "print('x' * 10000, flush=True)\n",
+    )
+    executor.start("lychee-m8", "exec-log")
+    limited = executor.wait("lychee-m8", "exec-log")
+    assert limited.status == "failed"
+    assert limited.error == "run exceeded max_log_bytes"
+    assert not (tmp_path / "log" / "artifacts" / "lychee-m8" / "exec-log").exists()
+    executor.shutdown()
+    repository.close()
+
+    output_db = tmp_path / "output.db"
+    output_spec = _executor_spec(execution_id="exec-output", max_output_bytes=10)
+    output_script = "\n".join(
+        [
+            "from pathlib import Path",
+            "Path('outputs/result.txt').write_text('x' * 100, encoding='utf-8')",
+            "",
+        ]
+    )
+    repository, executor = _prepare_executor(
+        output_db,
+        tmp_path / "output",
+        output_spec,
+        output_script,
+    )
+    executor.start("lychee-m8", "exec-output")
+    oversized = executor.wait("lychee-m8", "exec-output")
+    assert oversized.status == "failed"
+    assert oversized.error == "run exceeded max_output_bytes"
+    assert not (tmp_path / "output" / "artifacts" / "lychee-m8" / "exec-output").exists()
+    executor.shutdown()
     repository.close()

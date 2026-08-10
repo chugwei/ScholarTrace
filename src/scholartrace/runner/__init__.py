@@ -6,4 +6,8 @@ from scholartrace.runner.policy import (
     UnsafeCommandError,
 )
 
-__all__ = ["CommandPolicy", "DockerCommandBuilder", "UnsafeCommandError"]
+__all__ = [
+    "CommandPolicy",
+    "DockerCommandBuilder",
+    "UnsafeCommandError",
+]

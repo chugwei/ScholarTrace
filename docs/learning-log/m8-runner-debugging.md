@@ -35,3 +35,11 @@ per-run staging → controlled process → logs/status → verified artifact pub
 一个最小请求使用 `["python", "-m", "pytest", "-q"]`，绑定一个已冻结的农业视觉 Fixture 计划。`CommandPolicy` 会拒绝 `python -c ...`、shell 元字符和未列入白名单的模块；路径契约会拒绝绝对路径和 `..` 逃逸。Docker 不可用时只能验证构造出的 argv，不能把构造测试描述为真实容器执行。
 
 M8.1 与 M7 的关系是把可导入的 Run 身份扩展为可排队的受控执行身份；与 M8.2 的关系是为启动、取消、超时和日志提供不可变请求及资源上限。当前所有示例仍是合成/脱敏 Fixture，不是真实训练或现场结果。
+
+## M8.2：生命周期、日志和产物发布
+
+`RunExecutor` 使用线程池调度受控进程，但进程本身始终由 `subprocess.Popen(..., shell=False)` 以 argv 启动。每次运行有独立 staging 目录和最小环境；输出先写 staging，只有退出码为 0 且正式目标不存在时才复制到临时发布目录并原子改名。失败、取消、超时和日志超限都会留下 staging 与日志，正式 Artifact 不会被覆盖。
+
+日志读取线程把 stdout 分块放入队列，主循环同时检查取消事件和 deadline，因此无输出的长进程也能被超时终止。每个事件带有单调 sequence 并追加到 `controlled_run_events`；事件回调只用于观察，回调错误不会改变 Run 结果。M8.2 的测试用合成 Python 脚本验证成功发布、非零退出、超时、取消、日志上限和事件顺序，不把这些脚本结果描述成农业模型指标。
+
+M8.2 没有在本机宣称 Docker 资源隔离通过；Docker 只在 M8.1 验证了 argv 构造。下一批 M8.3 将把失败 Run 转成 DebugCase，要求诊断假设有证据、修复在隔离分支/沙箱中执行并通过回归后才可记录解决。

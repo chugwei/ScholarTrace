@@ -22,6 +22,7 @@ ControlledRunStatus = Literal[
     "cancelled",
     "timed_out",
 ]
+RunEventStream = Literal["stdout", "stderr", "system"]
 
 
 def validate_relative_path(value: str, *, field_name: str = "path") -> str:
@@ -46,6 +47,7 @@ class ResourceLimits(BaseModel):
 
     timeout_seconds: float = Field(gt=0, le=86_400)
     memory_mb: int = Field(gt=0, le=1_048_576)
+    cpu_cores: float = Field(default=1, gt=0, le=128)
     cpu_seconds: float | None = Field(default=None, gt=0, le=86_400)
     max_log_bytes: int = Field(default=1_048_576, gt=0, le=100_000_000)
     max_output_bytes: int = Field(default=1_073_741_824, gt=0, le=10_737_418_240)
@@ -75,6 +77,8 @@ class ControlledRunSpec(BaseModel):
     def validate_sandbox_contract(self) -> "ControlledRunSpec":
         validate_relative_path(self.workspace_relpath, field_name="workspace_relpath")
         validate_relative_path(self.output_relpath, field_name="output_relpath")
+        if self.workspace_relpath == self.output_relpath:
+            raise ValueError("output_relpath must be distinct from workspace_relpath")
         for path in self.input_relpaths:
             validate_relative_path(path, field_name="input_relpath")
         if self.backend == "docker" and self.image is None:
@@ -104,6 +108,22 @@ class ControlledRunRecord(BaseModel):
     spec: ControlledRunSpec
     exit_code: int | None = None
     error: str | None = None
+    log_relpath: str | None = None
+    staging_relpath: str | None = None
+    published_relpath: str | None = None
+    event_count: int = Field(default=0, ge=0)
     created_at: datetime
     started_at: datetime | None = None
     finished_at: datetime | None = None
+
+
+class ControlledRunEvent(BaseModel):
+    """An ordered, bounded event emitted by a controlled run."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    execution_id: NonBlankText
+    sequence: int = Field(ge=0)
+    stream: RunEventStream
+    message: str = Field(max_length=100_000)
+    created_at: datetime

@@ -41,11 +41,13 @@ from scholartrace.schemas.literature import (
 )
 from scholartrace.schemas.research import ResearchQuestion
 from scholartrace.schemas.runner import (
+    ControlledRunEvent,
     ControlledRunRecord,
     ControlledRunSpec,
     ControlledRunStatus,
     ResourceLimits,
     RunBackend,
+    RunEventStream,
 )
 
 __all__ = [
@@ -55,6 +57,7 @@ __all__ = [
     "CaptureField",
     "ChunkSearchResult",
     "ClaimUpdate",
+    "ControlledRunEvent",
     "ControlledRunRecord",
     "ControlledRunSpec",
     "ControlledRunStatus",
@@ -84,6 +87,7 @@ __all__ = [
     "ResearchQuestion",
     "ResourceLimits",
     "RunBackend",
+    "RunEventStream",
     "RunManifest",
     "SourceSpan",
 ]
