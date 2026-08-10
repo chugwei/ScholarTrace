@@ -54,6 +54,14 @@ class ResearchQuestionRow(Base):
     version: Mapped[int] = mapped_column(Integer, nullable=False)
     content_sha256: Mapped[str] = mapped_column(String(64), nullable=False)
     payload: Mapped[dict[str, Any]] = mapped_column(JSON, nullable=False)
+    status: Mapped[str] = mapped_column(String(16), nullable=False, default="draft")
+    frozen_at: Mapped[datetime | None] = mapped_column(DateTime, nullable=True)
+    frozen_by: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    parent_research_question_id: Mapped[str | None] = mapped_column(
+        String(35),
+        nullable=True,
+        index=True,
+    )
     created_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, default=utc_now_naive)
 
 

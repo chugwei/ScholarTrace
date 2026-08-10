@@ -6,6 +6,7 @@ from langgraph.types import Command
 from scholartrace.graphs.research_question_decision import (
     open_research_question_decision_graph,
 )
+from scholartrace.persistence.migrations import upgrade_database
 from scholartrace.persistence.repository import ProjectRepository
 from scholartrace.schemas import ResearchQuestion
 from scholartrace.states import new_research_project_state
@@ -113,6 +114,54 @@ def test_approved_decision_saves_question_and_modified_loops_to_review(
         "modified",
         "approved",
     ]
+    repository.close()
+
+
+def test_approved_revision_descends_from_frozen_question(tmp_path: Path) -> None:
+    project_id = "decision-revision"
+    database_path = tmp_path / "domain.db"
+    checkpoint_path = tmp_path / "checkpoints.db"
+    upgrade_database(database_path)
+
+    repository = ProjectRepository(database_path)
+    repository.create_project(
+        project_id,
+        project_id,
+        current_goal="确认研究问题边界",
+    )
+    base = repository.save_research_question(
+        project_id,
+        ResearchQuestion.model_validate(complete_payload()),
+    )
+    repository.freeze_research_question(project_id, base.research_question_id, "researcher-001")
+    repository.close()
+
+    state = initial_state(project_id)
+    state["research_question_id"] = base.research_question_id
+    revised_payload = complete_payload()
+    revised_payload["constraints"] = ["需覆盖雨季和晴天"]
+    state["research_question_payload"] = revised_payload
+
+    with open_research_question_decision_graph(database_path, checkpoint_path) as workflow:
+        start_decision(workflow, state)
+        result = workflow.resume(
+            project_id,
+            Command(
+                resume={
+                    "decision_id": "decision-revision-approved",
+                    "action": "approved",
+                    "actor_id": "researcher-001",
+                    "reason": "批准新的采集条件边界",
+                }
+            ),
+        )
+
+    assert result["active_stage"] == "completed"
+    assert result["research_question_id"] != base.research_question_id
+    repository = ProjectRepository(database_path)
+    versions = repository.list_research_questions(project_id)
+    assert [(item.version, item.status) for item in versions] == [(1, "frozen"), (2, "frozen")]
+    assert versions[1].parent_research_question_id == base.research_question_id
     repository.close()
 
 

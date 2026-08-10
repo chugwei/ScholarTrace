@@ -3,7 +3,7 @@ from pathlib import Path
 import pytest
 from pydantic import ValidationError
 
-from scholartrace.persistence.migrations import current_revision, upgrade_database
+from scholartrace.persistence.migrations import LATEST_REVISION, current_revision, upgrade_database
 from scholartrace.persistence.repository import (
     DecisionConflictError,
     ProjectNotFoundError,
@@ -58,7 +58,7 @@ def test_decision_record_rejects_unknown_fields() -> None:
 def test_decision_migration_and_idempotent_repository_write(tmp_path: Path) -> None:
     database_path = tmp_path / "domain.db"
     upgrade_database(database_path)
-    assert current_revision(database_path) == "0002"
+    assert current_revision(database_path) == LATEST_REVISION
 
     repository = ProjectRepository(database_path)
     repository.create_project("lychee-m2-decision", "lychee-m2-decision")

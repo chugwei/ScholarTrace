@@ -5,6 +5,7 @@ import json
 from dataclasses import dataclass
 from datetime import datetime
 from pathlib import Path
+from typing import Literal
 
 from sqlalchemy import func, select
 from sqlalchemy.exc import IntegrityError
@@ -38,6 +39,14 @@ class ResearchQuestionNotFoundError(ProjectRepositoryError):
     """Raised when a research question is not present in the requested project."""
 
 
+class ResearchQuestionFrozenError(ProjectRepositoryError):
+    """Raised when a frozen question is changed without creating a new version."""
+
+
+class ResearchQuestionVersionConflictError(ProjectRepositoryError):
+    """Raised when a new version does not descend from the current frozen version."""
+
+
 class DecisionConflictError(ProjectRepositoryError):
     """Raised when a decision ID is replayed with different content."""
 
@@ -59,6 +68,10 @@ class ResearchQuestionRecord:
     version: int
     content_sha256: str
     question: ResearchQuestion
+    status: Literal["draft", "frozen"]
+    frozen_at: datetime | None
+    frozen_by: str | None
+    parent_research_question_id: str | None
     created_at: datetime
 
 
@@ -142,27 +155,21 @@ class ProjectRepository:
         project_id: str,
         question: ResearchQuestion,
         active_stage: str | None = None,
+        parent_research_question_id: str | None = None,
     ) -> ResearchQuestionRecord:
         project_id = validate_identifier(project_id)
         if active_stage is not None:
             active_stage = validate_identifier(active_stage)
+        if parent_research_question_id is not None:
+            parent_research_question_id = validate_identifier(parent_research_question_id)
         payload = question.model_dump(mode="json")
-        canonical_payload = json.dumps(
-            payload,
-            ensure_ascii=False,
-            sort_keys=True,
-            separators=(",", ":"),
-        )
-        content_sha256 = hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
-        identity_digest = hashlib.sha256(f"{project_id}\0{content_sha256}".encode()).hexdigest()
-        research_question_id = f"rq_{identity_digest[:32]}"
+        content_sha256 = _research_question_content_sha256(payload)
+        research_question_id = research_question_id_for(project_id, question)
 
         with Session(self._engine) as session, session.begin():
             project = session.get(ProjectRow, project_id)
             if project is None:
                 raise ProjectNotFoundError(f"project {project_id!r} was not found")
-            if active_stage is not None:
-                project.active_stage = active_stage
 
             existing = session.scalar(
                 select(ResearchQuestionRow).where(
@@ -171,8 +178,46 @@ class ProjectRepository:
                 )
             )
             if existing is not None:
+                if active_stage is not None:
+                    project.active_stage = active_stage
                 session.flush()
                 return _research_question_record(existing)
+
+            latest = session.scalar(
+                select(ResearchQuestionRow)
+                .where(ResearchQuestionRow.project_id == project_id)
+                .order_by(ResearchQuestionRow.version.desc())
+            )
+            parent = None
+            if parent_research_question_id is not None:
+                parent = session.scalar(
+                    select(ResearchQuestionRow).where(
+                        ResearchQuestionRow.project_id == project_id,
+                        ResearchQuestionRow.research_question_id == parent_research_question_id,
+                    )
+                )
+                if parent is None:
+                    raise ResearchQuestionNotFoundError(
+                        f"research question {parent_research_question_id!r} was not found in "
+                        f"project {project_id!r}"
+                    )
+                if parent.status != "frozen":
+                    raise ResearchQuestionVersionConflictError(
+                        "new versions must descend from a frozen research question"
+                    )
+                if (
+                    latest is not None
+                    and latest.research_question_id != parent.research_question_id
+                ):
+                    raise ResearchQuestionVersionConflictError(
+                        "new version parent must be the current research question"
+                    )
+            elif latest is not None and latest.status == "frozen":
+                raise ResearchQuestionFrozenError(
+                    "research question is frozen; create a new version explicitly"
+                )
+            if active_stage is not None:
+                project.active_stage = active_stage
 
             latest_version = session.scalar(
                 select(func.max(ResearchQuestionRow.version)).where(
@@ -185,8 +230,74 @@ class ProjectRepository:
                 version=(latest_version or 0) + 1,
                 content_sha256=content_sha256,
                 payload=payload,
+                status="draft",
+                parent_research_question_id=parent_research_question_id,
             )
             session.add(row)
+            session.flush()
+            return _research_question_record(row)
+
+    def create_research_question_version(
+        self,
+        project_id: str,
+        parent_research_question_id: str,
+        question: ResearchQuestion,
+        active_stage: str | None = None,
+    ) -> ResearchQuestionRecord:
+        """Create a draft descendant of the project's current frozen question."""
+
+        return self.save_research_question(
+            project_id,
+            question,
+            active_stage=active_stage,
+            parent_research_question_id=parent_research_question_id,
+        )
+
+    def freeze_research_question(
+        self,
+        project_id: str,
+        research_question_id: str,
+        frozen_by: str,
+    ) -> ResearchQuestionRecord:
+        """Freeze one draft version idempotently and bind the approving actor."""
+
+        project_id = validate_identifier(project_id)
+        research_question_id = validate_identifier(research_question_id)
+        frozen_by = validate_identifier(frozen_by)
+        with Session(self._engine) as session, session.begin():
+            project = session.get(ProjectRow, project_id)
+            if project is None:
+                raise ProjectNotFoundError(f"project {project_id!r} was not found")
+            row = session.scalar(
+                select(ResearchQuestionRow).where(
+                    ResearchQuestionRow.project_id == project_id,
+                    ResearchQuestionRow.research_question_id == research_question_id,
+                )
+            )
+            if row is None:
+                raise ResearchQuestionNotFoundError(
+                    f"research question {research_question_id!r} was not found in "
+                    f"project {project_id!r}"
+                )
+            if row.status == "frozen":
+                if row.frozen_by != frozen_by:
+                    raise ResearchQuestionFrozenError(
+                        f"research question {research_question_id!r} is already frozen"
+                    )
+                return _research_question_record(row)
+            latest = session.scalar(
+                select(ResearchQuestionRow)
+                .where(ResearchQuestionRow.project_id == project_id)
+                .order_by(ResearchQuestionRow.version.desc())
+            )
+            if latest is not None and latest.research_question_id != row.research_question_id:
+                raise ResearchQuestionVersionConflictError(
+                    "only the current research question can be frozen"
+                )
+            row.status = "frozen"
+            row.frozen_at = utc_now_naive()
+            row.frozen_by = frozen_by
+            project.active_stage = "completed"
             session.flush()
             return _research_question_record(row)
 
@@ -316,8 +427,31 @@ def _research_question_record(row: ResearchQuestionRow) -> ResearchQuestionRecor
         version=row.version,
         content_sha256=row.content_sha256,
         question=ResearchQuestion.model_validate(row.payload),
+        status=row.status,
+        frozen_at=row.frozen_at,
+        frozen_by=row.frozen_by,
+        parent_research_question_id=row.parent_research_question_id,
         created_at=row.created_at,
     )
+
+
+def research_question_id_for(project_id: str, question: ResearchQuestion) -> str:
+    """Return the stable ID used for a project's canonical question payload."""
+
+    project_id = validate_identifier(project_id)
+    content_sha256 = _research_question_content_sha256(question.model_dump(mode="json"))
+    identity_digest = hashlib.sha256(f"{project_id}\0{content_sha256}".encode()).hexdigest()
+    return f"rq_{identity_digest[:32]}"
+
+
+def _research_question_content_sha256(payload: dict[str, object]) -> str:
+    canonical_payload = json.dumps(
+        payload,
+        ensure_ascii=False,
+        sort_keys=True,
+        separators=(",", ":"),
+    )
+    return hashlib.sha256(canonical_payload.encode("utf-8")).hexdigest()
 
 
 def _decision_record(row: DecisionRecordRow) -> DecisionRecord:

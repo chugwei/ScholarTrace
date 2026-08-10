@@ -28,7 +28,7 @@ M1 已提供可恢复 State、Repository、Checkpoint 和 CLI。M2 将在其上�
 
 `interrupt()` 第一次执行会停止 `clarify` 节点并把请求写入 SQLite Checkpoint。恢复不是普通函数调用，而是同一 thread 上的 `Command(resume=answer)`；LangGraph 会从节点开头重放，因此节点必须保持确定性。测试关闭并重开 graph 后完成恢复，也验证了不完整回答会再次产生 interrupt。
 
-这里仍没有“批准”结论：补充字段只是澄清输入，DecisionRecord 和冻结动作留给 M2.3–M2.4。这样可以把“恢复机制正确”和“科研审批已发生”分开验证。
+这里仍没有“批准”结论：补充字段只是澄清输入，DecisionRecord 和冻结动作在后续审批图中分开验证。这样可以把“恢复机制正确”和“科研审批已发生”分开验证。
 
 ## M2.3 已验证的审批路径
 
@@ -67,3 +67,11 @@ with open_research_question_decision_graph(domain_db, checkpoint_db) as graph:
 ```
 
 `waiting` 只表示存在人工审批请求；只有 `completed` 且 Repository 中存在 ResearchQuestion 时，才算批准路径完成。合成 Fixture 的通过结果不等同于真实果园数据验证。
+
+## M2.4 已验证的版本生命周期
+
+`ResearchQuestionRow` 在 `0003` 迁移后明确区分 `draft` 与 `frozen`。审批图的 `approved` 分支保存 draft 后调用 `freeze_research_question()`，将 actor 和时间写入同一版本；同一 actor 重放不会产生第二个版本。直接对 frozen 版本写入不同 payload 会失败，必须从当前 frozen 父版本调用 `create_research_question_version()`。
+
+这解决的是科研审计中的覆盖问题：荔枝病虫害研究问题在批准后仍可因“增加雨季和晴天采集约束”而演进，但新约束只能出现在版本 2，版本 1 的内容哈希、冻结人和冻结时间保持不变。审批图在状态中携带父版本 ID，新的批准记录对应新的内容 ID，形成“决定 → 版本 → payload”的可查询链。
+
+迁移测试实际走过 `0003 → 0002 → 0001 → base → head`，确认旧版本 Schema 不会残留生命周期列；这也是回滚兼容性的一部分，而不是只检查当前表结构。

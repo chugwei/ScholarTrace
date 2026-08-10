@@ -17,7 +17,7 @@ from scholartrace.graphs.research_question_review import (
 )
 from scholartrace.persistence.migrations import upgrade_database
 from scholartrace.persistence.models import utc_now_naive
-from scholartrace.persistence.repository import ProjectRepository
+from scholartrace.persistence.repository import ProjectRepository, research_question_id_for
 from scholartrace.schemas import DecisionRecord, ResearchQuestion
 from scholartrace.states import ResearchProjectState
 
@@ -134,6 +134,8 @@ def build_research_question_decision_graph(
                 "active_stage": "awaiting_approval",
                 "pending_approval": None,
                 "last_decision_action": "modified",
+                "last_decision_actor": record.actor_id,
+                "last_decision_id": record.decision_id,
                 "research_question_payload": updated_payload,
             }
 
@@ -142,6 +144,8 @@ def build_research_question_decision_graph(
                 "active_stage": "approved",
                 "pending_approval": None,
                 "last_decision_action": "approved",
+                "last_decision_actor": record.actor_id,
+                "last_decision_id": record.decision_id,
             }
 
         repository.update_project_stage(state["project_id"], record.action)
@@ -149,6 +153,8 @@ def build_research_question_decision_graph(
             "active_stage": record.action,
             "pending_approval": None,
             "last_decision_action": record.action,
+            "last_decision_actor": record.actor_id,
+            "last_decision_id": record.decision_id,
         }
 
     def route_after_decision(state: ResearchProjectState) -> str:
@@ -161,15 +167,29 @@ def build_research_question_decision_graph(
 
     def save(state: ResearchProjectState) -> dict[str, Any]:
         question = ResearchQuestion.model_validate(state["research_question_payload"])
-        saved = repository.save_research_question(
+        parent_id = state.get("research_question_id")
+        if parent_id is None:
+            saved = repository.save_research_question(
+                state["project_id"],
+                question,
+                active_stage="completed",
+            )
+        else:
+            saved = repository.create_research_question_version(
+                state["project_id"],
+                parent_id,
+                question,
+                active_stage="completed",
+            )
+        frozen = repository.freeze_research_question(
             state["project_id"],
-            question,
-            active_stage="completed",
+            saved.research_question_id,
+            state.get("last_decision_actor") or "system",
         )
         return {
             "active_stage": "completed",
             "draft_research_question": None,
-            "research_question_id": saved.research_question_id,
+            "research_question_id": frozen.research_question_id,
         }
 
     def finish(_state: ResearchProjectState) -> dict[str, Any]:
@@ -265,6 +285,15 @@ def _modified_payload(
 
 
 def _target_id(state: ResearchProjectState) -> str:
+    payload = state.get("research_question_payload")
+    if isinstance(payload, Mapping):
+        try:
+            return research_question_id_for(
+                state["project_id"],
+                ResearchQuestion.model_validate(payload),
+            )
+        except ValueError:
+            pass
     existing = state.get("research_question_id")
     if existing:
         return existing

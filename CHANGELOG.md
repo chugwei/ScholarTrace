@@ -11,6 +11,8 @@
 - M2.2 基于 SQLite Checkpoint 的 `interrupt()` / `Command(resume=...)` 暂停恢复。
 - M2.3 DecisionRecord Schema、SQLite 迁移和幂等审计记录。
 - 研究问题审批图支持批准、拒绝、修改、取消和暂停，并保留同一 thread 的恢复边界。
+- M2.4 研究问题 `draft/frozen` 生命周期、冻结元数据和父版本追溯。
+- 冻结版本不能被隐式覆盖；修改必须创建新的可审批版本。
 
 ## [0.1.0] - 2026-08-09
 
