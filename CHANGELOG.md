@@ -12,6 +12,7 @@
 - M9.2 批准 FigureSpec 的 CSV、可重建 `generate_figure.py`、PNG/SVG/PDF、Caption 和 provenance Bundle。
 - M9.3 verified-only 图表建议、来源型 Caption、MetricResult 数值一致性和 provenance hash 检查。
 - M9.4 完成 PNG/SVG/PDF 实际视觉验收、独立发布候选检查，并发布 `v0.9.0`。
+- M10.1 建立版本化 Manuscript、Section Contract、Claim Ledger、0018 迁移和项目级 evidence gate。
 
 ### Boundary
 

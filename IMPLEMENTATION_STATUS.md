@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M9 已发布，M10 待开始
-- 当前里程碑：M9 — 结果图表系统
+- 项目状态：M10.1 进行中
+- 当前里程碑：M10 — 论文撰写与引用校验
 - 当前版本：`v0.9.0`
-- 当前分支：`main`
+- 当前分支：`feat/m10-manuscript`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -101,7 +101,7 @@
 
 ## M10 小任务
 
-- [ ] M10.1 Manuscript/Section Contract/Claim Ledger 契约与迁移
+- [x] M10.1 Manuscript/Section Contract/Claim Ledger 契约与 0018 迁移
 - [ ] M10.2 章节生成、BibTeX 和引用解析
 - [ ] M10.3 章节一致性、证据缺口与数字回溯门禁
 - [ ] M10.4 独立审查、合并 `main` 与 `v0.10.0` 发布
@@ -230,6 +230,7 @@
 | M9.4 实际视觉验收 | 通过；PNG、SVG 和 PDF 已实际打开检查，未发现裁切、重叠、黑块或不可读标签；PDF 另经 Poppler 渲染检查 |
 | M9.4 发布候选 | 通过；wheel/sdist、隔离 venv、0017 迁移、CLI、Apache-2.0、内部文件排除、秘密/大文件扫描和 actionlint |
 | M9.4 main 合并与 v0.9.0 发布 | 通过；merge `4e60f48`；main 149 passed；annotated Tag `v0.9.0` object `0290f40` 已推送，peeled `4e60f48` |
+| M10.1 契约/Repository 目标测试 | 通过，4 passed；0018 回滚、版本父链、项目隔离和 Claim evidence gate |
 
 ## 当前限制
 
@@ -240,4 +241,4 @@
 
 ## 下一步
 
-下一步创建 `feat/m10-manuscript`，先实现 Manuscript、Section Contract 和 Claim Ledger 契约；不把图表或临时指标升级为科研 Claim。
+下一步完成 M10.1 全量质量门禁并进入 BibTeX/引用解析；不把缺失证据补写成 Claim。

@@ -57,6 +57,7 @@ from scholartrace.schemas.literature import (
     ProjectDocument,
     SourceSpan,
 )
+from scholartrace.schemas.manuscript import Claim, Manuscript, SectionContract
 from scholartrace.schemas.research import ResearchQuestion
 from scholartrace.schemas.runner import (
     ControlledRunEvent,
@@ -75,6 +76,7 @@ __all__ = [
     "CandidateExperimentPlan",
     "CaptureField",
     "ChunkSearchResult",
+    "Claim",
     "ClaimUpdate",
     "ControlledRunEvent",
     "ControlledRunRecord",
@@ -106,6 +108,7 @@ __all__ = [
     "InnovationCandidateRanking",
     "InnovationFinding",
     "InnovationValidationReport",
+    "Manuscript",
     "MethodDifference",
     "MetricAggregate",
     "MetricResult",
@@ -123,6 +126,7 @@ __all__ = [
     "RunBackend",
     "RunEventStream",
     "RunManifest",
+    "SectionContract",
     "SourceSpan",
     "TrackingAttempt",
 ]
