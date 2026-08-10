@@ -33,3 +33,4 @@
 | M3.2 PDF 入库与质量标记 | `src/scholartrace/literature/ingestion.py`, `pyproject.toml` | `tests/integration/test_literature_ingestion.py`, `docs/verification/m3-pdf-ingestion.md` | v0.3.0 | implemented-tested |
 | M3.3 Crossref/OpenAlex 元数据 | `src/scholartrace/literature/providers.py` | `tests/integration/test_literature_providers.py`, `docs/verification/m3-metadata-providers.md` | v0.3.0 | implemented-tested |
 | M3 v0.3.0 发布候选 | `pyproject.toml`, `README.md`, `CHANGELOG.md` | `docs/verification/m3-release-candidate.md`, `scripts/check.py` | v0.3.0 | release-candidate |
+| M4.1 项目文献审核与相关度 | `src/scholartrace/persistence/literature_repository.py`, `src/scholartrace/literature_relevance.py`, `src/scholartrace/persistence/migrations/versions/0005_add_project_document_review.py` | `tests/integration/test_m4_project_document_review.py`, `docs/verification/m4-project-review.md` | v0.4.0 | implemented-tested |

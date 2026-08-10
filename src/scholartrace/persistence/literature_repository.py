@@ -8,6 +8,7 @@ from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import Session
 
 from scholartrace.identifiers import validate_identifier
+from scholartrace.literature_relevance import RelevanceScore, score_document_relevance
 from scholartrace.persistence.database import create_sqlite_engine
 from scholartrace.persistence.models import (
     DocumentRow,
@@ -181,6 +182,95 @@ class LiteratureRepository:
             session.flush()
             return _project_document_model(row)
 
+    def review_project_document(
+        self,
+        project_id: str,
+        document_id: str,
+        *,
+        status: str,
+        actor_id: str,
+        reason: str,
+        relevance_score: float | None = None,
+    ) -> ProjectDocument:
+        """Record a project-scoped approval decision without changing the global document."""
+
+        project_id = validate_identifier(project_id)
+        document_id = validate_identifier(document_id)
+        actor_id = validate_identifier(actor_id)
+        if status not in {"approved", "rejected"}:
+            raise ValueError("review status must be approved or rejected")
+        if not reason.strip():
+            raise ValueError("review reason is required")
+        if relevance_score is not None and not 0 <= relevance_score <= 1:
+            raise ValueError("relevance_score must be between 0 and 1")
+        with Session(self._engine) as session, session.begin():
+            row = session.scalar(
+                select(ProjectDocumentRow).where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.document_id == document_id,
+                )
+            )
+            if row is None:
+                raise ProjectDocumentConflictError(
+                    "document must be attached as candidate before review"
+                )
+            document = session.get(DocumentRow, document_id)
+            if document is None:
+                raise DocumentNotFoundError(f"document {document_id!r} was not found")
+            if status == "approved" and (
+                document.ingest_status == "failed" or not document.searchable
+            ):
+                raise LiteratureRepositoryError(
+                    "failed or non-searchable documents cannot be approved"
+                )
+            row.status = status
+            row.relevance_score = relevance_score
+            row.relevance_reason = reason.strip()
+            row.decided_by = actor_id
+            row.decided_at = utc_now_naive()
+            session.flush()
+            return _project_document_model(row)
+
+    def rank_project_candidates(self, project_id: str, query: str) -> list[RelevanceScore]:
+        """Rank only candidate links using deterministic metadata overlap."""
+
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            rows = session.scalars(
+                select(ProjectDocumentRow)
+                .where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "candidate",
+                )
+                .order_by(ProjectDocumentRow.document_id)
+            ).all()
+            scores: list[RelevanceScore] = []
+            for link in rows:
+                document = session.get(DocumentRow, link.document_id)
+                if document is None:
+                    continue
+                scores.append(score_document_relevance(query, _document_model(document)))
+            return sorted(scores, key=lambda item: (-item.score, item.document.document_id))
+
+    def list_approved_documents(self, project_id: str) -> list[Document]:
+        """Return only project documents explicitly approved by a human."""
+
+        project_id = validate_identifier(project_id)
+        with Session(self._engine) as session:
+            rows = session.scalars(
+                select(DocumentRow)
+                .join(
+                    ProjectDocumentRow,
+                    ProjectDocumentRow.document_id == DocumentRow.document_id,
+                )
+                .where(
+                    ProjectDocumentRow.project_id == project_id,
+                    ProjectDocumentRow.status == "approved",
+                )
+                .order_by(DocumentRow.document_id)
+            ).all()
+            return [_document_model(row) for row in rows]
+
     def list_project_documents(self, project_id: str) -> list[ProjectDocument]:
         project_id = validate_identifier(project_id)
         with Session(self._engine) as session:
@@ -247,6 +337,10 @@ def _project_document_model(row: ProjectDocumentRow) -> ProjectDocument:
             "project_id": row.project_id,
             "document_id": row.document_id,
             "status": row.status,
+            "relevance_score": row.relevance_score,
+            "relevance_reason": row.relevance_reason,
+            "decided_by": row.decided_by,
+            "decided_at": row.decided_at,
             "created_at": row.created_at,
         }
     )

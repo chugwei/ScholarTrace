@@ -1,11 +1,11 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M3 已发布，进入 M4
-- 当前里程碑：M3 — 独立文献库
+- 项目状态：M3 已发布，M4 进行中
+- 当前里程碑：M4 — 项目文献筛选与可信证据
 - 当前版本：`v0.3.0`
-- 当前分支：`main`
+- 当前分支：`feat/m4-evidence-rag`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
-- 更新时间：2026-08-10（Asia/Shanghai）
+- 更新时间：2026-08-11（Asia/Shanghai）
 
 ## 已完成
 
@@ -53,6 +53,13 @@
 - [x] M3.2 合法 PDF 入库、原文只读保存、元数据解析和质量标记
 - [x] M3.3 Crossref/OpenAlex 查询、失败降级和来源标记
 - [x] M3.4 独立审查、合并 `main` 与 `v0.3.0` 发布
+
+## M4 小任务
+
+- [x] M4.1 项目文献 `candidate/approved/rejected`、确定性相关度与人工审核门禁
+- [ ] M4.2 Chunk/全文索引、BM25 + Vector 兼容检索与旧索引保留
+- [ ] M4.3 EvidenceCard、来源片段校验与固定检索回归集
+- [ ] M4.4 独立审查、合并 `main` 与 `v0.4.0` 发布
 
 ## 当前验证
 
@@ -124,14 +131,17 @@
 | 独立 wheel venv 安装/import/CLI/迁移 | 通过，版本 0.3.0，迁移 0004 |
 | M3 main 合并 | 通过，merge commit `c12b362`，main smoke test 与全量门禁通过 |
 | `v0.3.0` annotated Tag | 通过，tag object `8ac3d022`，peeled commit `c12b362`，远端已核验 |
+| M4.1 项目文献审核目标测试 | 通过，3 passed；迁移升级/回滚、相关度排序、审核与失败文献门禁 |
+| M4.1 Ruff format/lint | 通过，49 files unchanged；All checks passed |
+| M4.1 全量质量门禁 | 通过，`scripts/check.py`；89 passed；3 个合成 Fixture |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
-- M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 可信证据和 approved/rejected 仍未实现。
+- M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4.1 已实现项目级 approved/rejected 门禁，但 Chunk、混合检索和 EvidenceCard 仍未实现。
 - RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-下一步进入 M4：项目文献筛选与可信证据；不把 MockTransport 或合成 PDF 结果宣传为真实文献事实。
+下一步进入 M4.2：在 approved 文献上实现 Chunk/全文索引和可替换的混合检索；不把 MockTransport、合成 PDF 或 token overlap 结果宣传为真实文献事实。

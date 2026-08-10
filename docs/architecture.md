@@ -117,3 +117,9 @@ START → intake ──(缺字段)──> clarify ──> intake
 `CrossrefClient` 和 `OpenAlexClient` 实现同一个 `MetadataProvider` 契约，只返回结构化 `MetadataLookupResult`。HTTP 非 200、超时、连接异常、JSON 无结果都返回 `unavailable` 或 `not_found`，不会填充默认作者、年份或 DOI。`LiteratureMetadataService` 按调用方给定顺序尝试提供商，并保留所有 attempts，成功结果才可显式转换为 `metadata_only` Document。
 
 元数据 Document 的 `source_type` 是 `crossref` / `openalex`，`storage_relpath` 为空，表示它不是授权全文。MockTransport 让 CI 验证真实的请求路径、字段归一化和网络失败分支；真实 API 访问不属于离线测试通过的证据。
+
+## M4.1 项目文献审核与相关度
+
+M4 在 M3 全局目录之上维护项目级 `ProjectDocument` 状态：新关联为 `candidate`，人工审核后才可变为 `approved` 或 `rejected`。审核记录保存 actor、时间、理由和 0–1 相关度；全局 Document 不被复制或改写，失败/不可搜索文献不能批准。
+
+`rank_project_candidates()` 使用标题、作者、摘要和 DOI 的确定性 token overlap 评分，只用于排序候选，不声称语义相关或创新证据。项目正式文献查询通过 `list_approved_documents()`，因此 candidate 和 rejected 不会意外进入后续证据链；M4.2 才在 approved 文献上建立 Chunk 检索。

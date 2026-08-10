@@ -16,7 +16,7 @@ DocumentQualityStatus = Literal[
     "metadata_incomplete",
     "unknown",
 ]
-ProjectDocumentStatus = Literal["candidate"]
+ProjectDocumentStatus = Literal["candidate", "approved", "rejected"]
 
 
 class DocumentMetadata(BaseModel):
@@ -61,4 +61,8 @@ class ProjectDocument(BaseModel):
     project_id: NonBlankText
     document_id: NonBlankText
     status: ProjectDocumentStatus = "candidate"
+    relevance_score: float | None = Field(default=None, ge=0, le=1)
+    relevance_reason: str | None = None
+    decided_by: NonBlankText | None = None
+    decided_at: datetime | None = None
     created_at: datetime
