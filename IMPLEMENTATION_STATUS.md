@@ -93,6 +93,8 @@
 | M2.3 后全量 pytest | 通过，73 passed |
 | M2.3 迁移 `0002 → 0001 → base → head` | 通过，DecisionRecord 表正确移除并恢复 |
 | M2.3 Ruff format/lint | 通过，38 files formatted、无诊断 |
+| M2.3 提交与远端 Ref | `b467522`；`origin/feat/m2-human-approval` 已核验同步 |
+| M2.3 GitHub Actions | 未验证：当前环境访问 GitHub Actions API 发生 SSL 连接错误 |
 
 ## 当前限制
 
