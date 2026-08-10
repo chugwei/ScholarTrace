@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M0 已发布，准备 M1
+- 项目状态：M1 发布候选审查
 - 当前里程碑：M1 — 最小持久化科研项目图
-- 当前版本：`v0.0.1`
-- 当前分支：`main`
+- 当前版本：`v0.1.0-rc`
+- 当前分支：`feat/m1-project-state`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-09（Asia/Shanghai）
 
@@ -29,6 +29,15 @@
 - [x] M0.5 全新环境验收、工程记录、追溯矩阵和独立审查
 - [x] M0.6 发布候选 CI 通过，`v0.0.1` Tag 已推送并核验
 
+## M1 小任务
+
+- [x] M1.1 ResearchProjectState、ResearchQuestion 与 Reducer 契约
+- [x] M1.2 SQLite Project Repository、迁移与幂等写入
+- [x] M1.3 `START → intake → build_research_question → save → END` 与 SQLite Checkpointer
+- [x] M1.4 CLI 创建、继续和查看项目
+- [x] M1.5 重启恢复、项目隔离、幂等与农业视觉黄金场景验收
+- [ ] M1.6 独立审查、合并 `main` 与 `v0.1.0` 发布（当前）
+
 ## 当前验证
 
 | 命令 | 结果 |
@@ -36,11 +45,27 @@
 | `uv sync --all-groups` | 通过，CPython 3.12.13 |
 | `uv run ruff format --check src tests scripts` | 通过 |
 | `uv run ruff check src tests scripts` | 通过 |
-| `uv run pytest` | 通过，9 passed |
+| `uv run pytest` | 通过，50 passed |
 | `uv run python scripts/validate_fixtures.py` | 通过，3 个合成 Fixture |
-| `uv run python scripts/check.py` | 通过 |
+| `uv run python scripts/check.py` | 通过，50 passed |
+| M1.1 State/Schema/Reducer 目标测试 | 通过，16 passed |
+| M1.1 后全量 pytest | 通过，25 passed |
+| M1.2 Repository/迁移集成测试 | 通过，12 passed |
+| M1.2 后全量 pytest | 通过，37 passed |
+| M1.3 Graph/Checkpointer 集成测试 | 通过，5 passed |
+| M1.3 后全量 pytest | 通过，42 passed |
+| M1.4 CLI 集成测试 | 通过，4 passed |
+| M1.4 后全量 pytest | 通过，46 passed |
+| `uv run scholartrace --help` | 通过，Windows UTF-8 中文显示正常 |
+| M1.5 独立进程恢复 E2E | 通过，4 passed；参数化恢复 3/3 |
+| M1.5 后全量 pytest | 通过，50 passed |
+| `git archive 52bf99f` 独立源码验收 | 通过，50 passed，sdist/wheel 0.1.0 |
+| 独立 wheel 安装、迁移、CLI 恢复 | 通过，版本 0.1.0，Apache-2.0 |
+| M1 发布候选秘密/大文件/内部路径扫描 | 通过，均为 0 |
+| `actionlint` Docker | 通过，无诊断 |
+| GitHub Actions quality Run #14 | 通过，commit `52bf99f` |
 | Git archive 全新环境安装与门禁 | 通过，8 passed |
-| `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.0.1 |
+| `uv build` + 全新 venv wheel 安装/import | 通过，版本 0.1.0 |
 | `docker run --rm python:3.12-slim python --version` | 通过，Python 3.12.13 |
 | `actionlint` Docker 静态检查 | 通过，无诊断输出 |
 | GitHub Actions quality Run #4 | 通过，commit `42238c1`，10s |
@@ -52,8 +77,9 @@
 
 ## 当前限制
 
-- M0 仅提供工程骨架；LangGraph、RAG、实验、论文、Web 和部署能力尚未实现。
+- M1 功能与独立进程恢复门禁已完成；尚未完成独立 diff 审查、发布候选全新环境验收、合并 main 和 `v0.1.0` Tag。
+- RAG、实验、论文、Web 和部署能力仍未实现。
 
 ## 下一步
 
-创建并推送 `feat/m1-project-state`，按 M1 小任务实现 ResearchProjectState、ResearchQuestion、最小 LangGraph、SQLite Checkpointer、Project Repository 与 CLI。
+执行 M1.6 范围、测试、迁移、安全、文档、退化路径和秘密扫描审查，在全新环境验收后合并 main 并发布 `v0.1.0`。

@@ -16,3 +16,9 @@
 | M0 LICENSE | `LICENSE`, `pyproject.toml`, `README.md` | `tests/unit/test_package.py`, wheel 内容检查 | v0.0.1 | implemented-tested |
 | M0 发布 | `CHANGELOG.md`, `docs/verification/m0-release.md` | quality Run #4、annotated Tag `v0.0.1` | v0.0.1 | implemented-tested |
 | M1–M12 | `docs/roadmap.md` | 尚未实现 | v0.1.0–v1.0.0 | planned |
+| M1 State/ResearchQuestion/Reducer | `src/scholartrace/schemas/research.py`, `src/scholartrace/states/research_project.py` | `tests/unit/test_research_question.py`, `tests/unit/test_research_project_state.py` | v0.1.0 | implemented-tested |
+| M1 SQLite Repository/迁移 | `src/scholartrace/persistence/` | `tests/integration/test_project_repository.py`, `docs/verification/m1-repository.md` | v0.1.0 | implemented-tested |
+| M1 最小 Graph/Checkpointer | `src/scholartrace/graphs/research_project.py` | `tests/integration/test_research_graph.py`, `docs/verification/m1-graph.md` | v0.1.0 | implemented-tested |
+| M1 CLI create/continue/show | `src/scholartrace/cli.py`, `pyproject.toml` | `tests/integration/test_cli.py`, `docs/verification/m1-cli.md` | v0.1.0 | implemented-tested |
+| M1 独立进程重启恢复 | `src/scholartrace/__main__.py`, `examples/agriculture-vision-project/research-question.json` | `tests/e2e/test_cli_process_recovery.py`, `docs/verification/m1-process-recovery.md` | v0.1.0 | implemented-tested |
+| M1 发布候选与独立环境 | `pyproject.toml`, `uv.lock`, `docs/verification/m1-release-candidate.md` | Git archive、wheel、Run #14、actionlint、秘密扫描 | v0.1.0 | implemented-tested |

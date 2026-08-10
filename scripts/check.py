@@ -23,7 +23,7 @@ def main() -> None:
     run([python, "-m", "ruff", "check", *source_paths])
     run([python, "-m", "pytest"])
     run([python, "scripts/validate_fixtures.py"])
-    print("ScholarTrace M0 quality gate passed.")
+    print("ScholarTrace quality gate passed.")
 
 
 if __name__ == "__main__":
