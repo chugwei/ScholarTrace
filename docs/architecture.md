@@ -105,3 +105,9 @@ START → intake ──(缺字段)──> clarify ──> intake
 `documents` 是全局目录，`project_documents` 只是项目候选关联；M3 不把目录条目自动变成项目证据。文献 ID 由内容 SHA-256 派生，重复上传返回同一记录，项目关联使用独立稳定 ID 并保持 `candidate` 状态。
 
 目录查询只读取 `searchable=true` 且 `ingest_status != failed` 的元数据字段（标题、作者、摘要、DOI、URL）。原始 PDF、解析文本和大型运行数据不进入数据库或 Git；M3.2 将把合法上传文件写到 `.gitignore` 覆盖的运行时存储，并显式记录解析质量。
+
+## M3.2 PDF 入库与质量边界
+
+`DocumentLibrary.ingest_pdf()` 先计算内容 SHA-256，再尝试用 pypdf 解析；同一内容在解析前就返回已存在条目。成功解析的 PDF 和提取文本写到调用方提供的运行时根目录，并在写入完成后设置只读权限，数据库只保存相对路径。解析失败会保存 `failed/parse_failed/searchable=false` 诊断记录，但不复制原文，也不会出现在目录搜索中。
+
+合法上传、元数据来源和解析质量是三个独立事实：pypdf 的 `/Title`、`/Author` 和创建年份只作为可追溯元数据，缺失时标记 `metadata_incomplete`；空文本标记 `empty_text`，不能被描述成全文解析成功。M3 不自动下载受版权限制的全文，外部元数据客户端留给 M3.3。

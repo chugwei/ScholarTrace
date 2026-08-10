@@ -65,6 +65,6 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | ID | 批次 | 主要证据 | 状态 |
 |---|---|---|---|
 | M3.1 | Document/ProjectDocument 与 SHA-256 目录 | 迁移、去重、项目候选关联和目录搜索测试 | completed |
-| M3.2 | 合法 PDF 入库与质量标记 | 运行时只读保存、解析失败降级和重复文件测试 | in_progress |
-| M3.3 | Crossref/OpenAlex 与离线降级 | MockTransport、来源标记和网络失败测试 | pending |
+| M3.2 | 合法 PDF 入库与质量标记 | 运行时只读保存、解析失败降级和重复文件测试 | completed |
+| M3.3 | Crossref/OpenAlex 与离线降级 | MockTransport、来源标记和网络失败测试 | in_progress |
 | M3.4 | M3 发布 | 独立审查、main CI、`v0.3.0` | pending |
