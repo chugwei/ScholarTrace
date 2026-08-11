@@ -1,9 +1,9 @@
 # ScholarTrace 实施状态
 
-- 项目状态：M11.4 进行中
-- 当前里程碑：M11 — FastAPI、SSE 与 Web 工作台
-- 当前版本：`v0.11.0-rc`
-- 当前分支：`feat/m11-web-workbench`
+- 项目状态：M12 待开始
+- 当前里程碑：M12 — 打包、部署和真实场景验证
+- 当前版本：`v0.11.0`
+- 当前分支：`main`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
 
@@ -111,7 +111,7 @@
 - [x] M11.1 FastAPI Project/Run/Artifact API 与持久化读写
 - [x] M11.2 SSE Run 时间线与连接降级
 - [x] M11.3 Web 工作台页面、审批组件和黄金样例垂直流程
-- [ ] M11.4 独立审查、合并 `main` 与 `v0.11.0` 发布
+- [x] M11.4 独立审查、合并 `main` 与 `v0.11.0` 发布
 
 ## 当前验证
 
@@ -252,14 +252,15 @@
 | M11.3 全量质量门禁 | 通过，`scripts/check.py`；166 passed；3 个合成 Fixture |
 | M11.3 浏览器垂直验收 | 通过；URL 项目恢复、Run sequence 0–4 实时时间线、四章节草稿、`in_review` 人工审阅；详见 `docs/verification/m11-workbench.md` |
 | M11.4 发布候选 | 通过；`docs/verification/m11-release-candidate.md`，166 passed、独立 wheel/venv、迁移 0018 回滚、actionlint、秘密/大文件扫描和浏览器验收 |
+| M11.4 main 发布 | 通过；merge `8883047`、main `166 passed`、annotated Tag `v0.11.0` 已推送；详见 `docs/verification/m11-release.md` |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9 已发布 v0.9.0，完成 FigureSpec 门禁、可重建三格式 Bundle、verified-only 建议、来源 Caption、数值/provenance 检查和实际视觉验收；M10 已发布 v0.10.0，完成 Manuscript/SectionContract/Claim Ledger、离线 BibTeX、引用解析、章节一致性和显式数字回溯。M11.1–M11.3 已完成 API、SSE 和浏览器工作台验收；当前只证明合成/脱敏垂直演示，M11.4 发布审查、M12 部署和真实场景验证仍未完成。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9 已发布 v0.9.0，完成 FigureSpec 门禁、可重建三格式 Bundle、verified-only 建议、来源 Caption、数值/provenance 检查和实际视觉验收；M10 已发布 v0.10.0，完成 Manuscript/SectionContract/Claim Ledger、离线 BibTeX、引用解析、章节一致性和显式数字回溯。M11.1–M11.4 已完成并发布 `v0.11.0`；当前只证明合成/脱敏垂直演示，M12 的交付包、部署和真实场景验证仍未完成。
 
 ## 下一步
 
-下一步完成 M11.4 独立审查、发布候选、合并 `main` 和 `v0.11.0`；不把合成演示描述为真实场景交付。
+下一步从 `main` 创建 `feat/m12-deployment`，先拆解 M12.1–M12.6 的交付、部署、回滚和真实场景证据任务；不把合成演示描述为真实场景交付。
