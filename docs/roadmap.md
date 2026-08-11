@@ -18,7 +18,7 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M9 图表系统 | v0.9.0 | completed | main | [v0.9.0](https://github.com/chugwei/ScholarTrace/tree/v0.9.0) | merge `4e60f48`、149 tests、视觉验收和 Tag 已核验 |
 | M10 论文与引用 | v0.10.0 | completed | main | [v0.10.0](https://github.com/chugwei/ScholarTrace/tree/v0.10.0) | merge `33cf794`、162 tests、候选门禁和 Tag 已核验 |
 | M11 Web 工作台 | v0.11.0 | completed | main | [v0.11.0](https://github.com/chugwei/ScholarTrace/tree/v0.11.0) | merge `8883047`、166 tests、候选审查和 Tag 已核验 |
-| M12 交付与部署 | v1.0.0 | in progress | feat/m12-deployment | — | M12.1 待开始 |
+| M12 交付与部署 | v1.0.0 | in progress | feat/m12-deployment | — | M12.1–M12.2 已验证，当前 M12.3 |
 
 ## M0 验收进度
 
@@ -145,9 +145,9 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 
 | ID | 批次 | 主要证据 | 状态 |
 |---|---|---|---|
-| M12.1 | Delivery Manifest、Model Card、Data Card 和 SHA-256 验证 | `docs/verification/m12-delivery-contracts.md`；Schema、原子写入、篡改/路径/证据等级测试 | in progress |
-| M12.2 | 推理接口与输入/输出契约 | 离线推理测试、错误降级和 Manifest 绑定 | pending |
-| M12.3 | Docker Compose、Staging 和健康检查 | 独立容器启动、离线示例和资源/配置边界 | pending |
+| M12.1 | Delivery Manifest、Model Card、Data Card 和 SHA-256 验证 | `docs/verification/m12-delivery-contracts.md`；Schema、原子写入、篡改/路径/证据等级测试 | completed |
+| M12.2 | 推理接口与输入/输出契约 | `docs/verification/m12-inference.md`；CLI/API、离线 Provider、哈希/版本失败降级测试 | completed |
+| M12.3 | Docker Compose、Staging 和健康检查 | 独立容器启动、离线示例和资源/配置边界 | in progress |
 | M12.4 | 监控、回滚和交付包重建 | 失败部署回滚、日志/指标和 SHA-256 清单 | pending |
 | M12.5 | 真实场景验证记录与证据分层 | 用户/现场数据、伦理与真实结果记录 | pending |
 | M12.6 | v1.0.0 发布 | 独立环境、完整 README、交付演示和 Tag | pending |

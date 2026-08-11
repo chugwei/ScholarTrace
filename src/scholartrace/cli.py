@@ -1,5 +1,6 @@
 """Command-line interface for the M1 project workflow."""
 
+import hashlib
 import json
 import os
 import sys
@@ -13,6 +14,7 @@ from scholartrace.graphs.research_project import (
     CheckpointNotFoundError,
     open_research_project_graph,
 )
+from scholartrace.inference import InferenceContractError, InferenceService
 from scholartrace.persistence.migrations import upgrade_database
 from scholartrace.persistence.repository import (
     ProjectRecord,
@@ -20,7 +22,8 @@ from scholartrace.persistence.repository import (
     ProjectRepositoryError,
     ResearchQuestionRecord,
 )
-from scholartrace.schemas import ResearchQuestion
+from scholartrace.schemas import DeliveryManifest, InferenceRequest, ResearchQuestion
+from scholartrace.schemas.runner import validate_relative_path
 from scholartrace.states import ResearchProjectState, new_research_project_state
 
 
@@ -59,6 +62,41 @@ def run_web(
     from scholartrace.api.app import create_app
 
     uvicorn.run(create_app(database), host=host, port=port)
+
+
+@app.command("infer")
+def infer_delivery(
+    manifest_file: Annotated[
+        Path,
+        typer.Option("--manifest", help="Delivery Manifest JSON 文件。"),
+    ],
+    delivery_root: Annotated[
+        Path,
+        typer.Option("--delivery-root", help="已构建交付包的根目录。"),
+    ],
+    input_relpath: Annotated[
+        str,
+        typer.Option("--input", help="Manifest 中登记的相对输入路径。"),
+    ],
+    request_id: Annotated[str, typer.Option(help="可追踪的推理请求标识。")] = "inference-cli",
+) -> None:
+    """Run a manifest-bound offline inference request."""
+
+    try:
+        manifest = DeliveryManifest.model_validate_json(manifest_file.read_text(encoding="utf-8"))
+        validate_relative_path(input_relpath, field_name="inference input path")
+        input_path = delivery_root / input_relpath
+        payload = input_path.read_bytes()
+        response = InferenceService(delivery_root, manifest).predict(
+            InferenceRequest(
+                request_id=request_id,
+                input_relpath=input_relpath,
+                input_sha256=hashlib.sha256(payload).hexdigest(),
+            )
+        )
+    except (InferenceContractError, OSError, ValidationError, ValueError) as error:
+        _fail(str(error))
+    _write_json(response.model_dump(mode="json"))
 
 
 @project_app.command("create")

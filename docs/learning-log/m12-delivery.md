@@ -27,3 +27,9 @@ assert report.passed
 ## 常见错误与后续关系
 
 常见错误是使用绝对路径、重复文件、把 `real_field` 留空验证记录，或修改文件后忘记更新哈希。Pydantic 契约和 3 个单元测试覆盖这些边界；M12.2 将让推理接口读取已验证的 Manifest，之后再加入 Compose、Staging、监控/回滚和真实场景证据。当前结果仅是合成/离线交付契约，不是 v1.0.0。
+
+## M12.2：Manifest 绑定推理
+
+推理层把“输入、模型版本、交付包”连成一个可验证请求。`InferenceService` 先运行 `verify_delivery_tree()`，再检查输入路径在 Manifest 中、请求 SHA-256 与文件一致、Provider 版本与 Model Card 一致，最后才调用 `Predictor`。这相当于把 M8 的 Runner 安全边界延伸到交付边界：Provider 可以替换，provenance 校验不能替换。
+
+离线示例使用 `FixturePredictor`，标签由输入内容哈希生成并带 `synthetic_fixture` 警告；它证明 API/CLI 的数据流和失败路径，不代表病虫害识别模型。未配置交付根目录的 API 返回 503，篡改文件返回 422，避免把缺失部署配置伪装成“推理成功”。

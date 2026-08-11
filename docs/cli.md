@@ -38,6 +38,20 @@ uv run scholartrace web \
 
 打开 `http://127.0.0.1:8000/`；已有项目可使用 `?project=PROJECT_ID` 恢复工作区。工作台的 Run 时间线从持久事件快照开始，并通过 `live=true` SSE 接收增量事件。页面中的论文草稿必须经过人工审阅入口，合成/脱敏数据不会被标记为真实科研证据。
 
+## 运行交付包的离线推理
+
+M12.2 提供 Manifest 绑定的离线接口：
+
+```bash
+uv run scholartrace infer \
+  --manifest delivery/delivery-manifest.json \
+  --delivery-root delivery \
+  --input sample-inputs/sample.bin \
+  --request-id request-001
+```
+
+输入必须已经登记在 Manifest 中，文件大小、SHA-256 和 Model Card 版本都要匹配。没有配置 Manifest 的 API 会显式降级为 503；Fixture 推理输出只用于离线连通性，不是现场模型结果。
+
 ## 数据路径
 
 默认路径：

@@ -14,6 +14,7 @@ from fastapi import FastAPI, Header, HTTPException, Query, Request
 from fastapi.responses import HTMLResponse, StreamingResponse
 
 from scholartrace import __version__
+from scholartrace.inference import InferenceContractError, InferenceService
 from scholartrace.manuscript import SectionGenerationError, generate_section_draft
 from scholartrace.persistence.evidence_repository import EvidenceRepository
 from scholartrace.persistence.figure_repository import FigureRepository
@@ -38,6 +39,9 @@ from scholartrace.schemas import (
     ArtifactResponse,
     ControlledRunRecord,
     ControlledRunSpec,
+    DeliveryManifest,
+    InferenceRequest,
+    InferenceResponse,
     Manuscript,
     ManuscriptCreateRequest,
     ManuscriptDraftResponse,
@@ -49,7 +53,12 @@ from scholartrace.schemas import (
 )
 
 
-def create_app(database_path: Path | None = None) -> FastAPI:
+def create_app(
+    database_path: Path | None = None,
+    *,
+    delivery_root: Path | None = None,
+    delivery_manifest_path: Path | None = None,
+) -> FastAPI:
     """Create an isolated API application for a database path."""
 
     path = (database_path or Path(".scholartrace/domain.db")).expanduser()
@@ -60,11 +69,31 @@ def create_app(database_path: Path | None = None) -> FastAPI:
     evidence = EvidenceRepository(path)
     figures = FigureRepository(path)
     manuscripts = ManuscriptRepository(path)
+    inference_service: InferenceService | None = None
+    if delivery_root is not None or delivery_manifest_path is not None:
+        if delivery_root is None or delivery_manifest_path is None:
+            raise ValueError("delivery_root and delivery_manifest_path must be supplied together")
+        manifest = DeliveryManifest.model_validate_json(
+            delivery_manifest_path.read_text(encoding="utf-8")
+        )
+        inference_service = InferenceService(delivery_root, manifest)
     app = FastAPI(title="研迹 ScholarTrace API", version=__version__)
 
     @app.get("/health")
     def health() -> dict[str, str]:
         return {"status": "ok", "version": __version__}
+
+    @app.post("/api/inference", response_model=InferenceResponse)
+    def run_inference(request: InferenceRequest) -> InferenceResponse:
+        if inference_service is None:
+            raise HTTPException(
+                status_code=503,
+                detail="inference service is unavailable; configure a delivery manifest",
+            )
+        try:
+            return inference_service.predict(request)
+        except (InferenceContractError, OSError, ValueError) as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
 
     @app.post("/api/projects", response_model=ProjectResponse, status_code=201)
     def create_project(request: ProjectCreateRequest) -> ProjectResponse:

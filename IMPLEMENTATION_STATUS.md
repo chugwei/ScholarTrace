@@ -116,7 +116,7 @@
 ## M12 小任务
 
 - [x] M12.1 Delivery Manifest、Model Card、Data Card 和 SHA-256 清单
-- [ ] M12.2 推理接口与输入/输出契约
+- [x] M12.2 推理接口与输入/输出契约
 - [ ] M12.3 Docker Compose、Staging 和健康检查
 - [ ] M12.4 监控、回滚和交付包重建
 - [ ] M12.5 真实场景验证记录与证据分层
@@ -264,6 +264,8 @@
 | M11.4 main 发布 | 通过；merge `8883047`、main `166 passed`、annotated Tag `v0.11.0` 已推送；详见 `docs/verification/m11-release.md` |
 | M12.1 目标测试 | 通过，3 passed；Manifest 哈希/原子写入、篡改/路径/重复文件和证据等级门禁 |
 | M12.1 全量质量门禁 | 通过，`scripts/check.py`；169 passed；3 个合成 Fixture |
+| M12.2 目标测试 | 通过，6 passed；CLI/API、离线 Provider、哈希/版本失败降级 |
+| M12.2 全量质量门禁 | 通过，`scripts/check.py`；172 passed；3 个合成 Fixture |
 
 ## 当前限制
 
@@ -274,4 +276,4 @@
 
 ## 下一步
 
-下一步从 `main` 创建 `feat/m12-deployment`，先拆解 M12.1–M12.6 的交付、部署、回滚和真实场景证据任务；不把合成演示描述为真实场景交付。
+下一步继续在 `feat/m12-deployment` 实现 M12.3 Docker Compose、Staging 和健康检查；不把合成演示描述为真实场景交付。

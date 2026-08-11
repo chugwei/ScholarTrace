@@ -67,6 +67,12 @@ from scholartrace.schemas.figures import (
     FigureSuggestion,
     FigureValidationReport,
 )
+from scholartrace.schemas.inference import (
+    InferenceRequest,
+    InferenceResponse,
+    InferenceStatus,
+    Prediction,
+)
 from scholartrace.schemas.literature import (
     ChunkSearchResult,
     Document,
@@ -141,6 +147,9 @@ __all__ = [
     "FigureSpec",
     "FigureSuggestion",
     "FigureValidationReport",
+    "InferenceRequest",
+    "InferenceResponse",
+    "InferenceStatus",
     "InnovationCandidate",
     "InnovationCandidateRanking",
     "InnovationFinding",
@@ -158,6 +167,7 @@ __all__ = [
     "PipelineSpec",
     "PipelineStage",
     "PipelineVersionComparison",
+    "Prediction",
     "PriorArtEntry",
     "PriorArtMap",
     "ProjectCreateRequest",
