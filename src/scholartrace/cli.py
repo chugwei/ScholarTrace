@@ -43,6 +43,24 @@ project_app = typer.Typer(help="创建、继续和查看科研项目。", no_arg
 app.add_typer(project_app, name="project")
 
 
+@app.command("web")
+def run_web(
+    host: Annotated[str, typer.Option(help="监听地址。")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="监听端口。")] = 8000,
+    database: Annotated[
+        Path,
+        typer.Option("--database", help="业务 SQLite 文件。"),
+    ] = DEFAULT_DATABASE,
+) -> None:
+    """启动本地 FastAPI 工作台。"""
+
+    import uvicorn
+
+    from scholartrace.api.app import create_app
+
+    uvicorn.run(create_app(database), host=host, port=port)
+
+
 @project_app.command("create")
 def create_project(
     project_id: Annotated[str, typer.Argument(help="稳定的项目标识符。")],

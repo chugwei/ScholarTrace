@@ -12,6 +12,14 @@ from scholartrace.schemas.algorithm import (
     PriorArtEntry,
     PriorArtMap,
 )
+from scholartrace.schemas.api import (
+    ArtifactResponse,
+    ManuscriptCreateRequest,
+    ManuscriptDraftResponse,
+    ManuscriptReviewRequest,
+    ProjectCreateRequest,
+    ProjectResponse,
+)
 from scholartrace.schemas.debug import (
     DebugCase,
     DebugCaseStatus,
@@ -81,6 +89,7 @@ from scholartrace.schemas.tracking import DVCDataVersionCheck, TrackingAttempt
 __all__ = [
     "AlgorithmComponent",
     "AlgorithmSpec",
+    "ArtifactResponse",
     "BibTeXEntry",
     "CandidateExperimentPlan",
     "CaptureField",
@@ -120,6 +129,9 @@ __all__ = [
     "InnovationValidationReport",
     "Manuscript",
     "ManuscriptConsistencyReport",
+    "ManuscriptCreateRequest",
+    "ManuscriptDraftResponse",
+    "ManuscriptReviewRequest",
     "MethodDifference",
     "MetricAggregate",
     "MetricResult",
@@ -128,7 +140,9 @@ __all__ = [
     "PipelineVersionComparison",
     "PriorArtEntry",
     "PriorArtMap",
+    "ProjectCreateRequest",
     "ProjectDocument",
+    "ProjectResponse",
     "RegressionResult",
     "RepairFileChange",
     "RepairProposal",

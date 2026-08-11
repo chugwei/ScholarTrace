@@ -16,10 +16,26 @@
 - M10.2 增加离线 BibTeX 解析、引用缺失报告和来源绑定的确定性章节草稿模板。
 - M10.3 增加显式 Claim/MetricResult 标记、章节一致性、证据缺口和 Conclusion 新 Claim 门禁。
 - M10.4 完成独立发布候选审查，并发布 `v0.10.0`。
+- M11.1 增加 FastAPI Project/Run/Artifact API，复用 Repository 的迁移、隔离和受控 Run 门禁。
+- M11.2 增加可重放 SSE Run 时间线、Last-Event-ID 断线恢复和 keep-alive 降级。
+- M11.3 增加内嵌 Web 工作台、项目 URL 恢复、Run 事件时间线、论文草稿章节展示和人工审阅入口。
 
 ### Boundary
 
 - 图表输入仍必须来自 verified/final `MetricResult`；当前 Bundle 使用合成/脱敏农业视觉指标，不能当作真实科研结果。
+- Web 工作台的浏览器验收使用合成/脱敏农业视觉项目；真实文献、真实实验、真实设备和生产部署仍不在本版本证据范围内。
+
+## [0.11.0] - 2026-08-11
+
+### Added
+
+- M11.1 Project/Run/Artifact FastAPI API，复用 Repository 的迁移、隔离和 frozen plan 门禁。
+- M11.2 可重放 SSE Run 事件、`Last-Event-ID`/`after_sequence` 游标、keep-alive 和 `live=true` 增量流。
+- M11.3 内嵌 Web 工作台、项目 URL 恢复、Run 时间线、论文四章节草稿和人工审阅入口。
+
+### Boundary
+
+- M11 浏览器垂直流程使用合成/脱敏农业视觉数据；未证明真实文献证据、真实实验指标、独立部署或现场结果。M12 负责交付包、部署和真实场景验证。
 
 ## [0.10.0] - 2026-08-11
 
