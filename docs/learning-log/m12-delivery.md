@@ -33,3 +33,9 @@ assert report.passed
 推理层把“输入、模型版本、交付包”连成一个可验证请求。`InferenceService` 先运行 `verify_delivery_tree()`，再检查输入路径在 Manifest 中、请求 SHA-256 与文件一致、Provider 版本与 Model Card 一致，最后才调用 `Predictor`。这相当于把 M8 的 Runner 安全边界延伸到交付边界：Provider 可以替换，provenance 校验不能替换。
 
 离线示例使用 `FixturePredictor`，标签由输入内容哈希生成并带 `synthetic_fixture` 警告；它证明 API/CLI 的数据流和失败路径，不代表病虫害识别模型。未配置交付根目录的 API 返回 503，篡改文件返回 422，避免把缺失部署配置伪装成“推理成功”。
+
+## M12.3：Compose Staging
+
+Dockerfile 把当前 Python 包安装到 `python:3.12-slim`，以非 root 用户启动 `scholartrace web`；Compose 把交付包只读挂载，把 SQLite 状态放进命名卷，并用 `/health` 作为容器健康信号。健康检查只回答服务是否能响应，不代表模型或科研结果正确；推理响应仍必须带 Manifest 哈希和证据警告。
+
+本地验收真实执行了镜像构建、容器启动、健康检查、离线推理和清理。由于输入是合成 Fixture，Staging 结果只能归入离线/合成证据，M12.4 仍要补监控与回滚，M12.5 需要真实场景输入和用户操作。

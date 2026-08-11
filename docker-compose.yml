@@ -1,0 +1,41 @@
+services:
+  scholartrace:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command:
+      - --host
+      - 0.0.0.0
+      - --port
+      - "8000"
+      - --database
+      - /app/state/domain.db
+      - --delivery-root
+      - /app/delivery
+      - --delivery-manifest
+      - /app/delivery/delivery-manifest.json
+    ports:
+      - "8000:8000"
+    read_only: true
+    security_opt:
+      - no-new-privileges:true
+    cap_drop:
+      - ALL
+    tmpfs:
+      - /tmp
+    volumes:
+      - ./examples/delivery:/app/delivery:ro
+      - staging_state:/app/state
+    healthcheck:
+      test:
+        - CMD
+        - python
+        - -c
+        - import urllib.request; urllib.request.urlopen('http://127.0.0.1:8000/health', timeout=2)
+      interval: 10s
+      timeout: 3s
+      start_period: 20s
+      retries: 5
+
+volumes:
+  staging_state:

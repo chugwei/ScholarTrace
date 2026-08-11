@@ -54,6 +54,14 @@ def run_web(
         Path,
         typer.Option("--database", help="业务 SQLite 文件。"),
     ] = DEFAULT_DATABASE,
+    delivery_root: Annotated[
+        Path | None,
+        typer.Option("--delivery-root", help="可选的只读交付包根目录。"),
+    ] = None,
+    delivery_manifest: Annotated[
+        Path | None,
+        typer.Option("--delivery-manifest", help="可选的 Delivery Manifest JSON。"),
+    ] = None,
 ) -> None:
     """启动本地 FastAPI 工作台。"""
 
@@ -61,7 +69,15 @@ def run_web(
 
     from scholartrace.api.app import create_app
 
-    uvicorn.run(create_app(database), host=host, port=port)
+    uvicorn.run(
+        create_app(
+            database,
+            delivery_root=delivery_root,
+            delivery_manifest_path=delivery_manifest,
+        ),
+        host=host,
+        port=port,
+    )
 
 
 @app.command("infer")

@@ -117,7 +117,7 @@
 
 - [x] M12.1 Delivery Manifest、Model Card、Data Card 和 SHA-256 清单
 - [x] M12.2 推理接口与输入/输出契约
-- [ ] M12.3 Docker Compose、Staging 和健康检查
+- [x] M12.3 Docker Compose、Staging 和健康检查
 - [ ] M12.4 监控、回滚和交付包重建
 - [ ] M12.5 真实场景验证记录与证据分层
 - [ ] M12.6 独立环境验收、合并 `main` 与 `v1.0.0` 发布
@@ -266,6 +266,9 @@
 | M12.1 全量质量门禁 | 通过，`scripts/check.py`；169 passed；3 个合成 Fixture |
 | M12.2 目标测试 | 通过，6 passed；CLI/API、离线 Provider、哈希/版本失败降级 |
 | M12.2 全量质量门禁 | 通过，`scripts/check.py`；172 passed；3 个合成 Fixture |
+| M12.3 Compose 契约测试 | 通过，2 passed；Dockerfile 非 root/healthcheck、Compose 只读挂载/权限/Manifest 配置 |
+| M12.3 全量质量门禁 | 通过，`scripts/check.py`；174 passed；3 个合成 Fixture |
+| M12.3 Docker Staging smoke | 通过；镜像构建、容器 `healthy`、health 200、inference 200、日志和 `down -v` 清理；详见 `docs/verification/m12-compose.md` |
 
 ## 当前限制
 
