@@ -2,7 +2,7 @@
 
 - 项目状态：M11.4 进行中
 - 当前里程碑：M11 — FastAPI、SSE 与 Web 工作台
-- 当前版本：`v0.10.0`
+- 当前版本：`v0.11.0-rc`
 - 当前分支：`feat/m11-web-workbench`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
 - 更新时间：2026-08-11（Asia/Shanghai）
@@ -251,6 +251,7 @@
 | M11.3 API/E2E 目标测试 | 通过，4 passed；页面契约、四个 SectionContract、人工审阅状态和 SSE 路径 |
 | M11.3 全量质量门禁 | 通过，`scripts/check.py`；166 passed；3 个合成 Fixture |
 | M11.3 浏览器垂直验收 | 通过；URL 项目恢复、Run sequence 0–4 实时时间线、四章节草稿、`in_review` 人工审阅；详见 `docs/verification/m11-workbench.md` |
+| M11.4 发布候选 | 通过；`docs/verification/m11-release-candidate.md`，166 passed、独立 wheel/venv、迁移 0018 回滚、actionlint、秘密/大文件扫描和浏览器验收 |
 
 ## 当前限制
 

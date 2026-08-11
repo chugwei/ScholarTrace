@@ -27,6 +27,17 @@ uv run scholartrace project show PROJECT_ID
 
 命令输出项目身份、当前阶段和所有研究问题版本。重要内容包含内容 SHA-256，便于验证幂等保存。
 
+## 启动本地 Web 工作台
+
+```bash
+uv run scholartrace web \
+  --host 127.0.0.1 \
+  --port 8000 \
+  --database .scholartrace/domain.db
+```
+
+打开 `http://127.0.0.1:8000/`；已有项目可使用 `?project=PROJECT_ID` 恢复工作区。工作台的 Run 时间线从持久事件快照开始，并通过 `live=true` SSE 接收增量事件。页面中的论文草稿必须经过人工审阅入口，合成/脱敏数据不会被标记为真实科研证据。
+
 ## 数据路径
 
 默认路径：

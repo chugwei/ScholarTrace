@@ -25,6 +25,18 @@
 - 图表输入仍必须来自 verified/final `MetricResult`；当前 Bundle 使用合成/脱敏农业视觉指标，不能当作真实科研结果。
 - Web 工作台的浏览器验收使用合成/脱敏农业视觉项目；真实文献、真实实验、真实设备和生产部署仍不在本版本证据范围内。
 
+## [0.11.0] - 2026-08-11
+
+### Added
+
+- M11.1 Project/Run/Artifact FastAPI API，复用 Repository 的迁移、隔离和 frozen plan 门禁。
+- M11.2 可重放 SSE Run 事件、`Last-Event-ID`/`after_sequence` 游标、keep-alive 和 `live=true` 增量流。
+- M11.3 内嵌 Web 工作台、项目 URL 恢复、Run 时间线、论文四章节草稿和人工审阅入口。
+
+### Boundary
+
+- M11 浏览器垂直流程使用合成/脱敏农业视觉数据；未证明真实文献证据、真实实验指标、独立部署或现场结果。M12 负责交付包、部署和真实场景验证。
+
 ## [0.10.0] - 2026-08-11
 
 ### Added
