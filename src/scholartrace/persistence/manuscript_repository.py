@@ -40,6 +40,10 @@ class ManuscriptContractConflictError(ManuscriptRepositoryError):
     """Raised when a section contract conflicts with an existing contract."""
 
 
+class ManuscriptDecisionConflictError(ManuscriptRepositoryError):
+    """Raised when a manuscript review transition is out of order."""
+
+
 class ClaimLedgerConflictError(ManuscriptRepositoryError):
     """Raised when a claim identity or canonical content conflicts."""
 
@@ -140,6 +144,44 @@ class ManuscriptRepository:
                 .order_by(ManuscriptRow.version)
             ).all()
             return [_manuscript_model(row) for row in rows]
+
+    def submit_for_review(
+        self,
+        project_id: str,
+        manuscript_id: str,
+        *,
+        actor_id: str,
+        reason: str,
+    ) -> Manuscript:
+        """Move a draft to in_review while retaining an auditable actor and reason."""
+
+        project_id = validate_identifier(project_id)
+        manuscript_id = validate_identifier(manuscript_id)
+        actor_id = validate_identifier(actor_id)
+        if not reason.strip():
+            raise ValueError("manuscript review reason is required")
+        with Session(self._engine) as session, session.begin():
+            row = session.scalar(
+                select(ManuscriptRow).where(
+                    ManuscriptRow.project_id == project_id,
+                    ManuscriptRow.manuscript_id == manuscript_id,
+                )
+            )
+            if row is None:
+                raise ManuscriptNotFoundError(
+                    f"manuscript {manuscript_id!r} was not found in project {project_id!r}"
+                )
+            if row.status == "in_review":
+                return _manuscript_model(row)
+            if row.status != "draft":
+                raise ManuscriptDecisionConflictError(
+                    "only draft manuscripts can be submitted for review"
+                )
+            row.status = "in_review"
+            payload = dict(row.payload)
+            payload["review"] = {"actor_id": actor_id, "reason": reason.strip()}
+            row.payload = payload
+            return _manuscript_model(row)
 
     def save_section_contract(self, contract: SectionContract) -> SectionContract:
         if contract.status != "draft":
@@ -424,6 +466,7 @@ def _validate_new_version(manuscript: Manuscript, latest: ManuscriptRow | None) 
 
 def _manuscript_model(row: ManuscriptRow) -> Manuscript:
     payload = dict(row.payload)
+    payload.pop("review", None)
     payload.update(
         {
             "manuscript_id": row.manuscript_id,

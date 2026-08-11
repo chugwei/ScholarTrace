@@ -17,10 +17,13 @@
 - M10.3 增加显式 Claim/MetricResult 标记、章节一致性、证据缺口和 Conclusion 新 Claim 门禁。
 - M10.4 完成独立发布候选审查，并发布 `v0.10.0`。
 - M11.1 增加 FastAPI Project/Run/Artifact API，复用 Repository 的迁移、隔离和受控 Run 门禁。
+- M11.2 增加可重放 SSE Run 时间线、Last-Event-ID 断线恢复和 keep-alive 降级。
+- M11.3 增加内嵌 Web 工作台、项目 URL 恢复、Run 事件时间线、论文草稿章节展示和人工审阅入口。
 
 ### Boundary
 
 - 图表输入仍必须来自 verified/final `MetricResult`；当前 Bundle 使用合成/脱敏农业视觉指标，不能当作真实科研结果。
+- Web 工作台的浏览器验收使用合成/脱敏农业视觉项目；真实文献、真实实验、真实设备和生产部署仍不在本版本证据范围内。
 
 ## [0.10.0] - 2026-08-11
 

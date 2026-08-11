@@ -12,7 +12,14 @@ from scholartrace.schemas.algorithm import (
     PriorArtEntry,
     PriorArtMap,
 )
-from scholartrace.schemas.api import ArtifactResponse, ProjectCreateRequest, ProjectResponse
+from scholartrace.schemas.api import (
+    ArtifactResponse,
+    ManuscriptCreateRequest,
+    ManuscriptDraftResponse,
+    ManuscriptReviewRequest,
+    ProjectCreateRequest,
+    ProjectResponse,
+)
 from scholartrace.schemas.debug import (
     DebugCase,
     DebugCaseStatus,
@@ -122,6 +129,9 @@ __all__ = [
     "InnovationValidationReport",
     "Manuscript",
     "ManuscriptConsistencyReport",
+    "ManuscriptCreateRequest",
+    "ManuscriptDraftResponse",
+    "ManuscriptReviewRequest",
     "MethodDifference",
     "MetricAggregate",
     "MetricResult",

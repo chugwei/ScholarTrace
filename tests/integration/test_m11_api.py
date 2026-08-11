@@ -168,6 +168,12 @@ def test_run_events_and_sse_keep_connection_degradable(tmp_path: Path) -> None:
         stream="stdout",
         message="run started",
     )
+    run_repo.append_event(
+        "lychee-api",
+        "execution-api",
+        stream="system",
+        message="run queued",
+    )
     run_repo.close()
     events = client.get("/api/projects/lychee-api/runs/execution-api/events")
     assert events.status_code == 200
@@ -175,4 +181,20 @@ def test_run_events_and_sse_keep_connection_degradable(tmp_path: Path) -> None:
     stream = client.get("/api/projects/lychee-api/runs/execution-api/events/stream")
     assert stream.status_code == 200
     assert "event: stdout" in stream.text
+    assert "event: system" in stream.text
+    assert "retry: 3000" in stream.text
     assert "keep-alive" in stream.text
+    replay = client.get(
+        "/api/projects/lychee-api/runs/execution-api/events/stream",
+        headers={"Last-Event-ID": "0"},
+    )
+    assert replay.status_code == 200
+    assert "run queued" in replay.text
+    assert "run started" not in replay.text
+    assert (
+        client.get(
+            "/api/projects/lychee-api/runs/execution-api/events/stream",
+            headers={"Last-Event-ID": "invalid"},
+        ).status_code
+        == 400
+    )

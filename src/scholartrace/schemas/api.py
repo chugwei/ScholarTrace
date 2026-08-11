@@ -2,8 +2,9 @@
 
 from datetime import datetime
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
+from scholartrace.schemas.manuscript import ManuscriptTemplate, SectionDraft
 from scholartrace.schemas.research import NonBlankText
 
 
@@ -35,3 +36,25 @@ class ArtifactResponse(BaseModel):
     log_relpath: str | None = None
     staging_relpath: str | None = None
     published_relpath: str | None = None
+
+
+class ManuscriptCreateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    title: NonBlankText
+    target_template: ManuscriptTemplate = "journal_article"
+
+
+class ManuscriptDraftResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    manuscript_id: NonBlankText
+    sections: list[SectionDraft]
+    errors: list[NonBlankText] = Field(default_factory=list)
+
+
+class ManuscriptReviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    actor_id: NonBlankText
+    reason: NonBlankText
