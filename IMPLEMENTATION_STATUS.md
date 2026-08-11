@@ -113,6 +113,15 @@
 - [x] M11.3 Web 工作台页面、审批组件和黄金样例垂直流程
 - [x] M11.4 独立审查、合并 `main` 与 `v0.11.0` 发布
 
+## M12 小任务
+
+- [x] M12.1 Delivery Manifest、Model Card、Data Card 和 SHA-256 清单
+- [ ] M12.2 推理接口与输入/输出契约
+- [ ] M12.3 Docker Compose、Staging 和健康检查
+- [ ] M12.4 监控、回滚和交付包重建
+- [ ] M12.5 真实场景验证记录与证据分层
+- [ ] M12.6 独立环境验收、合并 `main` 与 `v1.0.0` 发布
+
 ## 当前验证
 
 | 命令 | 结果 |
@@ -253,6 +262,8 @@
 | M11.3 浏览器垂直验收 | 通过；URL 项目恢复、Run sequence 0–4 实时时间线、四章节草稿、`in_review` 人工审阅；详见 `docs/verification/m11-workbench.md` |
 | M11.4 发布候选 | 通过；`docs/verification/m11-release-candidate.md`，166 passed、独立 wheel/venv、迁移 0018 回滚、actionlint、秘密/大文件扫描和浏览器验收 |
 | M11.4 main 发布 | 通过；merge `8883047`、main `166 passed`、annotated Tag `v0.11.0` 已推送；详见 `docs/verification/m11-release.md` |
+| M12.1 目标测试 | 通过，3 passed；Manifest 哈希/原子写入、篡改/路径/重复文件和证据等级门禁 |
+| M12.1 全量质量门禁 | 通过，`scripts/check.py`；169 passed；3 个合成 Fixture |
 
 ## 当前限制
 

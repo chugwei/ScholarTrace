@@ -139,4 +139,15 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M11.1 | FastAPI Project/Run/Artifact API 与持久化读写 | `docs/verification/m11-api.md`；3 个目标测试、165 个全量测试、Repository 隔离 | completed |
 | M11.2 | SSE Run 时间线与连接降级 | `docs/verification/m11-sse.md`；3 个 API/SSE 目标测试、165 个全量测试、Last-Event-ID 重放 | completed |
 | M11.3 | Web 工作台页面、审批组件和黄金样例垂直流程 | `docs/verification/m11-workbench.md`；FastAPI 内嵌页面、4 个 SectionContract、Run SSE 时间线、浏览器截图/DOM 验收 | completed |
-| M11.4 | 独立审查、合并 `main` 与 `v0.11.0` 发布 | — | pending |
+| M11.4 | 独立审查、合并 `main` 与 `v0.11.0` 发布 | `docs/verification/m11-release.md`；merge `8883047`、166 个全量测试、Tag 已核验 | completed |
+
+## M12 验收批次
+
+| ID | 批次 | 主要证据 | 状态 |
+|---|---|---|---|
+| M12.1 | Delivery Manifest、Model Card、Data Card 和 SHA-256 验证 | `docs/verification/m12-delivery-contracts.md`；Schema、原子写入、篡改/路径/证据等级测试 | in progress |
+| M12.2 | 推理接口与输入/输出契约 | 离线推理测试、错误降级和 Manifest 绑定 | pending |
+| M12.3 | Docker Compose、Staging 和健康检查 | 独立容器启动、离线示例和资源/配置边界 | pending |
+| M12.4 | 监控、回滚和交付包重建 | 失败部署回滚、日志/指标和 SHA-256 清单 | pending |
+| M12.5 | 真实场景验证记录与证据分层 | 用户/现场数据、伦理与真实结果记录 | pending |
+| M12.6 | v1.0.0 发布 | 独立环境、完整 README、交付演示和 Tag | pending |
