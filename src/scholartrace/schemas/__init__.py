@@ -40,8 +40,11 @@ from scholartrace.schemas.delivery import (
     DeliveryStatus,
     DeliveryVerificationEntry,
     DeliveryVerificationReport,
+    HealthProbeResult,
     ModelCard,
     ModelMetric,
+    ReleasePointer,
+    ReleaseState,
 )
 from scholartrace.schemas.design import (
     CaptureField,
@@ -147,6 +150,7 @@ __all__ = [
     "FigureSpec",
     "FigureSuggestion",
     "FigureValidationReport",
+    "HealthProbeResult",
     "InferenceRequest",
     "InferenceResponse",
     "InferenceStatus",
@@ -174,6 +178,8 @@ __all__ = [
     "ProjectDocument",
     "ProjectResponse",
     "RegressionResult",
+    "ReleasePointer",
+    "ReleaseState",
     "RepairFileChange",
     "RepairProposal",
     "ResearchQuestion",

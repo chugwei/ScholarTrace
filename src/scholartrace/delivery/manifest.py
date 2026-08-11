@@ -104,3 +104,33 @@ def verify_delivery_tree(root: Path, manifest: DeliveryManifest) -> DeliveryVeri
         entries=entries,
         passed=all(entry.status == "passed" for entry in entries),
     )
+
+
+def write_sha256sums(
+    root: Path,
+    manifest: DeliveryManifest,
+    output_path: str = "SHA256SUMS.txt",
+) -> str:
+    """Write sorted hashes for all Manifest artifacts except the checksum file itself."""
+
+    lines: list[str] = []
+    for artifact in sorted(manifest.artifacts, key=lambda item: item.relative_path):
+        if artifact.relative_path == output_path:
+            continue
+        path = _resolve_inside(root, artifact.relative_path)
+        if not path.is_file():
+            raise FileNotFoundError(path)
+        lines.append(f"{_sha256(path)}  {artifact.relative_path}")
+    destination = _resolve_inside(root, output_path)
+    content = ("\n".join(lines) + "\n").encode("utf-8")
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    with NamedTemporaryFile(
+        "wb", dir=destination.parent, prefix=f".{destination.name}.", delete=False
+    ) as handle:
+        temporary = Path(handle.name)
+        handle.write(content)
+    try:
+        os.replace(temporary, destination)
+    finally:
+        temporary.unlink(missing_ok=True)
+    return hashlib.sha256(content).hexdigest()

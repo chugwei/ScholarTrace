@@ -39,3 +39,24 @@ assert report.passed
 Dockerfile 把当前 Python 包安装到 `python:3.12-slim`，以非 root 用户启动 `scholartrace web`；Compose 把交付包只读挂载，把 SQLite 状态放进命名卷，并用 `/health` 作为容器健康信号。健康检查只回答服务是否能响应，不代表模型或科研结果正确；推理响应仍必须带 Manifest 哈希和证据警告。
 
 本地验收真实执行了镜像构建、容器启动、健康检查、离线推理和清理。由于输入是合成 Fixture，Staging 结果只能归入离线/合成证据，M12.4 仍要补监控与回滚，M12.5 需要真实场景输入和用户操作。
+
+## M12.4：监控、回滚与交付包重建
+
+这一批次把“服务能响应”和“当前版本可安全切换”拆成两个可验证问题。`HealthProbeResult` 是监控事件的结构化记录；它保存 endpoint、状态码、JSON 载荷、失败原因和检查时间，格式错误或网络失败不会被吞成成功。`ReleaseStore` 维护 active、previous 和 history，激活前重新验证 Delivery Manifest，失败时保持原 active release；回滚则交换已验证指针并留下历史。
+
+数据流是：Staging `/health` → `probe_health()` → 结构化探针结果；交付目录 → `verify_delivery_tree()` → `ReleaseStore.activate()` → 原子 release state。`write_sha256sums()` 从 Manifest 中按相对路径排序生成校验和，排除自身后原子替换，因而重建后可以再次通过同一验证器。
+
+最小示例：
+
+```python
+from scholartrace.delivery import ReleaseStore, probe_health, write_sha256sums
+
+health = probe_health("http://127.0.0.1:8000/health")
+assert health.ok
+checksum = write_sha256sums(delivery_root, manifest)
+state = ReleaseStore(state_path).activate(
+    "release-2026-08-11", manifest, delivery_root, root_relpath="releases/current"
+)
+```
+
+常见错误是只检查 HTTP 200、先写 active 再验证文件，或手工维护顺序不稳定的 `SHA256SUMS.txt`。单元测试覆盖这些失败路径；M12.5 将把证据等级从合成/离线扩展到用户提供的真实现场记录，M12.6 再在独立环境复跑整套交付与回滚。

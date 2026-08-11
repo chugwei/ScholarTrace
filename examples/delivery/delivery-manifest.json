@@ -27,6 +27,13 @@
       "required": true,
       "sha256": "ed4df116e58b3298c4c0500199b60a8748acde426798b648dd9b30014772fa28",
       "size_bytes": 161
+    },
+    {
+      "media_type": "text/plain",
+      "relative_path": "SHA256SUMS.txt",
+      "required": true,
+      "sha256": "fe71be847bd241d213078f5c1fd985c24abfe32cbce651d9f672aabb9114f8ec",
+      "size_bytes": 335
     }
   ],
   "data_card": {

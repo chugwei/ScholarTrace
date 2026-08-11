@@ -74,10 +74,7 @@ index = HybridChunkIndex(runtime_index_root)
 snapshot = index.rebuild_project("lychee-m4", repository)
 hits = index.search("lychee-m4", "lychee disease", top_k=5)
 source_text = load_runtime_text_for(hits[0].chunk.document_id)
-assert (
-    source_text[hits[0].chunk.start_offset : hits[0].chunk.end_offset]
-    == hits[0].chunk.text
-)
+assert source_text[hits[0].chunk.start_offset : hits[0].chunk.end_offset] == hits[0].chunk.text
 ```
 
 M4.2 的索引仍不是 Rerank，也没有 EvidenceCard 或引用解析；下一批次会把 DOI/URL/原文片段校验作为进入可信证据集的第二道门。

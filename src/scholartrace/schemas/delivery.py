@@ -157,3 +157,38 @@ class DeliveryVerificationReport(BaseModel):
     manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
     entries: list[DeliveryVerificationEntry]
     passed: bool
+
+
+class HealthProbeResult(BaseModel):
+    """One HTTP health probe with explicit failure details."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    endpoint: NonBlankText
+    status_code: int | None = None
+    ok: bool
+    payload: dict[str, object] = Field(default_factory=dict)
+    error: NonBlankText | None = None
+    checked_at: datetime
+
+
+class ReleasePointer(BaseModel):
+    """A delivery version that can be activated or rolled back to."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    release_id: NonBlankText
+    delivery_id: NonBlankText
+    manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+    root_relpath: NonBlankText
+    activated_at: datetime
+
+
+class ReleaseState(BaseModel):
+    """Atomic active/previous release pointers for local Staging rollback."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    active: ReleasePointer | None = None
+    previous: ReleasePointer | None = None
+    history: list[ReleasePointer] = Field(default_factory=list)

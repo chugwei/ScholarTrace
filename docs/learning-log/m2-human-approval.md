@@ -57,12 +57,14 @@ with open_research_question_decision_graph(domain_db, checkpoint_db) as graph:
     waiting = graph.invoke(state)
     completed = graph.resume(
         state["thread_id"],
-        Command(resume={
-            "decision_id": "decision-001",
-            "action": "approved",
-            "actor_id": "researcher-001",
-            "reason": "已核对研究问题边界",
-        }),
+        Command(
+            resume={
+                "decision_id": "decision-001",
+                "action": "approved",
+                "actor_id": "researcher-001",
+                "reason": "已核对研究问题边界",
+            }
+        ),
     )
 ```
 

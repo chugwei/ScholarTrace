@@ -15,7 +15,7 @@
 | M0 CI | `.github/workflows/quality.yml`, `scripts/check.py` | [quality Run #1](https://github.com/chugwei/ScholarTrace/actions/runs/31313652417) | v0.0.1 | implemented-tested |
 | M0 LICENSE | `LICENSE`, `pyproject.toml`, `README.md` | `tests/unit/test_package.py`, wheel 内容检查 | v0.0.1 | implemented-tested |
 | M0 发布 | `CHANGELOG.md`, `docs/verification/m0-release.md` | quality Run #4、annotated Tag `v0.0.1` | v0.0.1 | implemented-tested |
-| M1–M12 | `docs/roadmap.md` | 尚未实现 | v0.1.0–v1.0.0 | planned |
+| M1–M12 路线索引 | `docs/roadmap.md` | 各里程碑明细行与验收记录 | v0.1.0–v1.0.0 | tracked |
 | M1 State/ResearchQuestion/Reducer | `src/scholartrace/schemas/research.py`, `src/scholartrace/states/research_project.py` | `tests/unit/test_research_question.py`, `tests/unit/test_research_project_state.py` | v0.1.0 | implemented-tested |
 | M1 SQLite Repository/迁移 | `src/scholartrace/persistence/` | `tests/integration/test_project_repository.py`, `docs/verification/m1-repository.md` | v0.1.0 | implemented-tested |
 | M1 最小 Graph/Checkpointer | `src/scholartrace/graphs/research_project.py` | `tests/integration/test_research_graph.py`, `docs/verification/m1-graph.md` | v0.1.0 | implemented-tested |
@@ -75,3 +75,4 @@
 | M12.1 Delivery Manifest、Model Card、Data Card、SHA-256 | `src/scholartrace/schemas/delivery.py`, `src/scholartrace/delivery/manifest.py` | `tests/unit/test_m12_delivery.py`, `docs/verification/m12-delivery-contracts.md`, `docs/adr/0025-delivery-evidence-boundaries.md` | v1.0.0 | implemented-tested |
 | M12.2 Manifest 绑定推理接口 | `src/scholartrace/schemas/inference.py`, `src/scholartrace/inference/service.py`, `src/scholartrace/api/app.py`, `src/scholartrace/cli.py` | `tests/unit/test_m12_inference.py`, `docs/verification/m12-inference.md`, `docs/adr/0026-manifest-bound-inference.md` | v1.0.0 | implemented-tested |
 | M12.3 Docker Compose/Staging/health | `Dockerfile`, `docker-compose.yml`, `.dockerignore`, `deployment/README.md`, `src/scholartrace/cli.py` | `tests/integration/test_m12_compose_contract.py`, `docs/verification/m12-compose.md`, `docs/adr/0027-compose-staging-boundary.md`, 实际 Docker build/up/health/inference/down | v1.0.0 | implemented-tested |
+| M12.4 监控、回滚与交付包重建 | `src/scholartrace/delivery/monitoring.py`, `src/scholartrace/delivery/release.py`, `src/scholartrace/delivery/manifest.py`, `src/scholartrace/schemas/delivery.py` | `tests/unit/test_m12_release.py`, `docs/verification/m12-monitoring-rollback.md`, `docs/adr/0028-monitoring-and-rollback.md` | v1.0.0 | implemented-tested |
