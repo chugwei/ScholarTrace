@@ -60,3 +60,15 @@ state = ReleaseStore(state_path).activate(
 ```
 
 常见错误是只检查 HTTP 200、先写 active 再验证文件，或手工维护顺序不稳定的 `SHA256SUMS.txt`。单元测试覆盖这些失败路径；M12.5 将把证据等级从合成/离线扩展到用户提供的真实现场记录，M12.6 再在独立环境复跑整套交付与回滚。
+
+## M12.5：真实场景验证记录与证据分层
+
+这一批次解决的核心问题是：如何保证合成、离线和 Staging 结果永远不会被包装成“已用于真实场景”。答案是类型层的强绑定，而不是文档约定。
+
+`FieldValidationRecord` 用 `model_validator` 把 `evidence_class` 和可携带字段直接绑定：`real_field` 记录必须同时带 `FieldEnvironmentContext`（现场地点、设备、采集条件、操作人员、隐私审查、伦理批准编号）和 `FieldProvenance`（代码/数据/模型版本 + Manifest 哈希）；而 `synthetic_fixture`、`offline_test` 和 `staging` 记录禁止携带现场环境上下文。这意味着无法在代码里“顺手”给一条合成记录加上 `site_name` 来模糊边界。
+
+`FieldEnvironmentContext` 把 `operator_name` 和 `ethics_approval_ref` 设为必填，对应权威计划对真实场景验证的硬性要求：无操作人员、无伦理批准的现场主张不可验证。`FieldValidationSummary` 再加一层保护——`conclusion_class` 为 `real_field` 时只接受全由 `real_field` 记录组成的非空集合，`record_count_by_class` 报告全部四类计数，避免“缺失即零”的歧义。
+
+数据流是：现场原始数据（用户提供）→ `FieldValidationRecord` → `FieldValidationSummary` → 发布说明/Model Card。当前仓库没有真实场景输入，所以本批次交付的是记录契约、分层门禁和填写模板，不是 `real_field` 证据。
+
+常见错误是给合成记录填现场字段、把 Staging smoke 冒充田间结论，或用空记录集声明 `real_field`。6 个单元测试覆盖这些失败路径；在用户提供真实数据、设备、伦理确认和现场操作前，Goal 保持进行中。

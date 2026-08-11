@@ -1,7 +1,7 @@
 # ScholarTrace 实施状态
 
 - 项目状态：M12 进行中
-- 当前里程碑：M12.5 — 真实场景验证记录与证据分层
+- 当前里程碑：M12.5 — 真实场景验证记录与证据分层（记录契约与门禁已实现，真实场景证据待用户提供）
 - 当前版本：`v0.11.0`
 - 当前分支：`feat/m12-deployment`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
@@ -119,7 +119,7 @@
 - [x] M12.2 推理接口与输入/输出契约
 - [x] M12.3 Docker Compose、Staging 和健康检查
 - [x] M12.4 监控、回滚和交付包重建
-- [ ] M12.5 真实场景验证记录与证据分层
+- [~] M12.5 真实场景验证记录与证据分层（记录契约与分层门禁已实现，真实场景证据待用户提供）
 - [ ] M12.6 独立环境验收、合并 `main` 与 `v1.0.0` 发布
 
 ## 当前验证
@@ -271,14 +271,16 @@
 | M12.3 Docker Staging smoke | 通过；镜像构建、容器 `healthy`、health 200、inference 200、日志和 `down -v` 清理；详见 `docs/verification/m12-compose.md` |
 | M12.4 监控/回滚目标测试 | 通过，`tests/unit/test_m12_release.py`；3 passed；探针成功/失败、双版本切换、篡改保护和回滚历史 |
 | M12.4 交付树验证 | 通过；`examples/delivery/` 全部 5 个 Artifact 通过，`SHA256SUMS.txt` SHA-256 为 `fe71be847bd241d213078f5c1fd985c24abfe32cbce651d9f672aabb9114f8ec` |
+| M12.4 全量质量门禁 | 通过，`scripts/check.py`；177 passed（0 failed/0 error）；3 个合成 Fixture |
+| M12.5 真实场景验证分层目标测试 | 通过，`tests/unit/test_m12_field_validation.py`；6 passed；合成/离线不可标 `real_field`、伦理批准与操作人员必填、结论不可跨层级升级 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9 已发布 v0.9.0，完成 FigureSpec 门禁、可重建三格式 Bundle、verified-only 建议、来源 Caption、数值/provenance 检查和实际视觉验收；M10 已发布 v0.10.0，完成 Manuscript/SectionContract/Claim Ledger、离线 BibTeX、引用解析、章节一致性和显式数字回溯。M11.1–M11.4 已完成并发布 `v0.11.0`；M12.1–M12.4 已完成合成交付契约、Manifest 绑定推理、Compose Staging、健康探针、失败激活保护、回滚和清单重建。真实数据、真实模型、生产部署和现场验证仍未完成。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9 已发布 v0.9.0，完成 FigureSpec 门禁、可重建三格式 Bundle、verified-only 建议、来源 Caption、数值/provenance 检查和实际视觉验收；M10 已发布 v0.10.0，完成 Manuscript/SectionContract/Claim Ledger、离线 BibTeX、引用解析、章节一致性和显式数字回溯。M11.1–M11.4 已完成并发布 `v0.11.0`；M12.1–M12.4 已完成合成交付契约、Manifest 绑定推理、Compose Staging、健康探针、失败激活保护、回滚和清单重建。M12.5 已实现真实场景验证记录契约（`FieldValidationRecord`/`FieldValidationSummary`/`FieldEnvironmentContext`/`FieldProvenance`/`RollbackOutcome`）和四类证据分层门禁，确保合成/离线/Staging 结果无法标记为 `real_field`。真实数据、真实模型、生产部署和现场验证仍未完成；`real_field` 记录需要用户提供真实数据来源、设备、环境、伦理确认、操作人员、代码/数据/模型版本和回滚结果。
 
 ## 下一步
 
-下一步在 `feat/m12-deployment` 建立 M12.5 真实场景验证记录模板和证据分层；真实数据、设备、伦理确认与现场操作由用户提供前，不把合成/离线/Staging 结果描述为真实场景交付。
+下一步等待用户提供真实场景输入（真实数据、设备、伦理批准、隐私审查、现场操作人员与时间、代码/数据/模型版本）。输入到位后填写 `docs/field-validation/` 下的 `real_field` 记录并经独立审查，再进入 M12.6 独立环境验收与 `v1.0.0` 发布。在真实场景证据存在前，不创建 `v1.0.0`，不把 Goal 标记完成。

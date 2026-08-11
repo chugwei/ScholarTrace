@@ -149,5 +149,5 @@ ScholarTrace 按可验收版本逐步建设。版本只有在代码、测试、�
 | M12.2 | 推理接口与输入/输出契约 | `docs/verification/m12-inference.md`；CLI/API、离线 Provider、哈希/版本失败降级测试 | completed |
 | M12.3 | Docker Compose、Staging 和健康检查 | `docs/verification/m12-compose.md`；独立镜像、healthy、health/inference smoke 和清理 | completed |
 | M12.4 | 监控、回滚和交付包重建 | `docs/verification/m12-monitoring-rollback.md`；健康探针、失败激活保护、回滚历史和 SHA-256 重建 | completed |
-| M12.5 | 真实场景验证记录与证据分层 | 用户/现场数据、伦理与真实结果记录 | pending |
+| M12.5 | 真实场景验证记录与证据分层 | `docs/verification/m12-field-validation-tiers.md`；`FieldValidationRecord`/Summary 分层门禁、伦理批准必填、合成/离线不可标 `real_field` | in progress |
 | M12.6 | v1.0.0 发布 | 独立环境、完整 README、交付演示和 Tag | pending |

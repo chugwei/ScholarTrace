@@ -1,7 +1,7 @@
 """Evidence-bound contracts for M12 delivery artifacts and cards."""
 
 from datetime import datetime
-from typing import Literal
+from typing import Literal, get_args
 
 from pydantic import BaseModel, ConfigDict, Field, model_validator
 
@@ -192,3 +192,113 @@ class ReleaseState(BaseModel):
     active: ReleasePointer | None = None
     previous: ReleasePointer | None = None
     history: list[ReleasePointer] = Field(default_factory=list)
+
+
+class RollbackOutcome(BaseModel):
+    """Record whether a release was rolled back during or after validation."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    attempted: bool
+    active_release_id: NonBlankText | None = None
+    notes: NonBlankText | None = None
+
+    @model_validator(mode="after")
+    def require_active_when_attempted(self) -> "RollbackOutcome":
+        if self.attempted and self.active_release_id is None:
+            raise ValueError("attempted rollback must record the resulting active_release_id")
+        return self
+
+
+class FieldEnvironmentContext(BaseModel):
+    """On-site environment context that only real field records may carry.
+
+    The fields mirror the M12.5 plan: data source, device, environment,
+    ethics/privacy, operator, time, code/data/model versions and rollback
+    outcome. Ethics approval and the named operator are mandatory because a
+    real field claim without them is unverifiable.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    site_name: NonBlankText
+    location_description: NonBlankText
+    device_description: NonBlankText
+    capture_conditions: NonBlankText
+    operator_name: NonBlankText
+    privacy_review: NonBlankText
+    ethics_approval_ref: NonBlankText
+
+
+class FieldProvenance(BaseModel):
+    """Code, data and model versioning plus the delivery manifest binding."""
+
+    model_config = ConfigDict(extra="forbid")
+
+    code_version: NonBlankText
+    data_version: NonBlankText
+    model_version: NonBlankText
+    manifest_delivery_id: NonBlankText
+    manifest_sha256: str = Field(pattern=r"^[0-9a-f]{64}$")
+
+
+class FieldValidationRecord(BaseModel):
+    """One validation record whose tier is bound to its evidence class.
+
+    Synthetic, offline and staging records are forbidden from carrying field
+    environment context so they cannot masquerade as real field evidence.
+    Real field records must carry full environment and provenance context.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    record_id: NonBlankText
+    evidence: DeliveryEvidence
+    conducted_at: datetime
+    summary: NonBlankText
+    environment: FieldEnvironmentContext | None = None
+    provenance: FieldProvenance | None = None
+    rollback_outcome: RollbackOutcome | None = None
+
+    @model_validator(mode="after")
+    def gate_field_context_by_evidence_class(self) -> "FieldValidationRecord":
+        if self.evidence.evidence_class != "real_field":
+            if self.environment is not None:
+                raise ValueError("field environment is only permitted for real_field records")
+            return self
+        if self.environment is None or self.provenance is None:
+            raise ValueError("real_field record requires full environment and provenance context")
+        return self
+
+
+class FieldValidationSummary(BaseModel):
+    """Aggregate validation records by evidence class without tier inflation.
+
+    A real_field conclusion may only be drawn from real_field records. Lower
+    tiers stay separable so synthetic/offline/staging results can never be
+    packaged as a real field conclusion.
+    """
+
+    model_config = ConfigDict(extra="forbid")
+
+    summary_id: NonBlankText
+    product_version: NonBlankText
+    generated_at: datetime
+    conclusion_class: EvidenceClass
+    records: list[FieldValidationRecord] = Field(default_factory=list)
+    notes: NonBlankText | None = None
+
+    @model_validator(mode="after")
+    def guard_conclusion_class(self) -> "FieldValidationSummary":
+        record_classes = {record.evidence.evidence_class for record in self.records}
+        if self.conclusion_class == "real_field" and record_classes != {"real_field"}:
+            raise ValueError("real_field conclusion requires real_field records only")
+        return self
+
+    @property
+    def record_count_by_class(self) -> dict[str, int]:
+        counts: dict[str, int] = {tier: 0 for tier in get_args(EvidenceClass)}
+        for record in self.records:
+            key = record.evidence.evidence_class
+            counts[key] = counts.get(key, 0) + 1
+        return counts

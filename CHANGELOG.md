@@ -9,6 +9,7 @@
 ### Added
 
 - M12.4 增加结构化健康探针、原子 release pointer、失败激活保护、回滚历史和可重建的 `SHA256SUMS.txt`。
+- M12.5 增加真实场景验证记录契约（`FieldValidationRecord`/`FieldValidationSummary`）和四类证据分层门禁，禁止合成/离线/Staging 结果标记为 `real_field`，并要求真实记录携带伦理批准、操作人员、隐私审查和代码/数据/模型版本。
 - M9.1 版本化 `FigureSpec`、输入点契约、Artifact Bundle 元数据，以及只允许 verified/final `MetricResult` 的图表数据门禁。
 - M9.2 批准 FigureSpec 的 CSV、可重建 `generate_figure.py`、PNG/SVG/PDF、Caption 和 provenance Bundle。
 - M9.3 verified-only 图表建议、来源型 Caption、MetricResult 数值一致性和 provenance hash 检查。
