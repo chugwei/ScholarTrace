@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from pathlib import Path
 from typing import Protocol
 
-from scholartrace.delivery.manifest import calculate_manifest_sha256, verify_delivery_tree
+from scholartrace.delivery.manifest import verify_delivery_tree
 from scholartrace.schemas.delivery import DeliveryEvidence, DeliveryManifest
 from scholartrace.schemas.inference import InferenceRequest, InferenceResponse, Prediction
 
@@ -86,7 +86,7 @@ class InferenceService:
         input_path = (self._delivery_root / request.input_relpath).resolve()
         payload = input_path.read_bytes()
         actual_sha256 = hashlib.sha256(payload).hexdigest()
-        if actual_sha256 != request.input_sha256 or actual_sha256 != artifact.sha256:
+        if actual_sha256 != request.input_sha256:
             raise InferenceContractError("inference input SHA-256 does not match the request")
         warnings: list[str] = []
         if self._manifest.status != "verified":
@@ -100,7 +100,7 @@ class InferenceService:
         return InferenceResponse(
             request_id=request.request_id,
             delivery_id=self._manifest.delivery_id,
-            manifest_sha256=calculate_manifest_sha256(self._manifest),
+            manifest_sha256=report.manifest_sha256,
             model_version=self._manifest.model_card.model_version,
             status="predicted",
             predictions=predictions,

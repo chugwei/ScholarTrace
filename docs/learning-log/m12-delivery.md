@@ -72,3 +72,11 @@ state = ReleaseStore(state_path).activate(
 数据流是：现场原始数据（用户提供）→ `FieldValidationRecord` → `FieldValidationSummary` → 发布说明/Model Card。当前仓库没有真实场景输入，所以本批次交付的是记录契约、分层门禁和填写模板，不是 `real_field` 证据。
 
 常见错误是给合成记录填现场字段、把 Staging smoke 冒充田间结论，或用空记录集声明 `real_field`。6 个单元测试覆盖这些失败路径；在用户提供真实数据、设备、伦理确认和现场操作前，Goal 保持进行中。
+
+## API 加固与公开项目呈现
+
+批量并发评估暴露了两个边界问题：非法标识符穿过请求 Schema 后在 Repository 抛出 `ValueError`，并发研究问题写入则会争用同一个递增版本号。前者应在 HTTP 边界返回 422；后者没有数据损坏，但调用方需要收到可重试的 409，而不是内部 500。解决方式是复用唯一的标识符正则，并把数据库唯一约束冲突转换为明确的领域异常。
+
+公开 README 也需要和内部实施记录承担不同职责。首页应先回答项目解决什么问题、如何启动、有哪些已实现能力和证据边界；详细里程碑、验收表和恢复信息继续留在状态文件与验证记录。通用缓存、IDE、日志、私有数据、模型和运行产物写入 `.gitignore`，而仅属于当前协作环境的计划、Prompt 与恢复记录保留在 `.git/info/exclude`，避免把个人工作流强加给所有贡献者。
+
+README 的 CLI create/show/continue 与本地 Web `/health`、首页均已实际 smoke；统一质量门禁为 187 passed。这里验证的是公开入口和工程契约，不增加真实科研证据，也不改变 M12.5 的现场输入缺口。

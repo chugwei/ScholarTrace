@@ -16,6 +16,8 @@
 | M0 LICENSE | `LICENSE`, `pyproject.toml`, `README.md` | `tests/unit/test_package.py`, wheel 内容检查 | v0.0.1 | implemented-tested |
 | M0 发布 | `CHANGELOG.md`, `docs/verification/m0-release.md` | quality Run #4、annotated Tag `v0.0.1` | v0.0.1 | implemented-tested |
 | M1–M12 路线索引 | `docs/roadmap.md` | 各里程碑明细行与验收记录 | v0.1.0–v1.0.0 | tracked |
+| 公开项目首页与快速开始 | `README.md` | CLI create/show/continue、Web `/health` 与首页 smoke，本地链接检查 | development | implemented-tested |
+| 仓库公开/本地文件边界 | `.gitignore`, `.git/info/exclude`, `pyproject.toml` | ignored probes、内部文件 0、tracked >5 MiB 为 0 | development | implemented-tested |
 | M1 State/ResearchQuestion/Reducer | `src/scholartrace/schemas/research.py`, `src/scholartrace/states/research_project.py` | `tests/unit/test_research_question.py`, `tests/unit/test_research_project_state.py` | v0.1.0 | implemented-tested |
 | M1 SQLite Repository/迁移 | `src/scholartrace/persistence/` | `tests/integration/test_project_repository.py`, `docs/verification/m1-repository.md` | v0.1.0 | implemented-tested |
 | M1 最小 Graph/Checkpointer | `src/scholartrace/graphs/research_project.py` | `tests/integration/test_research_graph.py`, `docs/verification/m1-graph.md` | v0.1.0 | implemented-tested |

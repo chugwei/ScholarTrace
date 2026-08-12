@@ -31,13 +31,10 @@ def calculate_manifest_sha256(manifest: DeliveryManifest) -> str:
     return hashlib.sha256(_canonical_manifest_json(manifest)).hexdigest()
 
 
-def write_delivery_manifest(path: Path, manifest: DeliveryManifest) -> str:
-    """Atomically write a UTF-8 manifest and return its content SHA-256."""
+def _atomic_write_bytes(path: Path, content: bytes) -> None:
+    """Persist bytes via a temp file in the target dir, then atomic replace."""
 
-    path = path.expanduser()
     path.parent.mkdir(parents=True, exist_ok=True)
-    content = _canonical_manifest_json(manifest)
-    digest = hashlib.sha256(content).hexdigest()
     with NamedTemporaryFile("wb", dir=path.parent, prefix=f".{path.name}.", delete=False) as handle:
         temporary = Path(handle.name)
         handle.write(content)
@@ -45,7 +42,15 @@ def write_delivery_manifest(path: Path, manifest: DeliveryManifest) -> str:
         os.replace(temporary, path)
     finally:
         temporary.unlink(missing_ok=True)
-    return digest
+
+
+def write_delivery_manifest(path: Path, manifest: DeliveryManifest) -> str:
+    """Atomically write a UTF-8 manifest and return its content SHA-256."""
+
+    path = path.expanduser()
+    content = _canonical_manifest_json(manifest)
+    _atomic_write_bytes(path, content)
+    return hashlib.sha256(content).hexdigest()
 
 
 def _sha256(path: Path) -> str:
@@ -56,7 +61,9 @@ def _sha256(path: Path) -> str:
     return digest.hexdigest()
 
 
-def _resolve_inside(root: Path, relative_path: str) -> Path:
+def resolve_inside(root: Path, relative_path: str) -> Path:
+    """Resolve ``relative_path`` against ``root``, raising if it escapes the root."""
+
     root = root.expanduser().resolve()
     candidate = (root / relative_path).resolve()
     if candidate != root and root not in candidate.parents:
@@ -69,7 +76,7 @@ def verify_delivery_tree(root: Path, manifest: DeliveryManifest) -> DeliveryVeri
 
     entries: list[DeliveryVerificationEntry] = []
     for artifact in manifest.artifacts:
-        path = _resolve_inside(root, artifact.relative_path)
+        path = resolve_inside(root, artifact.relative_path)
         if not path.is_file():
             entries.append(
                 DeliveryVerificationEntry(
@@ -113,24 +120,16 @@ def write_sha256sums(
 ) -> str:
     """Write sorted hashes for all Manifest artifacts except the checksum file itself."""
 
+    output_path = output_path.replace("\\", "/")
     lines: list[str] = []
     for artifact in sorted(manifest.artifacts, key=lambda item: item.relative_path):
         if artifact.relative_path == output_path:
             continue
-        path = _resolve_inside(root, artifact.relative_path)
+        path = resolve_inside(root, artifact.relative_path)
         if not path.is_file():
             raise FileNotFoundError(path)
         lines.append(f"{_sha256(path)}  {artifact.relative_path}")
-    destination = _resolve_inside(root, output_path)
+    destination = resolve_inside(root, output_path)
     content = ("\n".join(lines) + "\n").encode("utf-8")
-    destination.parent.mkdir(parents=True, exist_ok=True)
-    with NamedTemporaryFile(
-        "wb", dir=destination.parent, prefix=f".{destination.name}.", delete=False
-    ) as handle:
-        temporary = Path(handle.name)
-        handle.write(content)
-    try:
-        os.replace(temporary, destination)
-    finally:
-        temporary.unlink(missing_ok=True)
+    _atomic_write_bytes(destination, content)
     return hashlib.sha256(content).hexdigest()

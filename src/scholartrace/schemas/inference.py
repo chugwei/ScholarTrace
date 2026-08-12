@@ -24,7 +24,9 @@ class InferenceRequest(BaseModel):
 
     @model_validator(mode="after")
     def validate_path(self) -> "InferenceRequest":
-        validate_relative_path(self.input_relpath, field_name="inference input path")
+        self.input_relpath = validate_relative_path(
+            self.input_relpath, field_name="inference input path"
+        )
         return self
 
 

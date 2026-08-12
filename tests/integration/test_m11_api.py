@@ -1,3 +1,4 @@
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -198,3 +199,75 @@ def test_run_events_and_sse_keep_connection_degradable(tmp_path: Path) -> None:
         ).status_code
         == 400
     )
+
+
+def _research_question(seed: int) -> dict:
+    return {
+        "problem": f"concurrent research question {seed}",
+        "target_population_or_domain": "concurrent test domain",
+        "inputs": [f"input-{seed}"],
+        "expected_outputs": [f"output-{seed}"],
+        "constraints": [f"constraint-{seed}"],
+        "success_criteria": [f"criterion-{seed}"],
+        "assumptions": [f"assumption-{seed}"],
+        "unresolved_questions": [f"question-{seed}"],
+    }
+
+
+def test_api_rejects_invalid_identifiers_with_422(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "domain.db"))
+    # Malformed identifiers must be rejected at the API boundary as 422 rather
+    # than bubbling out of repository validation as a 500.
+    for invalid in ["bad id!", "with/slash", "semi;colon"]:
+        response = client.post(
+            "/api/projects",
+            json={"project_id": invalid, "thread_id": "thread-ok", "current_goal": "g"},
+        )
+        assert response.status_code == 422, (invalid, response.status_code, response.text)
+    # A malformed thread_id is rejected for the same reason.
+    response = client.post(
+        "/api/projects",
+        json={"project_id": "ok-id", "thread_id": "bad thread", "current_goal": "g"},
+    )
+    assert response.status_code == 422
+
+
+def test_api_concurrent_question_versions_conflict_cleanly(tmp_path: Path) -> None:
+    client = TestClient(create_app(tmp_path / "domain.db"))
+    project_id = "concurrent-api"
+    assert (
+        client.post(
+            "/api/projects",
+            json={"project_id": project_id, "thread_id": f"thread-{project_id}"},
+        ).status_code
+        == 201
+    )
+
+    # Submitting many distinct questions concurrently races the read-then-write
+    # version allocation. Losers of the (project_id, version) unique constraint
+    # must surface as retriable 409 instead of leaking IntegrityError as 500.
+    statuses: list[int] = []
+    with ThreadPoolExecutor(max_workers=8) as pool:
+        futures = [
+            pool.submit(
+                lambda seed: (
+                    client.post(
+                        f"/api/projects/{project_id}/research-questions",
+                        json=_research_question(seed),
+                    ).status_code
+                ),
+                seed,
+            )
+            for seed in range(24)
+        ]
+        for future in as_completed(futures):
+            statuses.append(future.result())
+
+    assert all(code in {201, 409} for code in statuses), statuses
+    assert 500 not in statuses, statuses
+
+    listed = client.get(f"/api/projects/{project_id}/research-questions").json()
+    versions = sorted(item["version"] for item in listed)
+    assert versions == list(range(1, len(versions) + 1)), versions
+    # Persisted versions stay duplicate-free even under contention.
+    assert len(versions) == len(set(versions))

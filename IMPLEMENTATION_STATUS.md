@@ -5,7 +5,7 @@
 - 当前版本：`v0.11.0`
 - 当前分支：`feat/m12-deployment`
 - 远端：<https://github.com/chugwei/ScholarTrace.git>
-- 更新时间：2026-08-11（Asia/Shanghai）
+- 更新时间：2026-08-12（Asia/Shanghai）
 
 ## 已完成
 
@@ -273,13 +273,17 @@
 | M12.4 交付树验证 | 通过；`examples/delivery/` 全部 5 个 Artifact 通过，`SHA256SUMS.txt` SHA-256 为 `fe71be847bd241d213078f5c1fd985c24abfe32cbce651d9f672aabb9114f8ec` |
 | M12.4 全量质量门禁 | 通过，`scripts/check.py`；177 passed（0 failed/0 error）；3 个合成 Fixture |
 | M12.5 真实场景验证分层目标测试 | 通过，`tests/unit/test_m12_field_validation.py`；6 passed；合成/离线不可标 `real_field`、伦理批准与操作人员必填、结论不可跨层级升级 |
+| M12 API 批量负载评估 | 通过；120 项目 + 120 研究问题 + 40 手稿草稿 + 推理确定性/证据分层；发现并修复两个错误码缺陷 |
+| M12 API 健壮性修复目标测试 | 通过，`tests/integration/test_m11_api.py`；非法标识符→422、并发版本冲突→409 无 500 |
+| M12 API 健壮性修复全量质量门禁 | 通过，`scripts/check.py`；187 passed（基线 185 + 新增 2）；Ruff format/lint；3 个合成 Fixture |
+| 公开项目首页与文件边界 | 通过；README 快速开始 CLI/Web smoke、全部本地链接、通用忽略规则、内部文件/大文件检查均通过 |
 
 ## 当前限制
 
 - M1 已完成并发布；依赖漏洞服务因 PyPI 网络超时未验证，不能视为漏洞扫描通过。
 - M2.1–M2.6 已完成缺失信息路由、真实 interrupt/resume、DecisionRecord、五类审批、研究问题版本冻结、受控 checkpoint 回滚和 `v0.2.0` 发布；CI API 读取与依赖审计仍有明确限制。
 - M3.1–M3.4 已完成独立文献目录、项目 candidate 关联、SHA-256 去重、合法 PDF 解析、只读运行时保存、Crossref/OpenAlex 归一化、显式失败降级和 `v0.3.0` 发布；M4 已发布 v0.4.0；M5 已发布 v0.5.0，包含版本化设计契约、人工 Subgraph、流程图、质量/泄漏门禁、版本比较和批准方案导出。
-- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9 已发布 v0.9.0，完成 FigureSpec 门禁、可重建三格式 Bundle、verified-only 建议、来源 Caption、数值/provenance 检查和实际视觉验收；M10 已发布 v0.10.0，完成 Manuscript/SectionContract/Claim Ledger、离线 BibTeX、引用解析、章节一致性和显式数字回溯。M11.1–M11.4 已完成并发布 `v0.11.0`；M12.1–M12.4 已完成合成交付契约、Manifest 绑定推理、Compose Staging、健康探针、失败激活保护、回滚和清单重建。M12.5 已实现真实场景验证记录契约（`FieldValidationRecord`/`FieldValidationSummary`/`FieldEnvironmentContext`/`FieldProvenance`/`RollbackOutcome`）和四类证据分层门禁，确保合成/离线/Staging 结果无法标记为 `real_field`。真实数据、真实模型、生产部署和现场验证仍未完成；`real_field` 记录需要用户提供真实数据来源、设备、环境、伦理确认、操作人员、代码/数据/模型版本和回滚结果。
+- M6.1–M6.3 已实现 AlgorithmSpec/PriorArtMap、InnovationCandidate、方法差异、完整度排序、证伪提案和验证入口门禁；`approved_for_experiment` 仍不是创新结论。M7.1–M7.3 已实现计划冻结、Run/Metric 导入边界、独立重算、verified 聚合和 Claim 降级。M8 已发布 v0.8.0，包含 frozen plan 绑定、argv 安全策略、异步本地进程、取消/超时、日志事件、成功后 staging 发布、DebugCase 证据链、隔离回归、JSON/DVC 离线适配和 MLflow 可用性降级。M9 已发布 v0.9.0，完成 FigureSpec 门禁、可重建三格式 Bundle、verified-only 建议、来源 Caption、数值/provenance 检查和实际视觉验收；M10 已发布 v0.10.0，完成 Manuscript/SectionContract/Claim Ledger、离线 BibTeX、引用解析、章节一致性和显式数字回溯。M11.1–M11.4 已完成并发布 `v0.11.0`；M12.1–M12.4 已完成合成交付契约、Manifest 绑定推理、Compose Staging、健康探针、失败激活保护、回滚和清单重建。M12.5 已实现真实场景验证记录契约（`FieldValidationRecord`/`FieldValidationSummary`/`FieldEnvironmentContext`/`FieldProvenance`/`RollbackOutcome`）和四类证据分层门禁，确保合成/离线/Staging 结果无法标记为 `real_field`。批量负载评估后修复了两个 API 错误码映射缺陷：非法标识符现按 422 拒绝（`IdentifierText` schema 约束 + `ValueError` 兜底），并发研究问题版本冲突现映射为可重试 409（`ResearchQuestionConcurrentUpdateError`）。真实数据、真实模型、生产部署和现场验证仍未完成；`real_field` 记录需要用户提供真实数据来源、设备、环境、伦理确认、操作人员、代码/数据/模型版本和回滚结果。
 
 ## 下一步
 

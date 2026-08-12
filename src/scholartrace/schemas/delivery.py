@@ -67,7 +67,9 @@ class ModelCard(BaseModel):
         if (self.model_artifact_relpath is None) != (self.model_artifact_sha256 is None):
             raise ValueError("model artifact path and SHA-256 must be supplied together")
         if self.model_artifact_relpath is not None:
-            validate_relative_path(self.model_artifact_relpath, field_name="model artifact path")
+            self.model_artifact_relpath = validate_relative_path(
+                self.model_artifact_relpath, field_name="model artifact path"
+            )
         return self
 
 
@@ -103,7 +105,9 @@ class DeliveryArtifact(BaseModel):
 
     @model_validator(mode="after")
     def validate_path(self) -> "DeliveryArtifact":
-        validate_relative_path(self.relative_path, field_name="delivery artifact path")
+        self.relative_path = validate_relative_path(
+            self.relative_path, field_name="delivery artifact path"
+        )
         return self
 
 

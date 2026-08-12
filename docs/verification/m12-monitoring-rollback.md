@@ -10,7 +10,7 @@
 
 - `probe_health()` 将 HTTP 状态、JSON 载荷、网络错误和非对象响应统一为 `HealthProbeResult`，便于监控层记录失败原因。
 - `ReleaseStore.activate()` 先完整验证 Delivery Manifest，再原子写入 active/previous 指针；失败交付不会覆盖当前 active release。
-- `ReleaseStore.rollback()` 只在存在 previous release 时交换指针，并追加历史记录；没有可回滚版本时明确失败。
+- `ReleaseStore.rollback(base_root, manifest)` 在重新校验 previous release 的交付树与清单哈希后才交换指针，并追加历史记录；树被篡改、清单哈希不匹配或没有可回滚版本时明确失败。
 - `write_sha256sums()` 按相对路径排序、排除自身并原子替换清单文件，重建结果可再次通过交付树验证。
 
 ## 验收命令与结果

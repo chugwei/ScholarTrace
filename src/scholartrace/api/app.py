@@ -29,6 +29,7 @@ from scholartrace.persistence.repository import (
     ProjectIdentityConflictError,
     ProjectNotFoundError,
     ProjectRepository,
+    ResearchQuestionConcurrentUpdateError,
 )
 from scholartrace.persistence.runner_repository import (
     ControlledRunConflictError,
@@ -105,6 +106,8 @@ def create_app(
             )
         except ProjectIdentityConflictError as error:
             raise HTTPException(status_code=409, detail=str(error)) from error
+        except ValueError as error:
+            raise HTTPException(status_code=422, detail=str(error)) from error
         return ProjectResponse.model_validate(asdict(record))
 
     @app.get("/api/projects", response_model=list[ProjectResponse])
@@ -233,6 +236,8 @@ def create_app(
                 question,
                 active_stage="question_defined",
             )
+        except ResearchQuestionConcurrentUpdateError as error:
+            raise HTTPException(status_code=409, detail=str(error)) from error
         except (ProjectNotFoundError, ValueError) as error:
             raise HTTPException(status_code=422, detail=str(error)) from error
         return _question_payload(record)

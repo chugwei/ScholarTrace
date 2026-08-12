@@ -5,14 +5,14 @@ from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 
 from scholartrace.schemas.manuscript import ManuscriptTemplate, SectionDraft
-from scholartrace.schemas.research import NonBlankText
+from scholartrace.schemas.research import IdentifierText, NonBlankText
 
 
 class ProjectCreateRequest(BaseModel):
     model_config = ConfigDict(extra="forbid")
 
-    project_id: NonBlankText
-    thread_id: NonBlankText
+    project_id: IdentifierText
+    thread_id: IdentifierText
     current_goal: str | None = None
 
 

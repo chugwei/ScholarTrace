@@ -69,15 +69,15 @@ def run_web(
 
     from scholartrace.api.app import create_app
 
-    uvicorn.run(
-        create_app(
+    try:
+        application = create_app(
             database,
             delivery_root=delivery_root,
             delivery_manifest_path=delivery_manifest,
-        ),
-        host=host,
-        port=port,
-    )
+        )
+    except (OSError, ValueError) as error:
+        _fail(str(error))
+    uvicorn.run(application, host=host, port=port)
 
 
 @app.command("infer")
