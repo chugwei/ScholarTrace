@@ -1,0 +1,4 @@
+df5003defec00565ba28c546c9f868cbec43742cb5b9603b60bb85d1fc4325b1  README.md
+14af13f0d483bd33829178e580cc0fafbbb6423cd9c52a152879c80cf244c6d3  data-card.md
+a777fef4a168689ab139fa61f2bbec9ff4c94c58f6c3aff3408cbe7e44ced4f5  model-card.md
+ed4df116e58b3298c4c0500199b60a8748acde426798b648dd9b30014772fa28  sample-inputs/lychee-fixture.json

@@ -2,7 +2,11 @@
 
 import re
 
-_IDENTIFIER_PATTERN = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$")
+#: Canonical pattern for externally supplied identifiers. Exported so request
+#: schemas can reject malformed identifiers at the API boundary (422) before
+#: they reach repository-level validation.
+IDENTIFIER_PATTERN = r"^[A-Za-z0-9][A-Za-z0-9._-]{0,127}$"
+_IDENTIFIER_PATTERN = re.compile(IDENTIFIER_PATTERN)
 
 
 def validate_identifier(value: str) -> str:

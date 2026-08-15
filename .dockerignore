@@ -1,0 +1,14 @@
+.git
+.gitignore
+.pytest-tmp
+.venv
+.verification
+.scholartrace
+AGENTS.md
+ScholarTrace_研迹_完整项目设计与实施计划.md
+ScholarTrace_Goal_全项目实施Prompt.md
+docs/goal-progress.md
+tests
+**/*.db
+**/*.sqlite
+**/*.sqlite3

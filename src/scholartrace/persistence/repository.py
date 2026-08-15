@@ -47,6 +47,15 @@ class ResearchQuestionVersionConflictError(ProjectRepositoryError):
     """Raised when a new version does not descend from the current frozen version."""
 
 
+class ResearchQuestionConcurrentUpdateError(ProjectRepositoryError):
+    """Raised when concurrent writes race on the next research question version.
+
+    The version slot is a read-then-write over ``max(version)``; two concurrent
+    saves can compute the same next version and trip the
+    ``(project_id, version)`` unique constraint. Callers may retry the request.
+    """
+
+
 class DecisionConflictError(ProjectRepositoryError):
     """Raised when a decision ID is replayed with different content."""
 
@@ -234,7 +243,15 @@ class ProjectRepository:
                 parent_research_question_id=parent_research_question_id,
             )
             session.add(row)
-            session.flush()
+            try:
+                session.flush()
+            except IntegrityError as error:
+                # Concurrent saves race on the (project_id, version) unique
+                # constraint because the next version is a read-then-write.
+                # Surface it as a retriable conflict rather than a 500.
+                raise ResearchQuestionConcurrentUpdateError(
+                    "research question version conflicted with a concurrent save; retry the request"
+                ) from error
             return _research_question_record(row)
 
     def create_research_question_version(

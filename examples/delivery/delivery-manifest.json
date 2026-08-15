@@ -1,0 +1,99 @@
+{
+  "artifacts": [
+    {
+      "media_type": "text/markdown",
+      "relative_path": "README.md",
+      "required": true,
+      "sha256": "df5003defec00565ba28c546c9f868cbec43742cb5b9603b60bb85d1fc4325b1",
+      "size_bytes": 495
+    },
+    {
+      "media_type": "text/markdown",
+      "relative_path": "model-card.md",
+      "required": true,
+      "sha256": "a777fef4a168689ab139fa61f2bbec9ff4c94c58f6c3aff3408cbe7e44ced4f5",
+      "size_bytes": 364
+    },
+    {
+      "media_type": "text/markdown",
+      "relative_path": "data-card.md",
+      "required": true,
+      "sha256": "14af13f0d483bd33829178e580cc0fafbbb6423cd9c52a152879c80cf244c6d3",
+      "size_bytes": 365
+    },
+    {
+      "media_type": "application/json",
+      "relative_path": "sample-inputs/lychee-fixture.json",
+      "required": true,
+      "sha256": "ed4df116e58b3298c4c0500199b60a8748acde426798b648dd9b30014772fa28",
+      "size_bytes": 161
+    },
+    {
+      "media_type": "text/plain",
+      "relative_path": "SHA256SUMS.txt",
+      "required": true,
+      "sha256": "fe71be847bd241d213078f5c1fd985c24abfe32cbce651d9f672aabb9114f8ec",
+      "size_bytes": 335
+    }
+  ],
+  "data_card": {
+    "collection_protocol_ref": "fixture://protocol/offline",
+    "data_card_id": "data-card-lychee-fixture",
+    "dataset_name": "lychee pest fixture",
+    "dataset_version": "fixture-1",
+    "evidence": {
+      "evidence_class": "synthetic_fixture",
+      "source_ref": "tests/fixtures/projects/lychee-pest-detection.json"
+    },
+    "known_limitations": [
+      "not a field sample",
+      "no real image distribution"
+    ],
+    "license_or_access": "repository synthetic fixture",
+    "preprocessing": [
+      "read JSON placeholder",
+      "do not infer field results"
+    ],
+    "privacy_review": "synthetic and de-identified",
+    "purpose": "offline delivery and inference smoke tests",
+    "source_description": "de-identified synthetic project fixture",
+    "split_strategy": "fixed fixture input"
+  },
+  "delivery_id": "delivery-lychee-fixture",
+  "entrypoint": "scholartrace.inference:predict",
+  "evidence": {
+    "evidence_class": "synthetic_fixture",
+    "source_ref": "tests/fixtures/projects/lychee-pest-detection.json"
+  },
+  "generated_at": "2026-08-11T00:00:00Z",
+  "install_command": "uv sync --frozen",
+  "model_card": {
+    "ethical_considerations": [
+      "no personal data is included",
+      "do not use for field decisions"
+    ],
+    "evidence": {
+      "evidence_class": "synthetic_fixture",
+      "source_ref": "tests/fixtures/projects/lychee-pest-detection.json"
+    },
+    "evaluation_data_ref": "fixture://lychee-pest-detection/validation",
+    "intended_use": "offline delivery-contract smoke test",
+    "limitations": [
+      "synthetic data only",
+      "no trained pest detector"
+    ],
+    "model_card_id": "model-card-fixture-pest-detector",
+    "model_name": "fixture-pest-detector",
+    "model_version": "fixture-1",
+    "out_of_scope_uses": [
+      "field decisions",
+      "regulatory decisions"
+    ],
+    "task": "pest detection",
+    "training_data_ref": "fixture://lychee-pest-detection/train"
+  },
+  "product_name": "研迹 ScholarTrace",
+  "product_version": "0.11.0",
+  "source_revision": "a40c191",
+  "status": "draft"
+}
