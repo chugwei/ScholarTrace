@@ -1,11 +1,12 @@
-"""HTTP request/response contracts for the M11 workbench API."""
+"""HTTP request/response contracts for the ScholarTrace workbench API."""
 
 from datetime import datetime
+from typing import Literal
 
 from pydantic import BaseModel, ConfigDict, Field
 
 from scholartrace.schemas.manuscript import ManuscriptTemplate, SectionDraft
-from scholartrace.schemas.research import IdentifierText, NonBlankText
+from scholartrace.schemas.research import IdentifierText, NonBlankText, ResearchQuestion
 
 
 class ProjectCreateRequest(BaseModel):
@@ -58,3 +59,37 @@ class ManuscriptReviewRequest(BaseModel):
 
     actor_id: NonBlankText
     reason: NonBlankText
+
+
+class LLMStatusResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    enabled: bool
+    provider: str | None = None
+    model: str | None = None
+
+
+class ResearchQuestionCandidateRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    problem: NonBlankText
+    context: str | None = Field(default=None, max_length=8000)
+
+
+class ResearchQuestionCandidateResponse(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["candidate"] = "candidate"
+    candidate: ResearchQuestion
+    provider: NonBlankText
+    model: NonBlankText
+    warnings: list[NonBlankText] = Field(default_factory=list)
+
+
+class ProjectDocumentReviewRequest(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+
+    status: Literal["approved", "rejected"]
+    actor_id: IdentifierText
+    reason: NonBlankText
+    relevance_score: float | None = Field(default=None, ge=0, le=1)

@@ -1,30 +1,20 @@
 """Command-line interface for the M1 project workflow."""
 
+from __future__ import annotations
+
 import hashlib
 import json
 import os
 import sys
 from pathlib import Path
-from typing import Annotated, Any, NoReturn
+from typing import TYPE_CHECKING, Annotated, Any, NoReturn
 
 import typer
-from pydantic import ValidationError
 
-from scholartrace.graphs.research_project import (
-    CheckpointNotFoundError,
-    open_research_project_graph,
-)
-from scholartrace.inference import InferenceContractError, InferenceService
-from scholartrace.persistence.migrations import upgrade_database
-from scholartrace.persistence.repository import (
-    ProjectRecord,
-    ProjectRepository,
-    ProjectRepositoryError,
-    ResearchQuestionRecord,
-)
-from scholartrace.schemas import DeliveryManifest, InferenceRequest, ResearchQuestion
-from scholartrace.schemas.runner import validate_relative_path
-from scholartrace.states import ResearchProjectState, new_research_project_state
+if TYPE_CHECKING:
+    from scholartrace.persistence.repository import ProjectRecord, ResearchQuestionRecord
+    from scholartrace.schemas import ResearchQuestion
+    from scholartrace.states import ResearchProjectState
 
 
 def _configure_windows_utf8() -> None:
@@ -44,6 +34,80 @@ DEFAULT_CHECKPOINTS = Path(".scholartrace/checkpoints.db")
 app = typer.Typer(help="研迹 ScholarTrace 科研项目工作台。", no_args_is_help=True)
 project_app = typer.Typer(help="创建、继续和查看科研项目。", no_args_is_help=True)
 app.add_typer(project_app, name="project")
+
+
+@app.command("app")
+def run_app(
+    host: Annotated[str, typer.Option(help="监听地址。")] = "127.0.0.1",
+    port: Annotated[int, typer.Option(help="首选端口; 被占用时自动顺延。")] = 8000,
+    database: Annotated[
+        Path,
+        typer.Option("--database", help="业务 SQLite 文件。"),
+    ] = DEFAULT_DATABASE,
+    browser: Annotated[
+        bool,
+        typer.Option("--browser", help="用默认浏览器代替桌面窗口。"),
+    ] = False,
+) -> None:
+    """一键启动应用模式: 本地服务 + 桌面窗口 (关闭窗口即退出)。"""
+
+    from scholartrace.launcher import (
+        BackgroundServer,
+        LauncherError,
+        build_app_url,
+        build_loading_html,
+        find_free_port,
+        open_browser,
+        open_desktop_window,
+    )
+
+    def _build_application() -> object:
+        # Imported inside the bootstrap thread so GUI startup overlaps the
+        # heavy api/sqlalchemy import chain instead of waiting for it.
+        from scholartrace.api.app import create_app
+
+        return create_app(database)
+
+    try:
+        chosen_port = find_free_port(port, host=host)
+    except LauncherError as error:
+        _fail(str(error))
+    url = build_app_url(host, chosen_port)
+
+    def _report_boot_error(message: str) -> None:
+        typer.echo(f"error: {message}", err=True)
+
+    startup = BackgroundServer(
+        _build_application,
+        host=host,
+        port=chosen_port,
+        on_error=_report_boot_error,
+    )
+    startup.start()
+    typer.echo(f"研迹 ScholarTrace 应用模式已启动: {url}")
+    typer.echo(f"数据库: {database.resolve()}")
+    try:
+        if browser:
+            typer.echo("按 Ctrl+C 退出。")
+            startup.wait_ready()
+            open_browser(url)
+            startup.wait_for_exit()
+        else:
+            typer.echo("关闭窗口即退出。")
+            open_desktop_window(
+                url,
+                on_close=startup.stop,
+                loading_html=build_loading_html(url),
+            )
+    except LauncherError as error:
+        _fail(str(error))
+    except KeyboardInterrupt:
+        typer.echo("正在退出应用模式…")
+        return
+    finally:
+        startup.stop()
+    if startup.error is not None:
+        _fail(f"应用服务启动失败: {startup.error}")
 
 
 @app.command("web")
@@ -98,6 +162,12 @@ def infer_delivery(
 ) -> None:
     """Run a manifest-bound offline inference request."""
 
+    from pydantic import ValidationError
+
+    from scholartrace.inference import InferenceContractError, InferenceService
+    from scholartrace.schemas import DeliveryManifest, InferenceRequest
+    from scholartrace.schemas.runner import validate_relative_path
+
     try:
         manifest = DeliveryManifest.model_validate_json(manifest_file.read_text(encoding="utf-8"))
         validate_relative_path(input_relpath, field_name="inference input path")
@@ -141,6 +211,10 @@ def create_project(
 ) -> None:
     """创建项目并执行 M1 研究问题图。"""
 
+    from scholartrace.graphs.research_project import open_research_project_graph
+    from scholartrace.persistence.repository import ProjectRepositoryError
+    from scholartrace.states import new_research_project_state
+
     question = _load_question(question_file)
     try:
         state = new_research_project_state(
@@ -170,6 +244,12 @@ def continue_project(
 ) -> None:
     """从项目绑定的 thread checkpoint 继续执行。"""
 
+    from scholartrace.graphs.research_project import (
+        CheckpointNotFoundError,
+        open_research_project_graph,
+    )
+    from scholartrace.persistence.repository import ProjectRepositoryError
+
     try:
         project = _get_project(database, project_id)
         with open_research_project_graph(database, checkpoints) as workflow:
@@ -188,6 +268,12 @@ def show_project(
     ] = DEFAULT_DATABASE,
 ) -> None:
     """只读展示项目及其研究问题版本。"""
+
+    from scholartrace.persistence.migrations import upgrade_database
+    from scholartrace.persistence.repository import (
+        ProjectRepository,
+        ProjectRepositoryError,
+    )
 
     try:
         upgrade_database(database)
@@ -208,6 +294,10 @@ def show_project(
 
 
 def _load_question(path: Path) -> ResearchQuestion:
+    from pydantic import ValidationError
+
+    from scholartrace.schemas import ResearchQuestion
+
     try:
         return ResearchQuestion.model_validate_json(path.read_text(encoding="utf-8"))
     except (OSError, UnicodeError, ValidationError, ValueError) as error:
@@ -218,6 +308,9 @@ def _load_question(path: Path) -> ResearchQuestion:
 
 
 def _get_project(database: Path, project_id: str) -> ProjectRecord:
+    from scholartrace.persistence.migrations import upgrade_database
+    from scholartrace.persistence.repository import ProjectRepository
+
     upgrade_database(database)
     repository = ProjectRepository(database)
     try:

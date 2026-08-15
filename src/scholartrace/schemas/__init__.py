@@ -14,11 +14,15 @@ from scholartrace.schemas.algorithm import (
 )
 from scholartrace.schemas.api import (
     ArtifactResponse,
+    LLMStatusResponse,
     ManuscriptCreateRequest,
     ManuscriptDraftResponse,
     ManuscriptReviewRequest,
     ProjectCreateRequest,
+    ProjectDocumentReviewRequest,
     ProjectResponse,
+    ResearchQuestionCandidateRequest,
+    ResearchQuestionCandidateResponse,
 )
 from scholartrace.schemas.debug import (
     DebugCase,
@@ -167,6 +171,7 @@ __all__ = [
     "InnovationCandidateRanking",
     "InnovationFinding",
     "InnovationValidationReport",
+    "LLMStatusResponse",
     "Manuscript",
     "ManuscriptConsistencyReport",
     "ManuscriptCreateRequest",
@@ -185,6 +190,7 @@ __all__ = [
     "PriorArtMap",
     "ProjectCreateRequest",
     "ProjectDocument",
+    "ProjectDocumentReviewRequest",
     "ProjectResponse",
     "RegressionResult",
     "ReleasePointer",
@@ -192,6 +198,8 @@ __all__ = [
     "RepairFileChange",
     "RepairProposal",
     "ResearchQuestion",
+    "ResearchQuestionCandidateRequest",
+    "ResearchQuestionCandidateResponse",
     "ResourceLimits",
     "RollbackOutcome",
     "RunBackend",

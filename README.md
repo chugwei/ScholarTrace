@@ -31,13 +31,36 @@ cd ScholarTrace
 uv sync --all-groups
 ```
 
-### 2. 启动 Web 工作台
+### 2. 启动应用模式或 Web 工作台
+
+**独立桌面应用**（推荐）：构建一次无控制台的独立可执行文件，之后双击即可使用，
+用户数据保存在 `%LOCALAPPDATA%\ScholarTrace`：
+
+```powershell
+uv sync --all-groups
+uv run pyinstaller scripts/app.spec --noconfirm   # 或 .\scripts\build-app.ps1
+# 生成 dist\ScholarTrace.exe，双击运行
+```
+
+开发仓库内也可用应用模式命令（pywebview 桌面窗口，Windows 使用系统自带 WebView2
+运行时；缺失或无桌面环境时可用 `--browser` 回退到默认浏览器）：
+
+```bash
+uv run scholartrace app
+```
+
+桌面窗口先显示加载页，服务就绪后自动进入工作台；关闭窗口即退出。Windows 下也可
+双击仓库根目录的 `ScholarTrace.bat`。传统浏览器方式仍然可用：
 
 ```bash
 uv run scholartrace web
 ```
 
 打开 <http://127.0.0.1:8000>。默认业务数据库和 LangGraph checkpoint 保存在已忽略的 `.scholartrace/` 目录中。
+
+可选的 LLM 只用于生成待人工复核的结构化研究问题候选。服务端环境变量、Z.AI
+Anthropic-compatible 示例和使用范围说明见 [LLM 配置](docs/llm.md)；不要把 API Key 写进
+源码或浏览器。
 
 ### 3. 使用 CLI 创建可恢复项目
 
@@ -113,6 +136,7 @@ scripts/            统一质量门禁与 Fixture 校验
 - [产品范围与非目标](docs/product-scope.md)
 - [架构说明](docs/architecture.md)
 - [CLI 使用指南](docs/cli.md)
+- [LLM 候选生成配置](docs/llm.md)
 - [公开路线图](docs/roadmap.md)
 - [需求追溯矩阵](docs/traceability-matrix.md)
 - [变更记录](CHANGELOG.md)

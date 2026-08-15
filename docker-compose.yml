@@ -16,6 +16,11 @@ services:
       - /app/delivery/delivery-manifest.json
     ports:
       - "8000:8000"
+    environment:
+      SCHOLARTRACE_LLM_BASE_URL: ${SCHOLARTRACE_LLM_BASE_URL:-https://api.z.ai/api/anthropic}
+      SCHOLARTRACE_LLM_API_KEY: ${SCHOLARTRACE_LLM_API_KEY:-}
+      SCHOLARTRACE_LLM_MODEL: ${SCHOLARTRACE_LLM_MODEL:-glm-5.3}
+      SCHOLARTRACE_LLM_TIMEOUT_SECONDS: ${SCHOLARTRACE_LLM_TIMEOUT_SECONDS:-180}
     read_only: true
     security_opt:
       - no-new-privileges:true
