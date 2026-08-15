@@ -36,7 +36,6 @@ scholartrace = "scholartrace.cli:app"
 [dependency-groups]
 dev = [
   "pyinstaller>=6,<7",
-  "pytest>=8.3,<10",
   "ruff>=0.11,<1",
 ]
 
@@ -50,10 +49,6 @@ exclude = [
   "/ScholarTrace_Goal_全项目实施Prompt.md",
   "/docs/goal-progress.md",
 ]
-
-[tool.pytest.ini_options]
-addopts = "-ra --strict-config --strict-markers --basetemp=.pytest-tmp"
-testpaths = ["tests"]
 
 [tool.ruff]
 target-version = "py312"

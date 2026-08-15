@@ -27,13 +27,7 @@ Fixture 用于验证：
 - 所有 Fixture 明确拒绝真实场景验证声明；
 - 机器相关绝对路径和未知字段会被拒绝。
 
-运行：
-
-```bash
-uv run python scripts/validate_fixtures.py
-```
-
-预期输出只报告通过校验的 Fixture 数量和 ID，不报告任何模型能力或科研指标。
+这些约束在项目早期的 Fixture 校验脚本中强制执行，脚本与验证记录已随仓库精简移除，可从 Git 历史找回。
 
 ## 后续里程碑关系
 
